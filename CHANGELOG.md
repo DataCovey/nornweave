@@ -43,5 +43,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Initial release. See [Unreleased] for current development.
 
-[Unreleased]: https://github.com/nornweave/nornweave/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/nornweave/nornweave/releases/tag/v0.1.0
+[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/DataCovey/nornweave/releases/tag/v0.1.0

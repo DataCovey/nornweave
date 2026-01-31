@@ -68,19 +68,14 @@ dev = [
     "httpx>=0.28.0",
     "aiosqlite>=0.20.0",
 ]
-# Documentation
-docs = [
-    "mkdocs>=1.6.0",
-    "mkdocs-material>=9.5.0",
-    "mkdocstrings[python]>=0.27.0",
-]
+# Documentation (Hugo-based, no Python deps needed)
 
 [project.urls]
-Homepage = "https://github.com/nornweave/nornweave"
+Homepage = "https://github.com/DataCovey/nornweave"
 Documentation = "https://nornweave.github.io/nornweave"
-Repository = "https://github.com/nornweave/nornweave"
-Issues = "https://github.com/nornweave/nornweave/issues"
-Changelog = "https://github.com/nornweave/nornweave/blob/main/CHANGELOG.md"
+Repository = "https://github.com/DataCovey/nornweave"
+Issues = "https://github.com/DataCovey/nornweave/issues"
+Changelog = "https://github.com/DataCovey/nornweave/blob/main/CHANGELOG.md"
 
 [project.scripts]
 nornweave = "nornweave.yggdrasil.app:main"

@@ -4,15 +4,31 @@ Thank you for your interest in contributing to NornWeave! This document provides
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [Making Changes](#making-changes)
-- [Coding Standards](#coding-standards)
-- [Testing](#testing)
-- [Documentation](#documentation)
-- [Submitting Changes](#submitting-changes)
-- [Release Process](#release-process)
+- [Contributing to NornWeave](#contributing-to-nornweave)
+  - [Table of Contents](#table-of-contents)
+  - [Code of Conduct](#code-of-conduct)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Finding Issues](#finding-issues)
+  - [Development Setup](#development-setup)
+  - [Making Changes](#making-changes)
+    - [Branch Naming](#branch-naming)
+    - [Commit Messages](#commit-messages)
+  - [Coding Standards](#coding-standards)
+    - [Python Style](#python-style)
+    - [Code Quality Checks](#code-quality-checks)
+    - [Architecture Guidelines](#architecture-guidelines)
+  - [Testing](#testing)
+    - [Running Tests](#running-tests)
+    - [Writing Tests](#writing-tests)
+  - [Documentation](#documentation)
+    - [Docstrings](#docstrings)
+    - [Updating Documentation](#updating-documentation)
+  - [Submitting Changes](#submitting-changes)
+    - [Pull Request Process](#pull-request-process)
+    - [PR Description Template](#pr-description-template)
+  - [Release Process](#release-process)
+  - [Questions?](#questions)
 
 ## Code of Conduct
 
@@ -29,8 +45,8 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ### Finding Issues
 
-- Look for issues labeled [`good first issue`](https://github.com/nornweave/nornweave/labels/good%20first%20issue) for beginner-friendly tasks
-- Issues labeled [`help wanted`](https://github.com/nornweave/nornweave/labels/help%20wanted) are looking for contributors
+- Look for issues labeled [`good first issue`](https://github.com/DataCovey/nornweave/labels/good%20first%20issue) for beginner-friendly tasks
+- Issues labeled [`help wanted`](https://github.com/DataCovey/nornweave/labels/help%20wanted) are looking for contributors
 - Feel free to ask questions on any issue before starting work
 
 ## Development Setup
@@ -299,8 +315,8 @@ Releases are managed by maintainers following [Semantic Versioning](https://semv
 
 ## Questions?
 
-- Open a [GitHub Discussion](https://github.com/nornweave/nornweave/discussions)
-- Check existing [issues](https://github.com/nornweave/nornweave/issues)
+- Open a [GitHub Discussion](https://github.com/DataCovey/nornweave/discussions)
+- Check existing [issues](https://github.com/DataCovey/nornweave/issues)
 - Read the [documentation](https://nornweave.github.io/nornweave/)
 
 Thank you for contributing to NornWeave!

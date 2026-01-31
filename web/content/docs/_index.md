@@ -1,0 +1,37 @@
+---
+title: Documentation
+cascade:
+  type: docs
+---
+
+Welcome to the NornWeave documentation. Learn how to set up and use the Inbox-as-a-Service API for your AI agents.
+
+## Getting Started
+
+{{< cards >}}
+  {{< card link="getting-started" title="Getting Started" icon="play" subtitle="Installation, configuration, and your first inbox" >}}
+  {{< card link="concepts" title="Concepts" icon="academic-cap" subtitle="Understand NornWeave's architecture and design" >}}
+  {{< card link="api" title="API Reference" icon="code" subtitle="REST API and MCP integration documentation" >}}
+  {{< card link="guides" title="Provider Guides" icon="book-open" subtitle="Setup guides for Mailgun, SendGrid, SES, and more" >}}
+{{< /cards >}}
+
+## Architecture Overview
+
+NornWeave uses a thematic architecture inspired by Norse mythology:
+
+| Component | Name | Purpose |
+|-----------|------|---------|
+| Storage Layer | **Urdr** (The Well) | Database adapters (PostgreSQL, SQLite) |
+| Ingestion Engine | **Verdandi** (The Loom) | Webhook processing, HTML to Markdown |
+| API & Outbound | **Skuld** (The Prophecy) | REST API, email sending, rate limiting |
+| Gateway | **Yggdrasil** | API router connecting all providers |
+| MCP Tools | **Huginn & Muninn** | Read/write tools for AI agents |
+
+## Supported Providers
+
+| Provider | Sending | Receiving | Auto-Route Setup |
+|----------|---------|-----------|------------------|
+| Mailgun | Yes | Yes | Yes |
+| AWS SES | Yes | Yes | Manual |
+| SendGrid | Yes | Yes | Yes |
+| Resend | Yes | Yes | Yes |

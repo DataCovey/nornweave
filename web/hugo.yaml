@@ -1,0 +1,52 @@
+# Hugo configuration for NornWeave website
+# Using Hextra theme: https://imfing.github.io/hextra/
+
+baseURL: "https://nornweave.datacovey.com/"
+languageCode: en-us
+title: NornWeave
+enableRobotsTXT: true
+enableGitInfo: true
+
+module:
+  imports:
+    - path: github.com/imfing/hextra
+
+# Main navigation menu
+menu:
+  main:
+    - name: Documentation
+      pageRef: /docs
+      weight: 1
+    - name: Roadmap
+      pageRef: /roadmap
+      weight: 2
+    - name: GitHub
+      url: https://github.com/DataCovey/nornweave
+      weight: 3
+
+params:
+  description: "Open-source, self-hosted Inbox-as-a-Service API for AI Agents"
+  
+  navbar:
+    displayTitle: true
+    displayLogo: true
+  
+  footer:
+    displayCopyright: true
+    displayPoweredBy: false
+  
+  editURL:
+    enable: true
+    base: https://github.com/DataCovey/nornweave/edit/main/web/content
+
+  # Search configuration
+  search:
+    enable: true
+    type: flexsearch
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    noClasses: false

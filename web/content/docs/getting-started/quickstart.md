@@ -1,0 +1,151 @@
+---
+title: Quickstart
+weight: 3
+---
+
+This guide walks you through creating your first inbox, receiving an email, and sending a reply.
+
+## Prerequisites
+
+- NornWeave is [installed and running](../installation)
+- You have your API key from the [configuration](../configuration)
+- Your email provider webhook is configured (see [Provider Guides](../../guides))
+
+## Create an Inbox
+
+Create a virtual inbox for your AI agent:
+
+```bash
+curl -X POST http://localhost:8000/v1/inboxes \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Support Agent",
+    "email_username": "support"
+  }'
+```
+
+Response:
+
+```json
+{
+  "id": "ibx_abc123",
+  "name": "Support Agent",
+  "email_address": "support@mail.yourdomain.com",
+  "created_at": "2025-01-31T12:00:00Z"
+}
+```
+
+{{< callout type="info" >}}
+The email address format depends on your provider configuration. The `email_username` becomes the local part before the `@`.
+{{< /callout >}}
+
+## Configure Webhook
+
+Point your email provider's inbound webhook to NornWeave:
+
+| Provider | Webhook URL |
+|----------|-------------|
+| Mailgun | `https://your-server.com/webhooks/mailgun` |
+| SendGrid | `https://your-server.com/webhooks/sendgrid` |
+| AWS SES | `https://your-server.com/webhooks/ses` |
+
+See [Provider Guides](../../guides) for detailed setup instructions.
+
+## Receive an Email
+
+When someone sends an email to your inbox address, NornWeave:
+
+1. Receives the webhook from your provider
+2. Parses the HTML into clean Markdown
+3. Groups the message into a thread
+4. Stores it in the database
+
+## Read a Thread
+
+Retrieve a conversation thread (optimized for LLM context):
+
+```bash
+curl http://localhost:8000/v1/threads/th_123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+Response:
+
+```json
+{
+  "id": "th_123",
+  "subject": "Re: Pricing Question",
+  "messages": [
+    {
+      "role": "user",
+      "author": "bob@gmail.com",
+      "content": "Hi, how much does your service cost?",
+      "timestamp": "2025-01-31T10:00:00Z"
+    },
+    {
+      "role": "assistant",
+      "author": "support@mail.yourdomain.com",
+      "content": "Thanks for reaching out! Our pricing starts at $20/month.",
+      "timestamp": "2025-01-31T10:05:00Z"
+    }
+  ]
+}
+```
+
+{{< callout type="tip" >}}
+The thread format uses `role: "user"` for incoming emails and `role: "assistant"` for outgoing emails, making it easy to use with LLM chat APIs.
+{{< /callout >}}
+
+## Send a Reply
+
+Send a reply to an existing thread:
+
+```bash
+curl -X POST http://localhost:8000/v1/messages \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "inbox_id": "ibx_abc123",
+    "reply_to_thread_id": "th_123",
+    "to": ["bob@gmail.com"],
+    "subject": "Re: Pricing Question",
+    "body": "Thanks for your interest! Our pricing starts at **$20/month** for the basic plan."
+  }'
+```
+
+{{< callout type="info" >}}
+NornWeave automatically converts Markdown to HTML for the email body and handles threading headers (`In-Reply-To`, `References`) for you.
+{{< /callout >}}
+
+## Using MCP
+
+If you're using Claude, Cursor, or another MCP-compatible client, you can interact with NornWeave directly.
+
+Add to your MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "nornweave": {
+      "command": "nornweave",
+      "args": ["--api-url", "http://localhost:8000"]
+    }
+  }
+}
+```
+
+Then use natural language:
+
+> "Check my support inbox for new messages"
+> "Reply to the pricing question thread saying we offer a 14-day free trial"
+
+See [MCP Integration](../../api/mcp) for more details.
+
+## Next Steps
+
+{{< cards >}}
+  {{< card link="../../api/rest" title="REST API Reference" icon="code" subtitle="Complete API documentation" >}}
+  {{< card link="../../api/mcp" title="MCP Integration" icon="chip" subtitle="Connect with Claude and Cursor" >}}
+  {{< card link="../../concepts" title="Concepts" icon="academic-cap" subtitle="Learn about NornWeave's architecture" >}}
+{{< /cards >}}

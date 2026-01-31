@@ -14,10 +14,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/nornweave/nornweave/actions"><img src="https://github.com/nornweave/nornweave/workflows/CI/badge.svg" alt="CI Status"></a>
+  <a href="https://github.com/DataCovey/nornweave/actions"><img src="https://github.com/DataCovey/nornweave/workflows/CI/badge.svg" alt="CI Status"></a>
   <a href="https://pypi.org/project/nornweave/"><img src="https://img.shields.io/pypi/v/nornweave.svg" alt="PyPI Version"></a>
   <a href="https://pypi.org/project/nornweave/"><img src="https://img.shields.io/pypi/pyversions/nornweave.svg" alt="Python Versions"></a>
-  <a href="https://github.com/nornweave/nornweave/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License"></a>
+  <a href="https://github.com/DataCovey/nornweave/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License"></a>
 </p>
 
 ---
@@ -59,7 +59,7 @@ In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Y
 
 ```bash
 # Clone the repository
-git clone https://github.com/nornweave/nornweave.git
+git clone https://github.com/DataCovey/nornweave.git
 cd nornweave
 
 # Copy environment configuration
@@ -77,7 +77,7 @@ docker compose exec api alembic upgrade head
 
 ```bash
 # Clone the repository
-git clone https://github.com/nornweave/nornweave.git
+git clone https://github.com/DataCovey/nornweave.git
 cd nornweave
 
 # Install dependencies
