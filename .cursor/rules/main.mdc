@@ -2,102 +2,148 @@
 alwaysApply: true
 ---
 
-# NornWeave Monorepo - Cursor Rules
+# NornWeave - Cursor Rules
 
-This monorepo contains all components for the NornWeave project.
+NornWeave is an open-source, self-hosted Inbox-as-a-Service API for AI Agents. It provides a stateful email layer (Inboxes, Threads, History) and an intelligent layer (Markdown parsing, Semantic Search) for LLMs via REST or MCP.
 
 ## Repository Structure
 
 ```
 nornweave/
-├── web/                    # Project web site
-├── apps/                   # Client applications
-│   ├── frontend/           # Main transactional app frontend
-├── services/                # Backend services
-│   ├── api/                # Python API backend (REST/GraphQL)
-│   └── .../         
-├── packages/                # Shared packages
-│   └── common/             # Common Python package (models, database, migrations)
-├── docs/                   # Internal documentation
-│   ├── api/                # API documentation
-│   ├── dev/                # Development documentation
-│   │   └── architecture/   # Architecture diagrams
-│   ├── prod/               # Product requirements and PRDs
-│   └── sec/                # Security documentation
-├── scripts/                # Utility scripts
-├── res/                    # Internal resources and test files
-│   └── test-files/         # Test data files (PDFs, images, etc.)
+├── src/nornweave/              # Main Python package
+│   ├── adapters/               # Email provider adapters (Mailgun, SES, SendGrid, Resend)
+│   ├── core/                   # Core utilities (config, exceptions, interfaces)
+│   ├── models/                 # Pydantic/SQLAlchemy models (Event, Inbox, Message, Thread)
+│   ├── huginn/                 # MCP Resources (read operations for AI agents)
+│   ├── muninn/                 # MCP Tools (write operations for AI agents)
+│   ├── skuld/                  # Outbound layer (rate limiting, scheduling, sending, webhooks)
+│   ├── urdr/                   # Storage layer (database adapters, migrations)
+│   │   ├── adapters/           # PostgreSQL and SQLite adapters
+│   │   └── migrations/         # Alembic migration scripts
+│   ├── verdandi/               # Ingestion engine (parsing, sanitizing, threading, attachments)
+│   └── yggdrasil/              # FastAPI gateway
+│       ├── middleware/         # Auth and logging middleware
+│       └── routes/             # API routes (v1/, webhooks/)
+├── tests/                      # Test suite
+│   ├── fixtures/               # Test data (emails, etc.)
+│   ├── integration/            # Integration tests
+│   └── unit/                   # Unit tests
+├── web/                        # Hugo documentation website
+│   └── content/docs/           # Documentation content
+├── scripts/                    # Utility scripts (DB init, migrations, dev setup)
+└── .github/                    # CI/CD workflows
 ```
+
+## Architecture Overview
+
+NornWeave uses a thematic architecture inspired by Norse mythology:
+
+| Module | Name | Purpose |
+|--------|------|---------|
+| `urdr` | The Well | Storage layer - PostgreSQL/SQLite adapters, Alembic migrations |
+| `verdandi` | The Loom | Ingestion - webhook processing, HTML→Markdown, email threading |
+| `skuld` | The Prophecy | Outbound - rate limiting, scheduling, email sending |
+| `yggdrasil` | World Tree | FastAPI gateway - routes, middleware, API endpoints |
+| `huginn` | Thought Raven | MCP Resources - read operations for AI agents |
+| `muninn` | Memory Raven | MCP Tools - write operations for AI agents |
+
+## Technology Stack
+
+- **Python**: 3.11+ with full type hints
+- **Web Framework**: FastAPI with async/await
+- **Validation**: Pydantic v2 with `pydantic-settings`
+- **Database**: SQLAlchemy 2.0 (async) with PostgreSQL (asyncpg) or SQLite (aiosqlite)
+- **Migrations**: Alembic
+- **AI Integration**: MCP SDK for Claude/Cursor integration
+- **HTTP Client**: httpx (async)
+- **Package Manager**: uv
+- **Linting/Formatting**: Ruff
+- **Type Checking**: MyPy (strict mode)
+- **Testing**: pytest with pytest-asyncio
+- **Documentation**: Hugo static site
 
 ## Development Guidelines
 
 ### General Principles
-- **Language-specific conventions**: Follow the standard conventions for each technology stack
-- **Security first**: Medical data is highly sensitive - always prioritize security and HIPAA compliance
-- **Documentation**: Keep README files updated in each directory
-- **Testing**: Include tests for all new features
-- **Dependencies**: Always use dependency management tools (uv for Python, pnpm for web)
+- **Type safety**: All functions must have complete type hints
+- **Async-first**: Use async/await for all I/O operations
+- **Documentation**: Docstrings for all public functions and classes
+- **Testing**: Unit tests for business logic, integration tests for API endpoints
+- **Security**: Never hardcode credentials; use environment variables
 
-### Python Services (services/api, ...)
-- Use `uv` for dependency management
-- Follow PEP 8 style guidelines
-- Use type hints for all functions
-- Include docstrings for all public functions and classes
-- Use async/await for I/O operations
-- Structure: Follow clean architecture principles
-- Use sqlalchemy, pydantic models and alembic for psql schema migrations.
-- Follow SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) principles for ensuring maintainable, scalable object-oriented designs.
-- Follow DRY (Don't Repeat Yourself) principles to eliminate code duplication for better readability and easier changes.
-- Add unit-tests for each new added or modified business logic
+### Python Code Style
+- Follow PEP 8 (enforced by Ruff)
+- Line length: 100 characters
+- Use double quotes for strings
+- Use `pathlib.Path` over `os.path`
+- Use comprehensions where they improve readability
+- Prefer `httpx` for HTTP requests (async support)
 
-### Main Frontend (apps/frontend)
-- Use React framework
-- USe shadcn/ui as the design system and apply the styling from the blue theme
-- Follow component-based architecture
-- Use TypeScript for type safety
-- Implement proper error handling and loading states
-- Ensure accessibility (WCAG 2.1 AA compliance)
-- Allow i18n and always localize into portuguese, spanish and german.
-- always ensure mobile version of the pages work well, without horizontal scroll
+### FastAPI Best Practices
+- Use dependency injection via `Depends()`
+- Define request/response models with Pydantic
+- Use `HTTPException` for error responses with appropriate status codes
+- Group routes in routers, version API endpoints (e.g., `/v1/`)
+- Add OpenAPI documentation to endpoints
 
-### Project Web Site (web/)
-- Public-facing content
+### Database Guidelines
+- Use SQLAlchemy async sessions
+- Define models in `src/nornweave/models/`
+- Create Alembic migrations for all schema changes in `src/nornweave/urdr/migrations/`
+- Use repository pattern for data access in `urdr/adapters/`
+- Support both PostgreSQL (production) and SQLite (development/testing)
+
+### MCP Integration
+- Resources (read-only data) go in `huginn/`
+- Tools (actions) go in `muninn/`
+- Follow MCP SDK patterns for tool definitions
+- Include clear descriptions for AI agent consumption
+
+### Testing
+- Place unit tests in `tests/unit/` mirroring source structure
+- Place integration tests in `tests/integration/`
+- Use `pytest.mark.asyncio` for async tests
+- Use fixtures from `tests/conftest.py`
+- Test files in `tests/fixtures/` (never commit real user data)
+
+### Documentation Website (web/)
 - Use Hugo for static site generation
-- Separate from the main transactional app
-- Fully hosted on Github Pages from a static build
-
-### Documentation (docs/)
-- Keep architecture diagrams and text updated at each change
-- Document API contracts
-- Maintain runbooks for operations
-- Include setup instructions for each component and keep them updated after changes
-
-## AI Assistant Guidelines
-
-When working in this monorepo:
-1. **Context awareness**: Understand which component you're working in and use appropriate patterns
-2. **Cross-service communication**: Be aware of how services interact (API contracts, message formats)
-3. **Security**: Never suggest hardcoding credentials or sensitive data
-4. **Medical data**: Be extra careful with data structures - medical records require precision
-5. **Testing**: Always consider testability when suggesting code changes
+- Content in Markdown at `web/content/docs/`
+- Hosted on GitHub Pages
+- Keep API documentation in sync with code changes
 
 ## File Organization
 
-- Each major component should have its own README.md
-- Configuration files should be at the root of each component
-- Shared utilities should be extracted to appropriate shared packages
-- Test files go in `res/test-files/` - never commit real patient data
-
-## Naming Conventions
-
-- Directories: lowercase with hyphens (kebab-case)
-- Python files: snake_case
-- JavaScript/TypeScript files: camelCase or kebab-case (match project convention)
-- Terraform files: snake_case.tf
+- Module names: snake_case
+- Class names: PascalCase
+- Constants: UPPER_SNAKE_CASE
+- Pydantic models: `*Schema` for API, `*Model` for DB
+- Each module should have an `__init__.py` exposing public API
 
 ## Git Workflow
 
-- Use feature branches for all changes
-- Commit messages should be clear and reference component (e.g., "[api] Add authentication endpoint")
-- Use conventional commits conventions
+- Use conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
 - Keep commits focused and atomic
+- Reference issue numbers when applicable (e.g., `feat: add mailgun webhook (#42)`)
+- Run `make lint` and `make test` before committing
+
+## Common Commands
+
+```bash
+make install-dev    # Install dependencies with dev extras
+make dev            # Run development server
+make test           # Run test suite
+make lint           # Run Ruff linter
+make format         # Format code with Ruff
+make migrate        # Run database migrations
+make typecheck      # Run MyPy type checker
+```
+
+## AI Assistant Guidelines
+
+When working in this codebase:
+1. **Module awareness**: Understand the Norse mythology naming and purpose of each module
+2. **Async patterns**: All database and HTTP operations must be async
+3. **Type hints**: Always include complete type annotations
+4. **Provider abstraction**: Email providers are abstracted in `adapters/` - maintain this pattern
+5. **MCP compatibility**: When adding features, consider MCP tool/resource exposure for AI agents
