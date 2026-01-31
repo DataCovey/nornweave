@@ -8,7 +8,10 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from nornweave.core.interfaces import EmailProvider, StorageInterface
+from nornweave.core.interfaces import (  # noqa: TC001 - needed at runtime for FastAPI
+    EmailProvider,
+    StorageInterface,
+)
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
 from nornweave.yggdrasil.dependencies import get_email_provider, get_storage

@@ -1,12 +1,13 @@
 """Inbox endpoints."""
 
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from nornweave.core.config import Settings, get_settings
-from nornweave.core.interfaces import StorageInterface
+from nornweave.core.interfaces import StorageInterface  # noqa: TC001 - needed at runtime
 from nornweave.models.inbox import Inbox, InboxCreate
 from nornweave.yggdrasil.dependencies import get_storage
 
@@ -19,7 +20,7 @@ class InboxResponse(BaseModel):
     id: str
     email_address: str
     name: str | None
-    provider_config: dict
+    provider_config: dict[str, Any]
 
 
 class InboxListResponse(BaseModel):

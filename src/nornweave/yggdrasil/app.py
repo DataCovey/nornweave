@@ -1,7 +1,7 @@
 """FastAPI application factory (Yggdrasil)."""
 
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,9 +10,12 @@ from nornweave import __version__
 from nornweave.core.config import get_settings
 from nornweave.yggdrasil.dependencies import close_database, init_database
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
+
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     """Application lifespan: initialize and close database connections."""
     settings = get_settings()
     await init_database(settings)

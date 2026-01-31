@@ -1,11 +1,11 @@
 """Thread endpoints."""
 
-from datetime import datetime
+from datetime import datetime  # noqa: TC003 - needed at runtime for Pydantic
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from nornweave.core.interfaces import StorageInterface
+from nornweave.core.interfaces import StorageInterface  # noqa: TC001 - needed at runtime
 from nornweave.models.message import MessageDirection
 from nornweave.yggdrasil.dependencies import get_storage
 

@@ -1,6 +1,6 @@
 """Thread model."""
 
-from datetime import datetime
+from datetime import datetime  # noqa: TC003 - needed at runtime for Pydantic
 
 from pydantic import BaseModel, Field
 

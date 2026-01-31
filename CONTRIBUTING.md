@@ -38,7 +38,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ### Prerequisites
 
-- Python 3.11 or higher
+- Python 3.14 or higher
 - [uv](https://docs.astral.sh/uv/) (recommended) or pip
 - Docker and Docker Compose (for local development)
 - Git

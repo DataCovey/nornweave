@@ -1,6 +1,6 @@
 """Message model."""
 
-from datetime import datetime
+from datetime import datetime  # noqa: TC003 - needed at runtime for Pydantic
 from enum import Enum
 from typing import Any
 

@@ -1,7 +1,7 @@
 """SQLAlchemy ORM models for Urðr storage layer."""
 
 import uuid
-from datetime import datetime
+from datetime import datetime  # noqa: TC003 - needed at runtime for SQLAlchemy ORM
 from typing import Any
 
 from sqlalchemy import (
@@ -58,12 +58,12 @@ class InboxORM(Base):
     )
 
     # Relationships
-    threads: Mapped[list["ThreadORM"]] = relationship(
+    threads: Mapped[list[ThreadORM]] = relationship(
         "ThreadORM",
         back_populates="inbox",
         cascade="all, delete-orphan",
     )
-    messages: Mapped[list["MessageORM"]] = relationship(
+    messages: Mapped[list[MessageORM]] = relationship(
         "MessageORM",
         back_populates="inbox",
         cascade="all, delete-orphan",
@@ -79,7 +79,7 @@ class InboxORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, inbox: PydanticInbox) -> "InboxORM":
+    def from_pydantic(cls, inbox: PydanticInbox) -> InboxORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=inbox.id,
@@ -115,8 +115,8 @@ class ThreadORM(Base):
     )
 
     # Relationships
-    inbox: Mapped["InboxORM"] = relationship("InboxORM", back_populates="threads")
-    messages: Mapped[list["MessageORM"]] = relationship(
+    inbox: Mapped[InboxORM] = relationship("InboxORM", back_populates="threads")
+    messages: Mapped[list[MessageORM]] = relationship(
         "MessageORM",
         back_populates="thread",
         cascade="all, delete-orphan",
@@ -141,7 +141,7 @@ class ThreadORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, thread: PydanticThread) -> "ThreadORM":
+    def from_pydantic(cls, thread: PydanticThread) -> ThreadORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=thread.id,
@@ -195,8 +195,8 @@ class MessageORM(Base):
     )
 
     # Relationships
-    thread: Mapped["ThreadORM"] = relationship("ThreadORM", back_populates="messages")
-    inbox: Mapped["InboxORM"] = relationship("InboxORM", back_populates="messages")
+    thread: Mapped[ThreadORM] = relationship("ThreadORM", back_populates="messages")
+    inbox: Mapped[InboxORM] = relationship("InboxORM", back_populates="messages")
 
     # Indexes for performance
     __table_args__ = (
@@ -231,7 +231,7 @@ class MessageORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, message: PydanticMessage) -> "MessageORM":
+    def from_pydantic(cls, message: PydanticMessage) -> MessageORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=message.id,
@@ -289,7 +289,7 @@ class EventORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, event: PydanticEvent) -> "EventORM":
+    def from_pydantic(cls, event: PydanticEvent) -> EventORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=event.id,

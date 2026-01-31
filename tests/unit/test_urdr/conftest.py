@@ -1,8 +1,7 @@
 """Pytest fixtures for URDR storage adapter tests."""
 
 import asyncio
-from collections.abc import AsyncGenerator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from sqlalchemy import event
@@ -15,6 +14,9 @@ from sqlalchemy.ext.asyncio import (
 
 from nornweave.urdr.orm import Base
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
+
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -25,7 +27,7 @@ def event_loop():
 
 
 @pytest.fixture
-async def sqlite_engine() -> AsyncGenerator[AsyncEngine, None]:
+async def sqlite_engine() -> AsyncGenerator[AsyncEngine]:
     """Create an in-memory SQLite async engine for testing."""
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
@@ -53,7 +55,7 @@ async def sqlite_engine() -> AsyncGenerator[AsyncEngine, None]:
 @pytest.fixture
 async def sqlite_session(
     sqlite_engine: AsyncEngine,
-) -> AsyncGenerator[AsyncSession, None]:
+) -> AsyncGenerator[AsyncSession]:
     """Create an async session for testing."""
     session_factory = async_sessionmaker(
         sqlite_engine,

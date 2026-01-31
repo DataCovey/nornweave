@@ -49,7 +49,7 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 
 ## Technology Stack
 
-- **Python**: 3.11+ with full type hints
+- **Python**: 3.14+ with full type hints
 - **Web Framework**: FastAPI with async/await
 - **Validation**: Pydantic v2 with `pydantic-settings`
 - **Database**: SQLAlchemy 2.0 (async) with PostgreSQL (asyncpg) or SQLite (aiosqlite)

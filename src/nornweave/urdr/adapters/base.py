@@ -2,16 +2,20 @@
 
 import uuid
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from nornweave.core.interfaces import StorageInterface
-from nornweave.models.event import Event, EventType
-from nornweave.models.inbox import Inbox
-from nornweave.models.message import Message
-from nornweave.models.thread import Thread
 from nornweave.urdr.orm import EventORM, InboxORM, MessageORM, ThreadORM
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from nornweave.models.event import Event, EventType
+    from nornweave.models.inbox import Inbox
+    from nornweave.models.message import Message
+    from nornweave.models.thread import Thread
 
 
 def generate_uuid() -> str:

@@ -1,6 +1,9 @@
 """Email sending via configured provider. Placeholder."""
 
-from nornweave.core.interfaces import EmailProvider
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from nornweave.core.interfaces import EmailProvider
 
 
 async def send_via_provider(

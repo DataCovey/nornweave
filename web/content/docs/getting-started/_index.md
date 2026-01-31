@@ -22,7 +22,7 @@ Get NornWeave up and running in minutes.
 ## Prerequisites
 
 - **Docker** and **Docker Compose** (recommended)
-- Or: **Python 3.11+** and **PostgreSQL 15+**
+- Or: **Python 3.14+** and **PostgreSQL 15+**
 - An email provider account (Mailgun, SendGrid, AWS SES, or Resend)
 
 ## Quick Install

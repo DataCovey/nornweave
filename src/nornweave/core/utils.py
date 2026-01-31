@@ -2,7 +2,10 @@
 
 import hashlib
 import re
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 def slugify(s: str, max_length: int = 64) -> str:

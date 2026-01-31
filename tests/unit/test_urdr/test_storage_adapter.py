@@ -6,15 +6,18 @@ base implementation, so testing SQLiteAdapter covers the common code paths.
 
 import uuid
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from nornweave.models.event import Event, EventType
 from nornweave.models.inbox import Inbox
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
 from nornweave.urdr.adapters.sqlite import SQLiteAdapter
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture

@@ -1,12 +1,13 @@
 """Core abstractions: storage and email provider interfaces."""
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from nornweave.models.event import Event, EventType
-from nornweave.models.inbox import Inbox
-from nornweave.models.message import Message
-from nornweave.models.thread import Thread
+if TYPE_CHECKING:
+    from nornweave.models.event import Event, EventType
+    from nornweave.models.inbox import Inbox
+    from nornweave.models.message import Message
+    from nornweave.models.thread import Thread
 
 
 class InboundMessage:

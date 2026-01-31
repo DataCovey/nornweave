@@ -1,6 +1,6 @@
 """Dependency injection (storage, provider)."""
 
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator  # noqa: TC003 - needed at runtime
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -13,7 +13,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from nornweave.core.config import Settings, get_settings
-from nornweave.core.interfaces import EmailProvider, StorageInterface
+from nornweave.core.interfaces import (  # noqa: TC001 - needed at runtime for FastAPI
+    EmailProvider,
+    StorageInterface,
+)
 from nornweave.urdr.adapters.postgres import PostgresAdapter
 from nornweave.urdr.adapters.sqlite import SQLiteAdapter
 
@@ -102,7 +105,7 @@ async def close_database() -> None:
 
 
 @asynccontextmanager
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_session() -> AsyncGenerator[AsyncSession]:
     """Get a database session (context manager)."""
     if _session_factory is None:
         raise RuntimeError("Database not initialized. Call init_database() first.")
@@ -119,7 +122,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 # -----------------------------------------------------------------------------
 # FastAPI Dependencies
 # -----------------------------------------------------------------------------
-async def get_db_session(_request: Request) -> AsyncGenerator[AsyncSession, None]:
+async def get_db_session(_request: Request) -> AsyncGenerator[AsyncSession]:
     """FastAPI dependency to get a database session."""
     if _session_factory is None:
         raise RuntimeError("Database not initialized")

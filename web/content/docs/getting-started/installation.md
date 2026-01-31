@@ -99,7 +99,7 @@ For development or when you need more control over the installation.
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.14+
 - PostgreSQL 15+
 - [uv](https://github.com/astral-sh/uv) package manager
 

@@ -1,11 +1,16 @@
 """PostgreSQL storage adapter (Urdr)."""
 
-from sqlalchemy import or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import TYPE_CHECKING
 
-from nornweave.models.message import Message
+from sqlalchemy import or_, select
+
 from nornweave.urdr.adapters.base import BaseSQLAlchemyAdapter
 from nornweave.urdr.orm import MessageORM
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from nornweave.models.message import Message
 
 
 class PostgresAdapter(BaseSQLAlchemyAdapter):
