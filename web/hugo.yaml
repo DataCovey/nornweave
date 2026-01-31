@@ -7,6 +7,33 @@ title: NornWeave
 enableRobotsTXT: true
 enableGitInfo: true
 
+# =============================================================================
+# Sitemap Configuration
+# =============================================================================
+sitemap:
+  changefreq: weekly
+  filename: sitemap.xml
+  priority: 0.5
+
+# =============================================================================
+# Output Formats - Enable sitemap and RSS
+# =============================================================================
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON  # For search index
+  section:
+    - HTML
+    - RSS
+
+# =============================================================================
+# Taxonomies (for potential future use with tags/categories)
+# =============================================================================
+taxonomies:
+  tag: tags
+  category: categories
+
 module:
   imports:
     - path: github.com/imfing/hextra
@@ -25,7 +52,42 @@ menu:
       weight: 3
 
 params:
-  description: "Open-source, self-hosted Inbox-as-a-Service API for AI Agents"
+  # =============================================================================
+  # Site-wide SEO Configuration
+  # =============================================================================
+  description: "Open-source, self-hosted Inbox-as-a-Service API for AI Agents. Turn standard email providers into intelligent, stateful email for LLMs via REST or MCP."
+  keywords:
+    - AI email API
+    - inbox as a service
+    - MCP server
+    - LLM email integration
+    - email automation
+    - AI agents
+    - self-hosted email
+    - Mailgun integration
+    - SendGrid integration
+    - AWS SES
+    - email threading
+    - Claude MCP
+    - Cursor MCP
+    - email webhook
+    - REST API email
+
+  # Open Graph / Social Media
+  images:
+    - /images/logo-big-blue.jpg
+  
+  # Author information (for structured data)
+  author:
+    name: DataCovey
+    url: https://github.com/DataCovey
+  
+  # Social links (for structured data)
+  social:
+    github: https://github.com/DataCovey/nornweave
+  
+  # Site logo for structured data
+  logo: /images/logo-big-blue.jpg
   
   navbar:
     displayTitle: true

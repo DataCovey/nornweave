@@ -1,6 +1,15 @@
 ---
-title: Quickstart
+title: NornWeave Quickstart Tutorial
+description: "Create your first AI agent inbox, receive emails via webhook, and send replies in minutes. Step-by-step quickstart guide with code examples."
 weight: 3
+keywords:
+  - NornWeave quickstart
+  - AI inbox tutorial
+  - email API getting started
+  - create inbox API
+  - send email REST API
+sitemap_priority: 0.9
+sitemap_changefreq: weekly
 ---
 
 This guide walks you through creating your first inbox, receiving an email, and sending a reply.

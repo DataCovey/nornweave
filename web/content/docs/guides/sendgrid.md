@@ -1,6 +1,15 @@
 ---
-title: SendGrid Setup
+title: SendGrid Setup Guide
+description: "Step-by-step SendGrid integration with NornWeave. API key creation, domain authentication, Inbound Parse webhook setup for AI agent email."
 weight: 2
+keywords:
+  - SendGrid setup
+  - SendGrid webhook
+  - SendGrid Inbound Parse
+  - SendGrid API integration
+  - email webhook setup
+sitemap_priority: 0.8
+sitemap_changefreq: monthly
 ---
 
 This guide walks through setting up SendGrid as your email provider for NornWeave.

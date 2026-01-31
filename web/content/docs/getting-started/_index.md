@@ -1,6 +1,14 @@
 ---
-title: Getting Started
+title: Getting Started with NornWeave
+description: "Install and configure NornWeave in minutes. Docker setup, environment configuration, and quickstart tutorial for AI agent email integration."
 weight: 1
+keywords:
+  - NornWeave installation
+  - Docker email API
+  - email API setup
+  - getting started guide
+sitemap_priority: 0.9
+sitemap_changefreq: weekly
 ---
 
 Get NornWeave up and running in minutes.

@@ -1,6 +1,15 @@
 ---
-title: AWS SES Setup
+title: AWS SES Setup Guide
+description: "Configure Amazon SES with NornWeave. Domain verification, SNS notifications, S3 storage, and Lambda webhook integration for AI agent email."
 weight: 3
+keywords:
+  - AWS SES setup
+  - Amazon SES integration
+  - SES webhook
+  - SES SNS notification
+  - AWS email service
+sitemap_priority: 0.8
+sitemap_changefreq: monthly
 ---
 
 This guide walks through setting up Amazon Simple Email Service (SES) as your email provider for NornWeave.

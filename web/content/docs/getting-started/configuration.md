@@ -1,6 +1,15 @@
 ---
-title: Configuration
+title: NornWeave Configuration
+description: "Complete configuration reference for NornWeave. Environment variables for database, email providers, API keys, and logging settings."
 weight: 2
+keywords:
+  - NornWeave configuration
+  - environment variables
+  - API key setup
+  - database configuration
+  - email provider config
+sitemap_priority: 0.85
+sitemap_changefreq: weekly
 ---
 
 NornWeave is configured through environment variables. This page documents all available options.

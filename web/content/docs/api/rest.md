@@ -1,6 +1,16 @@
 ---
-title: REST API
+title: REST API Reference
+description: "Complete REST API documentation for NornWeave. Endpoints for inboxes, threads, messages, and search with authentication, request/response examples."
 weight: 1
+keywords:
+  - NornWeave REST API
+  - email API endpoints
+  - inbox API
+  - thread API
+  - message API
+  - email search API
+sitemap_priority: 0.85
+sitemap_changefreq: weekly
 ---
 
 The NornWeave REST API provides full control over inboxes, threads, and messages.

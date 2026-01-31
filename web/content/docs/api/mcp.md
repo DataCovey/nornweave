@@ -1,6 +1,17 @@
 ---
-title: MCP Integration
+title: MCP Integration Guide
+description: "Connect NornWeave to Claude, Cursor, and other MCP clients. Resources, tools, and natural language examples for AI agent email automation."
 weight: 2
+keywords:
+  - MCP server
+  - Claude MCP integration
+  - Cursor MCP
+  - Model Context Protocol
+  - AI agent email
+  - MCP tools
+  - MCP resources
+sitemap_priority: 0.85
+sitemap_changefreq: weekly
 ---
 
 NornWeave exposes an MCP (Model Context Protocol) server that allows Claude, Cursor, and other MCP-compatible clients to interact with email directly.

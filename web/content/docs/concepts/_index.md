@@ -1,6 +1,15 @@
 ---
-title: Concepts
+title: NornWeave Concepts & Architecture
+description: "Understand NornWeave's Norse mythology-inspired architecture. Learn about Inboxes, Threads, Messages, storage adapters, and the BYOP email provider model."
 weight: 2
+keywords:
+  - NornWeave architecture
+  - email threading
+  - inbox abstraction
+  - storage adapter
+  - email provider abstraction
+sitemap_priority: 0.7
+sitemap_changefreq: monthly
 ---
 
 NornWeave uses a thematic architecture inspired by Norse mythology. This section explains the core concepts and how they map to the system's components.

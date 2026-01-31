@@ -1,7 +1,16 @@
 ---
-title: Documentation
+title: NornWeave Documentation
+description: "Complete documentation for NornWeave - learn how to set up virtual inboxes, configure email providers, and integrate AI agents with the REST API and MCP."
 cascade:
   type: docs
+keywords:
+  - NornWeave documentation
+  - email API documentation
+  - MCP integration guide
+  - REST API reference
+  - AI agent email setup
+sitemap_priority: 0.9
+sitemap_changefreq: weekly
 ---
 
 Welcome to the NornWeave documentation. Learn how to set up and use the Inbox-as-a-Service API for your AI agents.

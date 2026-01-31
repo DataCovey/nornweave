@@ -1,6 +1,15 @@
 ---
-title: Architecture
+title: NornWeave Architecture
+description: "Deep dive into NornWeave's modular architecture. Data flow diagrams, component interactions, and the Norse mythology-inspired design."
 weight: 1
+keywords:
+  - NornWeave architecture
+  - system design
+  - modular architecture
+  - data flow diagram
+  - component overview
+sitemap_priority: 0.7
+sitemap_changefreq: monthly
 ---
 
 NornWeave's architecture uses thematic naming inspired by Norse mythology, with each component having a clear technical purpose.

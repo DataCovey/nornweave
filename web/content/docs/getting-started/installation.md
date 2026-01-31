@@ -1,6 +1,15 @@
 ---
-title: Installation
+title: NornWeave Installation Guide
+description: "Install NornWeave using Docker or from source with uv. Complete setup instructions including PostgreSQL database configuration."
 weight: 1
+keywords:
+  - NornWeave installation
+  - Docker setup
+  - PostgreSQL setup
+  - Python installation
+  - uv package manager
+sitemap_priority: 0.9
+sitemap_changefreq: weekly
 ---
 
 NornWeave can be installed using Docker (recommended) or directly from source using uv.

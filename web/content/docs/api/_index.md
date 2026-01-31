@@ -1,6 +1,14 @@
 ---
-title: API Reference
+title: NornWeave API Reference
+description: "Complete API documentation for NornWeave. REST endpoints and MCP integration for inboxes, threads, messages, and search operations."
 weight: 3
+keywords:
+  - NornWeave API
+  - REST API reference
+  - MCP API
+  - email API endpoints
+sitemap_priority: 0.85
+sitemap_changefreq: weekly
 ---
 
 NornWeave provides two ways to interact with your email data:

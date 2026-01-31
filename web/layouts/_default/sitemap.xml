@@ -1,0 +1,85 @@
+{{/* 
+  NornWeave Dynamic Sitemap Generator
+  
+  Priority Guidelines:
+  - Homepage: 1.0
+  - Main sections (docs, guides): 0.9
+  - Documentation pages: 0.8
+  - Guide pages: 0.8
+  - Other pages: 0.6
+  
+  Change Frequency:
+  - Homepage: daily (shows latest info)
+  - Documentation: weekly (updates with features)
+  - Guides: monthly (stable content)
+  - Static pages: yearly
+*/}}
+{{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  {{- range .Data.Pages }}
+  {{- if not .Params.sitemap_exclude }}
+  <url>
+    <loc>{{ .Permalink }}</loc>
+    {{- if .Lastmod }}
+    <lastmod>{{ .Lastmod.Format "2006-01-02T15:04:05-07:00" }}</lastmod>
+    {{- else if .Date }}
+    <lastmod>{{ .Date.Format "2006-01-02T15:04:05-07:00" }}</lastmod>
+    {{- end }}
+    {{- /* Determine priority based on page type and location */ -}}
+    {{- $priority := 0.5 -}}
+    {{- $changefreq := "weekly" -}}
+    {{- if .IsHome -}}
+      {{- $priority = 1.0 -}}
+      {{- $changefreq = "daily" -}}
+    {{- else if .Params.sitemap_priority -}}
+      {{- $priority = .Params.sitemap_priority -}}
+    {{- else if eq .Section "docs" -}}
+      {{- if .IsSection -}}
+        {{- $priority = 0.9 -}}
+      {{- else -}}
+        {{- $priority = 0.8 -}}
+      {{- end -}}
+      {{- if in .RelPermalink "/getting-started/" -}}
+        {{- $priority = 0.9 -}}
+        {{- $changefreq = "weekly" -}}
+      {{- else if in .RelPermalink "/guides/" -}}
+        {{- $priority = 0.8 -}}
+        {{- $changefreq = "monthly" -}}
+      {{- else if in .RelPermalink "/api/" -}}
+        {{- $priority = 0.85 -}}
+        {{- $changefreq = "weekly" -}}
+      {{- else if in .RelPermalink "/concepts/" -}}
+        {{- $priority = 0.7 -}}
+        {{- $changefreq = "monthly" -}}
+      {{- end -}}
+    {{- else if eq .Section "roadmap" -}}
+      {{- $priority = 0.6 -}}
+      {{- $changefreq = "monthly" -}}
+    {{- else -}}
+      {{- $priority = 0.5 -}}
+      {{- $changefreq = "monthly" -}}
+    {{- end -}}
+    {{- /* Allow front matter override */ -}}
+    {{- if .Params.sitemap_changefreq -}}
+      {{- $changefreq = .Params.sitemap_changefreq -}}
+    {{- end }}
+    <changefreq>{{ $changefreq }}</changefreq>
+    <priority>{{ printf "%.1f" $priority }}</priority>
+    {{- /* Add images for better SEO (Google Image Search) */ -}}
+    {{- if .Params.image }}
+    <image:image>
+      <image:loc>{{ .Params.image | absURL }}</image:loc>
+      <image:title>{{ .Title | htmlEscape }}</image:title>
+    </image:image>
+    {{- else if and .IsHome $.Site.Params.images }}
+    <image:image>
+      <image:loc>{{ index $.Site.Params.images 0 | absURL }}</image:loc>
+      <image:title>{{ $.Site.Title | htmlEscape }}</image:title>
+    </image:image>
+    {{- end }}
+  </url>
+  {{- end }}
+  {{- end }}
+</urlset>

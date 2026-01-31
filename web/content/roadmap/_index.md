@@ -1,5 +1,13 @@
 ---
-title: Roadmap
+title: NornWeave Roadmap
+description: "Development roadmap for NornWeave. Current features, upcoming releases, and planned enhancements for AI agent email automation."
+keywords:
+  - NornWeave roadmap
+  - feature roadmap
+  - upcoming features
+  - development plan
+sitemap_priority: 0.6
+sitemap_changefreq: monthly
 ---
 
 NornWeave is being developed in phases. This page outlines the current status and upcoming features.

@@ -1,6 +1,15 @@
 ---
-title: Mailgun Setup
+title: Mailgun Setup Guide
+description: "Complete guide to integrating Mailgun with NornWeave. Domain verification, DNS setup, webhook configuration, and API credentials for AI agent email."
 weight: 1
+keywords:
+  - Mailgun setup
+  - Mailgun webhook
+  - Mailgun API integration
+  - email domain setup
+  - Mailgun DNS records
+sitemap_priority: 0.8
+sitemap_changefreq: monthly
 ---
 
 This guide walks through setting up Mailgun as your email provider for NornWeave.

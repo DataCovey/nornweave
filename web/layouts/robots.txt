@@ -1,0 +1,43 @@
+{{/*
+  NornWeave robots.txt Template
+  
+  This template generates a dynamic robots.txt that:
+  - Allows all major search engine crawlers
+  - Points to the sitemap
+  - Blocks unnecessary paths
+*/}}
+# NornWeave - Inbox-as-a-Service for AI Agents
+# https://nornweave.datacovey.com
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Crawl-delay to be respectful (optional, in seconds)
+# Crawl-delay: 1
+
+# Disallow paths that shouldn't be indexed
+Disallow: /404.html
+Disallow: /*.json$
+Disallow: /search/
+
+# Block AI training crawlers (optional - uncomment if desired)
+# User-agent: GPTBot
+# Disallow: /
+# User-agent: ChatGPT-User
+# Disallow: /
+# User-agent: CCBot
+# Disallow: /
+# User-agent: anthropic-ai
+# Disallow: /
+
+# Allow Google image bot for better image discovery
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /favicon/
+
+# Sitemap location
+Sitemap: {{ "sitemap.xml" | absURL }}
+
+# Additional sitemaps (RSS feeds can serve as sitemaps too)
+Sitemap: {{ "index.xml" | absURL }}

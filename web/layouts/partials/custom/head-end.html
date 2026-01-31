@@ -1,6 +1,248 @@
-{{/* NornWeave favicons from static/favicon/ */}}
+{{/* =============================================================================
+    NornWeave SEO Head Partial
+    Includes: Favicons, Meta Tags, Open Graph, Twitter Cards, JSON-LD
+============================================================================= */}}
+
+{{/* Favicons */}}
 <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
+
+{{/* =============================================================================
+    SEO Meta Tags
+============================================================================= */}}
+{{- $title := .Title | default .Site.Title -}}
+{{- $description := .Description | default .Params.description | default .Summary | default .Site.Params.description -}}
+{{- $description = $description | plainify | htmlUnescape | truncate 160 -}}
+{{- $keywords := .Params.keywords | default .Site.Params.keywords -}}
+{{- $canonicalURL := .Permalink -}}
+{{- $image := "" -}}
+{{- if .Params.image -}}
+  {{- $image = .Params.image | absURL -}}
+{{- else if .Site.Params.images -}}
+  {{- $image = (index .Site.Params.images 0) | absURL -}}
+{{- end -}}
+
+{{/* Primary Meta Tags */}}
+<meta name="description" content="{{ $description }}">
+{{- if $keywords }}
+<meta name="keywords" content="{{ if reflect.IsSlice $keywords }}{{ delimit $keywords ", " }}{{ else }}{{ $keywords }}{{ end }}">
+{{- end }}
+<meta name="author" content="{{ .Site.Params.author.name | default "DataCovey" }}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="{{ $canonicalURL }}">
+
+{{/* Language and Locale */}}
+<meta name="language" content="English">
+<meta http-equiv="content-language" content="en">
+
+{{/* =============================================================================
+    Open Graph / Facebook Meta Tags
+============================================================================= */}}
+<meta property="og:type" content="{{ if .IsHome }}website{{ else if .IsPage }}article{{ else }}website{{ end }}">
+<meta property="og:url" content="{{ $canonicalURL }}">
+<meta property="og:title" content="{{ $title }}">
+<meta property="og:description" content="{{ $description }}">
+<meta property="og:site_name" content="{{ .Site.Title }}">
+<meta property="og:locale" content="en_US">
+{{- if $image }}
+<meta property="og:image" content="{{ $image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ $title }}">
+{{- end }}
+{{- if .IsPage }}
+{{- if .PublishDate }}
+<meta property="article:published_time" content="{{ .PublishDate.Format "2006-01-02T15:04:05Z07:00" }}">
+{{- end }}
+{{- if .Lastmod }}
+<meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">
+{{- end }}
+{{- end }}
+
+{{/* =============================================================================
+    Twitter Card Meta Tags
+============================================================================= */}}
+<meta name="twitter:card" content="{{ if $image }}summary_large_image{{ else }}summary{{ end }}">
+<meta name="twitter:title" content="{{ $title }}">
+<meta name="twitter:description" content="{{ $description }}">
+{{- if $image }}
+<meta name="twitter:image" content="{{ $image }}">
+<meta name="twitter:image:alt" content="{{ $title }}">
+{{- end }}
+
+{{/* =============================================================================
+    JSON-LD Structured Data
+============================================================================= */}}
+{{- if .IsHome }}
+{{/* Organization and WebSite Schema for Homepage */}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "{{ .Site.BaseURL }}#organization",
+      "name": "{{ .Site.Params.author.name | default "DataCovey" }}",
+      "url": "{{ .Site.BaseURL }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ .Site.Params.logo | absURL }}",
+        "width": 512,
+        "height": 512
+      },
+      "sameAs": [
+        "{{ .Site.Params.social.github }}"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{ .Site.BaseURL }}#website",
+      "url": "{{ .Site.BaseURL }}",
+      "name": "{{ .Site.Title }}",
+      "description": "{{ .Site.Params.description }}",
+      "publisher": {
+        "@id": "{{ .Site.BaseURL }}#organization"
+      },
+      "inLanguage": "en-US"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "{{ .Site.BaseURL }}#software",
+      "name": "NornWeave",
+      "description": "{{ .Site.Params.description }}",
+      "url": "{{ .Site.BaseURL }}",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@id": "{{ .Site.BaseURL }}#organization"
+      },
+      "softwareHelp": {
+        "@type": "WebPage",
+        "url": "{{ "docs/" | absURL }}"
+      },
+      "downloadUrl": "{{ .Site.Params.social.github }}",
+      "license": "https://opensource.org/licenses/MIT"
+    }
+  ]
+}
+</script>
+{{- else if and .IsPage (in .RelPermalink "/docs/") }}
+{{/* TechArticle Schema for Documentation Pages */}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "{{ $title }}",
+  "description": "{{ $description }}",
+  "url": "{{ $canonicalURL }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ $canonicalURL }}"
+  },
+  {{- if $image }}
+  "image": "{{ $image }}",
+  {{- end }}
+  "author": {
+    "@type": "Organization",
+    "name": "{{ .Site.Params.author.name | default "DataCovey" }}",
+    "url": "{{ .Site.Params.author.url | default .Site.BaseURL }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ .Site.Params.author.name | default "DataCovey" }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ .Site.Params.logo | absURL }}"
+    }
+  },
+  {{- if .PublishDate }}
+  "datePublished": "{{ .PublishDate.Format "2006-01-02T15:04:05Z07:00" }}",
+  {{- end }}
+  {{- if .Lastmod }}
+  "dateModified": "{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}",
+  {{- end }}
+  "inLanguage": "en-US",
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "{{ .Site.BaseURL }}#website"
+  },
+  "about": {
+    "@type": "SoftwareApplication",
+    "@id": "{{ .Site.BaseURL }}#software"
+  }
+}
+</script>
+{{- else if .IsSection }}
+{{/* CollectionPage Schema for Section Pages */}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "{{ $title }}",
+  "description": "{{ $description }}",
+  "url": "{{ $canonicalURL }}",
+  "mainEntity": {
+    "@type": "ItemList",
+    "numberOfItems": {{ len .Pages }},
+    "itemListElement": [
+      {{- range $index, $page := .Pages }}
+      {{- if $index }},{{ end }}
+      {
+        "@type": "ListItem",
+        "position": {{ add $index 1 }},
+        "url": "{{ $page.Permalink }}",
+        "name": "{{ $page.Title }}"
+      }
+      {{- end }}
+    ]
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "{{ .Site.BaseURL }}#website"
+  }
+}
+</script>
+{{- end }}
+
+{{/* =============================================================================
+    BreadcrumbList Schema (for all pages except homepage)
+============================================================================= */}}
+{{- if not .IsHome }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ .Site.BaseURL }}"
+    }
+    {{- $ancestors := .Ancestors.Reverse }}
+    {{- range $index, $ancestor := $ancestors }}
+    ,{
+      "@type": "ListItem",
+      "position": {{ add $index 2 }},
+      "name": "{{ $ancestor.Title }}",
+      "item": "{{ $ancestor.Permalink }}"
+    }
+    {{- end }}
+    ,{
+      "@type": "ListItem",
+      "position": {{ add (len $ancestors) 2 }},
+      "name": "{{ .Title }}",
+      "item": "{{ .Permalink }}"
+    }
+  ]
+}
+</script>
+{{- end }}

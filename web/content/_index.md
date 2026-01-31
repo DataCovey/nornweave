@@ -1,6 +1,19 @@
 ---
-title: NornWeave
+title: NornWeave - Inbox-as-a-Service API for AI Agents
 layout: hextra-home
+description: "Open-source, self-hosted email API that turns standard email providers into intelligent, stateful email for LLMs. REST API and MCP integration for AI agents."
+keywords:
+  - AI email API
+  - inbox as a service
+  - MCP server
+  - LLM email
+  - AI agents email
+  - self-hosted email API
+  - email automation
+  - Claude MCP
+  - Cursor MCP
+sitemap_priority: 1.0
+sitemap_changefreq: daily
 ---
 
 <style>

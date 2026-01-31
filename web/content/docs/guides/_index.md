@@ -1,6 +1,16 @@
 ---
-title: Provider Guides
+title: Email Provider Setup Guides
+description: "Step-by-step guides for integrating NornWeave with Mailgun, SendGrid, AWS SES, and Resend. Configure webhooks, DNS records, and API credentials."
 weight: 4
+keywords:
+  - Mailgun setup guide
+  - SendGrid integration
+  - AWS SES email setup
+  - Resend webhook
+  - email provider configuration
+  - webhook setup
+sitemap_priority: 0.8
+sitemap_changefreq: monthly
 ---
 
 Detailed setup guides for each supported email provider.
