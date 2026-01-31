@@ -204,6 +204,6 @@ class EmailProvider(ABC):
         """Parse provider webhook payload into a standardized InboundMessage."""
         ...
 
-    async def setup_inbound_route(self, inbox_address: str) -> None:
+    async def setup_inbound_route(self, inbox_address: str) -> None:  # noqa: B027
         """Optional: configure provider to route inbound mail to our webhook."""
         pass

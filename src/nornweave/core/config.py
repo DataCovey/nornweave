@@ -17,7 +17,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Storage (Urdr)
+    # Storage (Urdr)  # noqa: ERA001
     db_driver: Literal["postgres", "sqlite"] = Field(default="postgres", alias="DB_DRIVER")
     database_url: str = Field(default="", alias="DATABASE_URL")
 
