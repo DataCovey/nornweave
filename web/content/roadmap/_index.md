@@ -4,9 +4,7 @@ title: Roadmap
 
 NornWeave is being developed in phases. This page outlines the current status and upcoming features.
 
-## Current Status
-
-### Phase 1: Foundation (The Mail Proxy) - Available
+## Phase 1: Foundation (The Mail Proxy) - Available
 
 The foundation layer is complete and provides core email functionality:
 
@@ -16,7 +14,7 @@ The foundation layer is complete and provides core email functionality:
 - **Email Sending**: Send replies through your configured provider
 - **API Key Authentication**: Secure your endpoints
 
-### Phase 2: Intelligence (The Agent Layer) - Available
+## Phase 2: Intelligence (The Agent Layer) - Available
 
 The intelligence layer adds LLM-friendly features:
 
