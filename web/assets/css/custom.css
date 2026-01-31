@@ -1,0 +1,4 @@
+/* Invert navbar logo (favicon) in dark mode for contrast */
+html.dark .hextra-nav-container a[href="/"] img {
+  filter: invert(1);
+}

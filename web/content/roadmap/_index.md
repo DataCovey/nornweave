@@ -4,6 +4,10 @@ title: Roadmap
 
 NornWeave is being developed in phases. This page outlines the current status and upcoming features.
 
+<p style="text-align: center;">
+  <img src="/images/logo-big-metallic.jpg" alt="NornWeave" style="max-width: 100%; height: auto;">
+</p>
+
 ## Phase 1: Foundation (The Mail Proxy) - Available
 
 The foundation layer is complete and provides core email functionality:

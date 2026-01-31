@@ -3,6 +3,56 @@ title: NornWeave
 layout: hextra-home
 ---
 
+<style>
+.nw-hero-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 4rem;
+}
+.nw-hero-row .nw-hero-image {
+  flex: 0 0 min(45%, 420px);
+  min-width: 0;
+}
+.nw-hero-row .nw-hero-image img {
+  width: 100%;
+  border-radius: 0.5rem;
+  display: block;
+}
+.nw-hero-row .nw-hero-right {
+  flex: 1 1 45%;
+  min-width: 0;
+}
+.nw-hero-row .nw-hero-quote,
+.nw-hero-row .nw-hero-credits {
+  text-align: left;
+}
+@media (max-width: 768px) {
+  .nw-hero-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .nw-hero-row .nw-hero-image {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 320px;
+  }
+  .nw-hero-row .nw-hero-right {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .nw-hero-row .nw-hero-quote,
+  .nw-hero-row .nw-hero-credits {
+    text-align: center;
+  }
+}
+</style>
+
 <div style="margin-top: 2rem; margin-bottom: 2rem;">
 {{< hextra/hero-headline >}}
   Inbox-as-a-Service for AI Agents
@@ -20,31 +70,35 @@ layout: hextra-home
 {{< hextra/hero-button text="GitHub" link="https://github.com/DataCovey/nornweave" style="outline" >}}
 </div>
 
-<div style="margin-top: 3rem; margin-bottom: 2rem; display: flex; justify-content: center;">
-  <img src="/images/Nornorna_spinner.jpg" alt="The Norns weaving fate at Yggdrasil" style="max-width: 50%; border-radius: 0.5rem;" />
-</div>
-
-<div style="text-align: center; margin-bottom: 5rem;">
-  <p style="font-size: 0.875rem; color: #6b7280; font-style: italic;">
-    "Thaer log logdu, thaer lif voldu..."<br/>
-    "Laws they made there, and life allotted / To the sons of men, and set their fates."
-  </p>
-  <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
-    — Voluspa (The Prophecy of the Seeress), Poetic Edda, Stanza 20
-  </p>
-  <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 1rem;">
-    Image: "Nornorna spinner odets tradar vid Yggdrasil" by L. B. Hansen — 
-    <a href="https://commons.wikimedia.org/w/index.php?curid=164065" target="_blank" style="text-decoration: underline;">Public Domain</a>
-  </p>
-</div>
-
-<div style="margin-bottom: 4rem;">
-{{< hextra/feature-grid >}}
-  {{< hextra/feature-card
-    title="The Story"
-    subtitle="In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Yggdrasil, the World Tree. They weave the tapestry of fate for all beings. NornWeave acts as the Norns for AI Agents — taking raw email data and weaving it into coherent, structured context."
-  >}}
-{{< /hextra/feature-grid >}}
+<div class="nw-hero-row">
+  <div class="nw-hero-image">
+    <img src="/images/Nornorna_spinner.jpg" alt="The Norns weaving fate at Yggdrasil" />
+  </div>
+  <div class="nw-hero-right">
+    <div class="nw-hero-quote" style="margin-bottom: 1.5rem;">
+      <p style="font-size: 0.875rem; color: #6b7280; font-style: italic;">
+        "Thaer log logdu, thaer lif voldu..."<br/>
+        "Laws they made there, and life allotted / To the sons of men, and set their fates."
+      </p>
+      <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
+        — Voluspa (The Prophecy of the Seeress), Poetic Edda, Stanza 20
+      </p>
+    </div>
+    <div class="nw-hero-credits" style="margin-bottom: 2rem;">
+      <p style="font-size: 0.75rem; color: #9ca3af;">
+        Image: "Nornorna spinner odets tradar vid Yggdrasil" by L. B. Hansen —
+        <a href="https://commons.wikimedia.org/w/index.php?curid=164065" target="_blank" style="text-decoration: underline;">Public Domain</a>
+      </p>
+    </div>
+    <div style="width: 100%;">
+      {{< hextra/feature-grid >}}
+        {{< hextra/feature-card
+          title="The Story"
+          subtitle="In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Yggdrasil, the World Tree. They weave the tapestry of fate for all beings. NornWeave acts as the Norns for AI Agents — taking raw email data and weaving it into coherent, structured context."
+        >}}
+      {{< /hextra/feature-grid >}}
+    </div>
+  </div>
 </div>
 
 <div style="margin-top: 5rem; margin-bottom: 2.5rem;">

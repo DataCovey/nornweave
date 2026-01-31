@@ -30,6 +30,11 @@ params:
   navbar:
     displayTitle: true
     displayLogo: true
+    logo:
+      path: favicon/favicon-32x32.png
+      link: /
+      width: 24
+      height: 24
   
   footer:
     displayCopyright: true
