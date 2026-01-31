@@ -93,7 +93,7 @@ Response:
 }
 ```
 
-{{< callout type="tip" >}}
+{{< callout type="info" >}}
 The thread format uses `role: "user"` for incoming emails and `role: "assistant"` for outgoing emails, making it easy to use with LLM chat APIs.
 {{< /callout >}}
 

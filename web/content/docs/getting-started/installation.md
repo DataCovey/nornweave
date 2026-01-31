@@ -16,7 +16,7 @@ Docker is the easiest way to get started with NornWeave.
 
 ### Steps
 
-{{< steps >}}
+{{% steps %}}
 
 ### Clone the Repository
 
@@ -70,7 +70,7 @@ curl http://localhost:8000/health
 
 You should see: `{"status": "healthy"}`
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Using uv (Development)
 
@@ -84,7 +84,7 @@ For development or when you need more control over the installation.
 
 ### Steps
 
-{{< steps >}}
+{{% steps %}}
 
 ### Clone and Install
 
@@ -127,7 +127,7 @@ make dev
 
 The API will be available at `http://localhost:8000`.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Next Steps
 

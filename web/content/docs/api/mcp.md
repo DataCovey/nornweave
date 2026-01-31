@@ -119,7 +119,7 @@ Send an email to bob@gmail.com with subject "Thanks for your interest"
 saying "We'd love to schedule a demo. Are you available next week?"
 ```
 
-{{< callout type="tip" >}}
+{{< callout type="info" >}}
 When `thread_id` is provided, NornWeave handles all threading headers automatically.
 {{< /callout >}}
 

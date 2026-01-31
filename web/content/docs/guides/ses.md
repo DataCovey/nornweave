@@ -14,7 +14,7 @@ This guide walks through setting up Amazon Simple Email Service (SES) as your em
 
 ## Step 1: Verify Your Domain
 
-{{< steps >}}
+{{% steps %}}
 
 ### Navigate to SES Console
 
@@ -40,7 +40,7 @@ SES will provide DNS records to verify ownership:
 
 Verification can take up to 72 hours, but usually completes within minutes.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 2: Request Production Access
 
@@ -48,7 +48,7 @@ Verification can take up to 72 hours, but usually completes within minutes.
 New SES accounts are in "sandbox mode" and can only send to verified addresses. Request production access to remove this limitation.
 {{< /callout >}}
 
-{{< steps >}}
+{{% steps %}}
 
 ### Navigate to Account Dashboard
 
@@ -66,11 +66,11 @@ Click **Request production access** and fill out the form:
 
 AWS typically approves within 24 hours.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 3: Create IAM Credentials
 
-{{< steps >}}
+{{% steps %}}
 
 ### Create IAM User
 
@@ -103,13 +103,13 @@ Create a custom policy or attach `AmazonSESFullAccess`:
 
 Copy the **Access Key ID** and **Secret Access Key**.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 4: Configure Inbound Email
 
 SES receiving is more complex than other providers. You'll need:
 
-{{< steps >}}
+{{% steps %}}
 
 ### Create S3 Bucket
 
@@ -138,7 +138,7 @@ Add MX record pointing to SES:
 
 (Use the correct region for your SES setup)
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 5: Create Lambda Function (Optional)
 
@@ -179,7 +179,7 @@ AWS_REGION=us-east-1
 
 ## Step 7: Verify Setup
 
-{{< steps >}}
+{{% steps %}}
 
 ### Restart NornWeave
 
@@ -201,7 +201,7 @@ curl -X POST http://localhost:8000/v1/messages \
   }'
 ```
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Troubleshooting
 

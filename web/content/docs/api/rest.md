@@ -138,7 +138,7 @@ GET /v1/threads/{thread_id}
 | `role` | `user` for inbound messages, `assistant` for outbound |
 | `content` | Clean Markdown content (HTML converted, cruft removed) |
 
-{{< callout type="tip" >}}
+{{< callout type="info" >}}
 The `role` field maps directly to LLM chat formats, making it easy to use thread content as conversation history.
 {{< /callout >}}
 

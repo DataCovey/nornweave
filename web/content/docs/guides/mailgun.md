@@ -13,7 +13,7 @@ This guide walks through setting up Mailgun as your email provider for NornWeave
 
 ## Step 1: Create a Mailgun Domain
 
-{{< steps >}}
+{{% steps %}}
 
 ### Log in to Mailgun
 
@@ -23,7 +23,7 @@ Go to the [Mailgun Dashboard](https://app.mailgun.com/) and navigate to **Sendin
 
 Click **Add New Domain** and enter your domain (e.g., `mail.yourdomain.com`).
 
-{{< callout type="tip" >}}
+{{< callout type="info" >}}
 We recommend using a subdomain like `mail.` or `mg.` rather than your root domain.
 {{< /callout >}}
 
@@ -48,11 +48,11 @@ Example DNS records:
 
 After adding DNS records, click **Verify DNS Settings** in Mailgun.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 2: Get API Credentials
 
-{{< steps >}}
+{{% steps %}}
 
 ### Navigate to API Keys
 
@@ -66,11 +66,11 @@ Copy your **Private API key**. It looks like: `key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Keep your API key secret. Never commit it to version control.
 {{< /callout >}}
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 3: Configure Inbound Routes
 
-{{< steps >}}
+{{% steps %}}
 
 ### Navigate to Receiving
 
@@ -90,7 +90,7 @@ Click **Create Route** with these settings:
 
 Send a test email to `test@mail.yourdomain.com` and check NornWeave logs.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 4: Configure NornWeave
 
@@ -111,7 +111,7 @@ MAILGUN_REGION=us  # or: eu
 
 ## Step 5: Verify Setup
 
-{{< steps >}}
+{{% steps %}}
 
 ### Restart NornWeave
 
@@ -140,7 +140,7 @@ docker compose logs -f api
 
 You should see the incoming webhook being processed.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Auto-Route Setup
 

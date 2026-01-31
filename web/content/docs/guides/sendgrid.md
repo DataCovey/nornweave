@@ -13,7 +13,7 @@ This guide walks through setting up SendGrid as your email provider for NornWeav
 
 ## Step 1: Create API Key
 
-{{< steps >}}
+{{% steps %}}
 
 ### Log in to SendGrid
 
@@ -30,11 +30,11 @@ Navigate to **Settings** > **API Keys** > **Create API Key**.
 
 Copy the API key immediately - it won't be shown again.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 2: Authenticate Your Domain
 
-{{< steps >}}
+{{% steps %}}
 
 ### Navigate to Sender Authentication
 
@@ -56,11 +56,11 @@ You'll need to add DNS records:
 
 Click **Verify** after adding the DNS records.
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 3: Configure Inbound Parse
 
-{{< steps >}}
+{{% steps %}}
 
 ### Navigate to Inbound Parse
 
@@ -83,7 +83,7 @@ Add MX record for your receiving subdomain:
 |------|------|-------|----------|
 | MX | mail | `mx.sendgrid.net` | 10 |
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Step 4: Configure NornWeave
 
@@ -96,7 +96,7 @@ SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## Step 5: Verify Setup
 
-{{< steps >}}
+{{% steps %}}
 
 ### Restart NornWeave
 
@@ -123,7 +123,7 @@ Send an email to `test@mail.yourdomain.com` from your personal email.
 docker compose logs -f api
 ```
 
-{{< /steps >}}
+{{% /steps %}}
 
 ## Troubleshooting
 
