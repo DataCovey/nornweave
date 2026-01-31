@@ -58,7 +58,7 @@ A **Message** is a single email within a thread. Each message has:
 
 NornWeave uses two critical abstraction layers for flexibility:
 
-### Storage Adapter Layer
+### Storage Adapter Layer (Urdr)
 
 The system uses a `StorageInterface` to persist data, not hardcoded to any specific database.
 
