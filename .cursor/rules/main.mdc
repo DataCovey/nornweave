@@ -1,0 +1,103 @@
+---
+alwaysApply: true
+---
+
+# NornWeave Monorepo - Cursor Rules
+
+This monorepo contains all components for the NornWeave project.
+
+## Repository Structure
+
+```
+nornweave/
+├── web/                    # Project web site
+├── apps/                   # Client applications
+│   ├── frontend/           # Main transactional app frontend
+├── services/                # Backend services
+│   ├── api/                # Python API backend (REST/GraphQL)
+│   └── .../         
+├── packages/                # Shared packages
+│   └── common/             # Common Python package (models, database, migrations)
+├── docs/                   # Internal documentation
+│   ├── api/                # API documentation
+│   ├── dev/                # Development documentation
+│   │   └── architecture/   # Architecture diagrams
+│   ├── prod/               # Product requirements and PRDs
+│   └── sec/                # Security documentation
+├── scripts/                # Utility scripts
+├── res/                    # Internal resources and test files
+│   └── test-files/         # Test data files (PDFs, images, etc.)
+```
+
+## Development Guidelines
+
+### General Principles
+- **Language-specific conventions**: Follow the standard conventions for each technology stack
+- **Security first**: Medical data is highly sensitive - always prioritize security and HIPAA compliance
+- **Documentation**: Keep README files updated in each directory
+- **Testing**: Include tests for all new features
+- **Dependencies**: Always use dependency management tools (uv for Python, pnpm for web)
+
+### Python Services (services/api, ...)
+- Use `uv` for dependency management
+- Follow PEP 8 style guidelines
+- Use type hints for all functions
+- Include docstrings for all public functions and classes
+- Use async/await for I/O operations
+- Structure: Follow clean architecture principles
+- Use sqlalchemy, pydantic models and alembic for psql schema migrations.
+- Follow SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) principles for ensuring maintainable, scalable object-oriented designs.
+- Follow DRY (Don't Repeat Yourself) principles to eliminate code duplication for better readability and easier changes.
+- Add unit-tests for each new added or modified business logic
+
+### Main Frontend (apps/frontend)
+- Use React framework
+- USe shadcn/ui as the design system and apply the styling from the blue theme
+- Follow component-based architecture
+- Use TypeScript for type safety
+- Implement proper error handling and loading states
+- Ensure accessibility (WCAG 2.1 AA compliance)
+- Allow i18n and always localize into portuguese, spanish and german.
+- always ensure mobile version of the pages work well, without horizontal scroll
+
+### Project Web Site (web/)
+- Public-facing content
+- Use Hugo for static site generation
+- Separate from the main transactional app
+- Fully hosted on Github Pages from a static build
+
+### Documentation (docs/)
+- Keep architecture diagrams and text updated at each change
+- Document API contracts
+- Maintain runbooks for operations
+- Include setup instructions for each component and keep them updated after changes
+
+## AI Assistant Guidelines
+
+When working in this monorepo:
+1. **Context awareness**: Understand which component you're working in and use appropriate patterns
+2. **Cross-service communication**: Be aware of how services interact (API contracts, message formats)
+3. **Security**: Never suggest hardcoding credentials or sensitive data
+4. **Medical data**: Be extra careful with data structures - medical records require precision
+5. **Testing**: Always consider testability when suggesting code changes
+
+## File Organization
+
+- Each major component should have its own README.md
+- Configuration files should be at the root of each component
+- Shared utilities should be extracted to appropriate shared packages
+- Test files go in `res/test-files/` - never commit real patient data
+
+## Naming Conventions
+
+- Directories: lowercase with hyphens (kebab-case)
+- Python files: snake_case
+- JavaScript/TypeScript files: camelCase or kebab-case (match project convention)
+- Terraform files: snake_case.tf
+
+## Git Workflow
+
+- Use feature branches for all changes
+- Commit messages should be clear and reference component (e.g., "[api] Add authentication endpoint")
+- Use conventional commits conventions
+- Keep commits focused and atomic
