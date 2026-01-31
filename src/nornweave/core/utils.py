@@ -2,7 +2,7 @@
 
 import hashlib
 import re
-from typing import Sequence
+from collections.abc import Sequence
 
 
 def slugify(s: str, max_length: int = 64) -> str:

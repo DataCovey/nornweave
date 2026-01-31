@@ -3,9 +3,10 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from nornweave.models.event import Event, EventType
 from nornweave.models.inbox import Inbox
-from nornweave.models.thread import Thread
 from nornweave.models.message import Message
+from nornweave.models.thread import Thread
 
 
 class InboundMessage:
@@ -38,6 +39,9 @@ class InboundMessage:
 class StorageInterface(ABC):
     """Abstract storage layer (Urdr - The Well). Implementations: Postgres, SQLite."""
 
+    # -------------------------------------------------------------------------
+    # Inbox methods
+    # -------------------------------------------------------------------------
     @abstractmethod
     async def create_inbox(self, inbox: Inbox) -> Inbox:
         """Create an inbox. Returns the created inbox with id set."""
@@ -59,6 +63,19 @@ class StorageInterface(ABC):
         ...
 
     @abstractmethod
+    async def list_inboxes(
+        self,
+        *,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[Inbox]:
+        """List all inboxes."""
+        ...
+
+    # -------------------------------------------------------------------------
+    # Thread methods
+    # -------------------------------------------------------------------------
+    @abstractmethod
     async def create_thread(self, thread: Thread) -> Thread:
         """Create a thread."""
         ...
@@ -68,6 +85,34 @@ class StorageInterface(ABC):
         """Get a thread by id."""
         ...
 
+    @abstractmethod
+    async def get_thread_by_participant_hash(
+        self,
+        inbox_id: str,
+        participant_hash: str,
+    ) -> Thread | None:
+        """Get a thread by inbox and participant hash (Phase 2 threading)."""
+        ...
+
+    @abstractmethod
+    async def update_thread(self, thread: Thread) -> Thread:
+        """Update a thread (e.g. last_message_at)."""
+        ...
+
+    @abstractmethod
+    async def list_threads_for_inbox(
+        self,
+        inbox_id: str,
+        *,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> list[Thread]:
+        """List threads for an inbox, ordered by last_message_at DESC."""
+        ...
+
+    # -------------------------------------------------------------------------
+    # Message methods
+    # -------------------------------------------------------------------------
     @abstractmethod
     async def create_message(self, message: Message) -> Message:
         """Create a message."""
@@ -86,18 +131,54 @@ class StorageInterface(ABC):
         limit: int = 50,
         offset: int = 0,
     ) -> list[Message]:
-        """List messages for an inbox."""
+        """List messages for an inbox, ordered by created_at."""
         ...
 
     @abstractmethod
-    async def list_threads_for_inbox(
+    async def list_messages_for_thread(
+        self,
+        thread_id: str,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[Message]:
+        """List messages for a thread, ordered by created_at (conversation order)."""
+        ...
+
+    @abstractmethod
+    async def search_messages(
         self,
         inbox_id: str,
+        query: str,
         *,
-        limit: int = 20,
+        limit: int = 50,
         offset: int = 0,
-    ) -> list[Thread]:
-        """List threads for an inbox."""
+    ) -> list[Message]:
+        """Search messages by content (ILIKE/LIKE on content_clean and content_raw)."""
+        ...
+
+    # -------------------------------------------------------------------------
+    # Event methods (Phase 3 webhooks)
+    # -------------------------------------------------------------------------
+    @abstractmethod
+    async def create_event(self, event: Event) -> Event:
+        """Create an event. Returns the created event with id set."""
+        ...
+
+    @abstractmethod
+    async def get_event(self, event_id: str) -> Event | None:
+        """Get an event by id."""
+        ...
+
+    @abstractmethod
+    async def list_events(
+        self,
+        *,
+        event_type: EventType | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[Event]:
+        """List events, optionally filtered by type, ordered by created_at DESC."""
         ...
 
 

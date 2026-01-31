@@ -2,6 +2,8 @@
 
 from datetime import datetime
 from enum import Enum
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -21,20 +23,26 @@ class MessageBase(BaseModel):
     direction: MessageDirection = Field(..., description="Inbound or outbound")
     content_raw: str = Field("", description="Original HTML/plain text")
     content_clean: str = Field("", description="LLM-ready Markdown")
-    metadata: dict[str, str | int | bool] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict,
-        description="Headers, token counts, etc.",
+        description="Headers, token counts, sentiment, etc.",
     )
 
 
 class MessageCreate(BaseModel):
-    """Payload to send a message (outbound)."""
+    """Payload to send a message (outbound via API)."""
 
     inbox_id: str
     to: list[str] = Field(..., min_length=1)
     subject: str = Field(..., min_length=1)
     body: str = Field(..., description="Markdown body")
     reply_to_thread_id: str | None = None
+
+    model_config = {"extra": "forbid"}
+
+
+class MessageInCreate(MessageBase):
+    """Payload to create a message on ingestion (inbound webhook)."""
 
     model_config = {"extra": "forbid"}
 

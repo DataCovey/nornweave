@@ -216,26 +216,3 @@ The storage layer enforces this schema through the `StorageAdapter`:
 | `content_clean` | Text | LLM-ready Markdown |
 | `metadata` | JSON | Headers, attachments, etc. |
 | `created_at` | Timestamp | Message time |
-
-## Directory Structure
-
-The codebase follows the thematic naming:
-
-```
-src/nornweave/
-├── core/           # Shared interfaces and config
-├── urdr/           # Storage layer
-│   └── adapters/   # PostgreSQL, SQLite implementations
-├── verdandi/       # Ingestion engine
-│   ├── parser.py   # HTML to Markdown
-│   ├── sanitizer.py # Cruft removal
-│   └── threading.py # Thread grouping
-├── skuld/          # Outbound layer
-│   ├── sender.py   # Email sending
-│   └── rate_limiter.py
-├── yggdrasil/      # API gateway
-│   ├── app.py      # FastAPI application
-│   └── routes/     # API endpoints
-├── huginn/         # MCP resources
-└── muninn/         # MCP tools
-```

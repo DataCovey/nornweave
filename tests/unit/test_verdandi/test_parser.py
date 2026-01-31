@@ -1,6 +1,5 @@
 """Tests for Verdandi parser."""
 
-import pytest
 from nornweave.verdandi.parser import html_to_markdown
 
 

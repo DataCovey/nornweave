@@ -77,7 +77,19 @@ docker compose exec api alembic upgrade head
 curl http://localhost:8000/health
 ```
 
-You should see: `{"status": "healthy"}`
+You should see: `{"status": "ok"}`
+
+### (Optional) Validate with Python SDK
+
+For a comprehensive validation of all API endpoints, you can use the Python SDK validation script:
+
+```bash
+cd clients/python
+pip install -e .
+python scripts/validate_local.py
+```
+
+This runs 22 integration tests covering all SDK features including sync/async clients, pagination, error handling, and raw response access.
 
 {{% /steps %}}
 
@@ -135,6 +147,18 @@ make dev
 ```
 
 The API will be available at `http://localhost:8000`.
+
+### (Optional) Validate with Python SDK
+
+For a comprehensive validation of all API endpoints, you can use the Python SDK validation script:
+
+```bash
+cd clients/python
+pip install -e ".[dev]"
+python scripts/validate_local.py
+```
+
+This runs 22 integration tests covering all SDK features including sync/async clients, pagination, error handling, and raw response access.
 
 {{% /steps %}}
 

@@ -1,5 +1,7 @@
 """Inbox model."""
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -8,9 +10,9 @@ class InboxBase(BaseModel):
 
     email_address: str = Field(..., description="Full email address for this inbox")
     name: str | None = Field(None, description="Human-readable name")
-    provider_config: dict[str, str | int | bool] = Field(
+    provider_config: dict[str, Any] = Field(
         default_factory=dict,
-        description="Provider-specific metadata (e.g. route id)",
+        description="Provider-specific metadata (e.g. route_id, domain, webhook_id)",
     )
 
 

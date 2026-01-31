@@ -42,8 +42,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files and install with dev dependencies
-COPY pyproject.toml uv.lock* ./
+# Copy dependency files and README (required by pyproject.toml)
+COPY pyproject.toml uv.lock* README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
@@ -56,14 +56,11 @@ COPY alembic.ini ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash nornweave
-USER nornweave
-
 # Expose port
 EXPOSE 8000
 
-# Default command for development
+# For development, run as root to allow mounting volumes
+# Production stage has proper non-root user
 CMD ["uv", "run", "uvicorn", "nornweave.yggdrasil.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 # -----------------------------------------------------------------------------

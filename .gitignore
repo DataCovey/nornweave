@@ -103,6 +103,8 @@ docker-compose.override.yml
 *.sqlite
 *.sqlite3
 nornweave.db
+data/*.db
+!data/.gitkeep
 
 # -----------------------------------------------------------------------------
 # Local / temp

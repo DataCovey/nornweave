@@ -22,10 +22,10 @@ outputs:
   home:
     - HTML
     - RSS
-    - JSON  # For search index
   section:
     - HTML
     - RSS
+    - JSON # For FlexSearch index
 
 # =============================================================================
 # Taxonomies (for potential future use with tags/categories)

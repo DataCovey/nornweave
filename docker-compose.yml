@@ -1,31 +1,82 @@
 # NornWeave Development Stack
-# Usage: docker compose up -d
+#
+# Usage with profiles:
+#   Postgres + Mailgun:   docker compose --profile storage_psql --profile mail_mailgun up --build
+#   Postgres + SendGrid:  docker compose --profile storage_psql --profile mail_sendgrid up --build
+#   SQLite + Mailgun:     docker compose --profile storage_sqlite --profile mail_mailgun up --build
+#   SQLite + SendGrid:    docker compose --profile storage_sqlite --profile mail_sendgrid up --build
+#
+# Run migrations after starting:
+#   docker compose exec api alembic upgrade head
 
 services:
   # ==========================================================================
-  # NornWeave API (Yggdrasil)
+  # NornWeave API (Yggdrasil) - PostgreSQL variant
   # ==========================================================================
-  api:
+  api-psql:
     build:
       context: .
       dockerfile: Dockerfile
       target: development
     container_name: nornweave-api
+    profiles: ["storage_psql"]
     ports:
       - "8000:8000"
     environment:
+      - DB_DRIVER=postgres
       - DATABASE_URL=postgresql+asyncpg://nornweave:nornweave@postgres:5432/nornweave
       - REDIS_URL=redis://redis:6379/0
       - ENVIRONMENT=development
       - LOG_LEVEL=DEBUG
+      - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mailgun}
     env_file:
       - .env
     volumes:
       - ./src:/app/src:ro
       - ./tests:/app/tests:ro
+      - ./alembic.ini:/app/alembic.ini:ro
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nornweave-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ==========================================================================
+  # NornWeave API (Yggdrasil) - SQLite variant
+  # ==========================================================================
+  api-sqlite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: nornweave-api
+    profiles: ["storage_sqlite"]
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_DRIVER=sqlite
+      - DATABASE_URL=sqlite+aiosqlite:///./data/nornweave.db
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mailgun}
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+      - ./data:/app/data
+    depends_on:
       redis:
         condition: service_healthy
     networks:
@@ -44,6 +95,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     container_name: nornweave-postgres
+    profiles: ["storage_psql"]
     ports:
       - "5432:5432"
     environment:
@@ -68,6 +120,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: nornweave-redis
+    profiles: ["storage_psql", "storage_sqlite"]
     ports:
       - "6379:6379"
     volumes:
@@ -88,12 +141,33 @@ services:
   mailpit:
     image: axllent/mailpit:latest
     container_name: nornweave-mailpit
+    profiles: ["storage_psql", "storage_sqlite"]
     ports:
       - "8025:8025"  # Web UI
       - "1025:1025"  # SMTP
     networks:
       - nornweave-network
     restart: unless-stopped
+
+  # ==========================================================================
+  # Email Provider Profile Services (for documentation/env setup)
+  # These are placeholder services that set EMAIL_PROVIDER env var
+  # ==========================================================================
+  # Note: Email provider selection is done via EMAIL_PROVIDER env var
+  # Use --profile mail_mailgun or --profile mail_sendgrid to document intent
+  # The actual API key must be set in .env file
+
+  mail-mailgun:
+    image: busybox
+    profiles: ["mail_mailgun"]
+    command: echo "Mailgun provider selected. Set MAILGUN_API_KEY and MAILGUN_DOMAIN in .env"
+    restart: "no"
+
+  mail-sendgrid:
+    image: busybox
+    profiles: ["mail_sendgrid"]
+    command: echo "SendGrid provider selected. Set SENDGRID_API_KEY in .env"
+    restart: "no"
 
 networks:
   nornweave-network:

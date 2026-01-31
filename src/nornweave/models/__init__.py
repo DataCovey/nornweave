@@ -1,17 +1,30 @@
 """Domain models: Inbox, Thread, Message, Event."""
 
-from nornweave.models.inbox import Inbox, InboxCreate
-from nornweave.models.thread import Thread, ThreadSummary
-from nornweave.models.message import Message, MessageCreate, MessageDirection
-from nornweave.models.event import Event
+from nornweave.models.event import Event, EventCreate, EventType
+from nornweave.models.inbox import Inbox, InboxBase, InboxCreate
+from nornweave.models.message import (
+    Message,
+    MessageBase,
+    MessageCreate,
+    MessageDirection,
+    MessageInCreate,
+)
+from nornweave.models.thread import Thread, ThreadBase, ThreadCreate, ThreadSummary
 
 __all__ = [
+    "Event",
+    "EventCreate",
+    "EventType",
     "Inbox",
+    "InboxBase",
     "InboxCreate",
-    "Thread",
-    "ThreadSummary",
     "Message",
+    "MessageBase",
     "MessageCreate",
     "MessageDirection",
-    "Event",
+    "MessageInCreate",
+    "Thread",
+    "ThreadBase",
+    "ThreadCreate",
+    "ThreadSummary",
 ]

@@ -1,6 +1,7 @@
 """Thread model."""
 
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -11,6 +12,12 @@ class ThreadBase(BaseModel):
     subject: str = Field(..., description="Thread subject")
     last_message_at: datetime | None = Field(None, description="Last message timestamp")
     participant_hash: str | None = Field(None, description="Hash of participants for grouping")
+
+
+class ThreadCreate(ThreadBase):
+    """Payload to create a thread (used on ingestion)."""
+
+    model_config = {"extra": "forbid"}
 
 
 class Thread(ThreadBase):

@@ -196,10 +196,15 @@ cp .env.example .env
 # Edit .env with your API keys
 
 # Start the stack
-docker compose up -d
+docker compose --profile storage_psql --profile mail_mailgun up -d
 
 # Run migrations
-docker compose exec api alembic upgrade head
+docker compose --profile storage_psql exec api-psql uv run alembic upgrade head
+
+# (Optional) Validate with Python SDK
+cd clients/python
+pip install -e .
+python scripts/validate_local.py
 ```
 
 <div style="margin-top: 2rem;">

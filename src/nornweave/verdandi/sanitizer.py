@@ -1,6 +1,5 @@
 """Remove reply cruft (e.g. 'On Date wrote:') from email content."""
 
-import re
 
 
 def remove_reply_cruft(content: str) -> str:
