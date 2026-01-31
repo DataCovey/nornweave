@@ -168,11 +168,11 @@ Human-in-the-loop approval before sending sensitive emails.
 
 We welcome contributions! If you'd like to help build these features:
 
-1. Check the [GitHub Issues](https://github.com/nornweave/nornweave/issues) for current priorities
-2. Read the [Contributing Guide](https://github.com/nornweave/nornweave/blob/main/CONTRIBUTING.md)
+1. Check the [GitHub Issues](https://github.com/DataCovey/nornweave/issues) for current priorities
+2. Read the [Contributing Guide](https://github.com/DataCovey/nornweave/blob/main/CONTRIBUTING.md)
 3. Join the discussion in Issues or Discussions
 
 {{< cards >}}
   {{< card link="https://github.com/nornweave/nornweave" title="GitHub Repository" icon="github" subtitle="Star, fork, or contribute" >}}
-  {{< card link="https://github.com/nornweave/nornweave/issues" title="Issues" icon="exclamation-circle" subtitle="Report bugs or request features" >}}
+  {{< card link="https://github.com/DataCovey/nornweave/issues" title="Issues" icon="exclamation-circle" subtitle="Report bugs or request features" >}}
 {{< /cards >}}
