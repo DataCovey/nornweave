@@ -3,48 +3,42 @@ title: NornWeave
 layout: hextra-home
 ---
 
-{{< hextra/hero-badge >}}
-  <div class="hx-w-2 hx-h-2 hx-rounded-full hx-bg-primary-400"></div>
-  <span>Open Source</span>
-  {{< icon name="arrow-circle-right" attributes="height=14" >}}
-{{< /hextra/hero-badge >}}
-
-<div class="hx-mt-8 hx-mb-8">
+<div style="margin-top: 2rem; margin-bottom: 2rem;">
 {{< hextra/hero-headline >}}
   Inbox-as-a-Service for AI Agents
 {{< /hextra/hero-headline >}}
 </div>
 
-<div class="hx-mb-16">
+<div style="margin-bottom: 3rem;">
 {{< hextra/hero-subtitle >}}
   Open-source, self-hosted API that turns standard email providers into intelligent, stateful email for LLMs via REST or MCP.
 {{< /hextra/hero-subtitle >}}
 </div>
 
-<div class="hx-mb-16">
+<div style="margin-bottom: 4rem;">
 {{< hextra/hero-button text="Get Started" link="docs/getting-started" >}}
 {{< hextra/hero-button text="GitHub" link="https://github.com/DataCovey/nornweave" style="outline" >}}
 </div>
 
-<div class="hx-mt-12 hx-mb-8 hx-flex hx-justify-center">
-  <img src="/images/Nornorna_spinner.jpg" alt="The Norns weaving fate at Yggdrasil" class="hx-max-w-xs md:hx-max-w-sm hx-rounded-lg" style="max-width: 33%;" />
+<div style="margin-top: 3rem; margin-bottom: 2rem; display: flex; justify-content: center;">
+  <img src="/images/Nornorna_spinner.jpg" alt="The Norns weaving fate at Yggdrasil" style="max-width: 50%; border-radius: 0.5rem;" />
 </div>
 
-<div class="hx-text-center hx-mb-20">
-  <p class="hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 hx-italic">
+<div style="text-align: center; margin-bottom: 5rem;">
+  <p style="font-size: 0.875rem; color: #6b7280; font-style: italic;">
     "Thaer log logdu, thaer lif voldu..."<br/>
     "Laws they made there, and life allotted / To the sons of men, and set their fates."
   </p>
-  <p class="hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 hx-mt-2">
+  <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
     — Voluspa (The Prophecy of the Seeress), Poetic Edda, Stanza 20
   </p>
-  <p class="hx-text-xs hx-text-gray-400 dark:hx-text-gray-500 hx-mt-4">
+  <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 1rem;">
     Image: "Nornorna spinner odets tradar vid Yggdrasil" by L. B. Hansen — 
-    <a href="https://commons.wikimedia.org/w/index.php?curid=164065" target="_blank" class="hx-underline">Public Domain</a>
+    <a href="https://commons.wikimedia.org/w/index.php?curid=164065" target="_blank" style="text-decoration: underline;">Public Domain</a>
   </p>
 </div>
 
-<div class="hx-mb-16">
+<div style="margin-bottom: 4rem;">
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
     title="The Story"
@@ -53,7 +47,7 @@ layout: hextra-home
 {{< /hextra/feature-grid >}}
 </div>
 
-<div class="hx-mt-20 hx-mb-10">
+<div style="margin-top: 5rem; margin-bottom: 2.5rem;">
 {{< hextra/hero-headline >}}
   Features
 {{< /hextra/hero-headline >}}
@@ -98,7 +92,7 @@ layout: hextra-home
   >}}
 {{< /hextra/feature-grid >}}
 
-<div class="hx-mt-20 hx-mb-10">
+<div style="margin-top: 5rem; margin-bottom: 2.5rem;">
 {{< hextra/hero-headline >}}
   Current Capabilities
 {{< /hextra/hero-headline >}}
@@ -119,7 +113,7 @@ layout: hextra-home
   >}}
 {{< /hextra/feature-grid >}}
 
-<div class="hx-mt-20 hx-mb-10">
+<div style="margin-top: 5rem; margin-bottom: 2.5rem;">
 {{< hextra/hero-headline >}}
   Quick Start
 {{< /hextra/hero-headline >}}
@@ -141,7 +135,7 @@ docker compose up -d
 docker compose exec api alembic upgrade head
 ```
 
-<div class="hx-mt-8">
+<div style="margin-top: 2rem;">
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
     title="Installation Guide"
