@@ -175,6 +175,6 @@ We welcome contributions! If you'd like to help build these features:
 3. Join the discussion in Issues or Discussions
 
 {{< cards >}}
-  {{< card link="https://github.com/nornweave/nornweave" title="GitHub Repository" icon="github" subtitle="Star, fork, or contribute" >}}
+  {{< card link="https://github.com/DataCovey/nornweave" title="GitHub Repository" icon="github" subtitle="Star, fork, or contribute" >}}
   {{< card link="https://github.com/DataCovey/nornweave/issues" title="Issues" icon="exclamation-circle" subtitle="Report bugs or request features" >}}
 {{< /cards >}}
