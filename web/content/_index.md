@@ -140,7 +140,7 @@ layout: hextra-home
   >}}
   {{< hextra/feature-card
     title="Clean Architecture"
-    subtitle="Modular design with storage and provider adapters."
+    subtitle="Modular design with storage and provider adapters. Change email providers with ease."
     link="docs/concepts/architecture"
     icon="template"
   >}}
