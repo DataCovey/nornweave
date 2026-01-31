@@ -86,7 +86,7 @@ layout: hextra-home
   >}}
   {{< hextra/feature-card
     title="Clean Architecture"
-    subtitle="Thematic components inspired by Norse mythology. Modular design with storage and provider adapters."
+    subtitle="Modular design with storage and provider adapters."
     link="docs/concepts/architecture"
     icon="template"
   >}}

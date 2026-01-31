@@ -7,7 +7,7 @@ NornWeave's architecture uses thematic naming inspired by Norse mythology, with 
 
 ## Component Overview
 
-| Component | Thematic Name | Technical Purpose |
+| Layer | Name | Roles |
 |-----------|---------------|-------------------|
 | Storage Layer | **Urdr** (The Well) | Database adapters for persistence |
 | Ingestion Engine | **Verdandi** (The Loom) | Webhook processing, HTML to Markdown parsing |
@@ -15,17 +15,51 @@ NornWeave's architecture uses thematic naming inspired by Norse mythology, with 
 | API Gateway | **Yggdrasil** | Central router connecting all providers |
 | MCP Tools | **Huginn & Muninn** | Read/write tools for AI agents |
 
-## Thematic Reasoning
+### Component connections and actions
 
-- **Urdr (The Well)** represents "The Past." The database holds the immutable history of what has already happened (logs, stored messages).
+The diagram below shows how the main components connect and what actions they perform on each other.
 
-- **Verdandi (The Loom)** represents "The Present" or "Becoming." This engine processes incoming webhooks in real-time, parsing raw HTML into clean Markdown threads.
+```mermaid
+flowchart LR
+    subgraph external [External]
+        Provider[Email Providers\nMailgun, SES, SendGrid, Resend]
+        Agent[AI Agent\nREST or MCP client]
+    end
 
-- **Skuld (The Prophecy)** represents "The Future" or "Debt." This layer handles what *shall be* done: sending emails, scheduling replies, and managing API credits/rate limits.
+    subgraph yggdrasil [Yggdrasil - Gateway]
+        G[API Router]
+    end
 
-- **Yggdrasil** is the central axis that connects all disparate worlds (Email Providers like Mailgun, SES) into one unified structure.
+    subgraph verdandi [Verdandi - Ingestion]
+        V[Parse webhook\nHTML→Markdown\nThreading]
+    end
 
-- **Huginn & Muninn** are Odin's ravens (Thought and Memory). These are the specific MCP tools that fly out to retrieve knowledge for the Agent.
+    subgraph urdr [Urdr - Storage]
+        U[(PostgreSQL\nSQLite)]
+    end
+
+    subgraph skuld [Skuld - Outbound]
+        S[Send email\nRate limit]
+    end
+
+    subgraph mcp [Huginn & Muninn]
+        M[MCP read/write]
+    end
+
+    Provider -->|"POST /webhooks/{provider}"| G
+    G -->|"route webhook"| V
+    V -->|"store message & thread"| U
+    Agent -->|"GET /v1/threads, POST /v1/messages"| G
+    M -->|"calls API"| G
+    G -->|"fetch thread/messages"| U
+    G -->|"send message"| S
+    S -->|"deliver via API"| Provider
+    S -->|"persist sent message"| U
+```
+
+- **Inbound:** Provider sends webhook → Yggdrasil routes → Verdandi parses and threads → Urdr stores.
+- **Read:** Agent (or MCP) calls API → Yggdrasil → Urdr returns thread/messages.
+- **Reply:** Agent (or MCP) posts message → Yggdrasil → Skuld sends via provider and Urdr stores the sent message.
 
 ## System Architecture Diagram
 

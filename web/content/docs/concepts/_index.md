@@ -15,6 +15,18 @@ Email is often a chaotic, rotting mess of raw HTML and disconnected messages. **
 - It "weaves" disconnected messages into coherent **Threads** (the Tapestry)
 - It nourishes the Agent (Yggdrasil) with clean, structured context so it can survive and function at the center of the user's workflow
 
+And this translates to the main components of the software architecture:
+
+- **Urdr (The Well)** represents "The Past." The database holds the immutable history of what has already happened (logs, stored messages).
+
+- **Verdandi (The Loom)** represents "The Present" or "Becoming." This engine processes incoming webhooks in real-time, parsing raw HTML into clean Markdown threads.
+
+- **Skuld (The Prophecy)** represents "The Future" or "Debt." This layer handles what *shall be* done: sending emails, scheduling replies, and managing API credits/rate limits.
+
+- **Yggdrasil** is the central axis that connects all disparate worlds (Email Providers like Mailgun, SES) into one unified structure.
+
+- **Huginn & Muninn** are Odin's ravens (Thought and Memory). These are the specific MCP tools that fly out to retrieve knowledge for the Agent.
+
 ## Core Entities
 
 ### Inbox

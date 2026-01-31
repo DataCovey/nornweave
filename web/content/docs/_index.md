@@ -17,8 +17,6 @@ Welcome to the NornWeave documentation. Learn how to set up and use the Inbox-as
 
 ## Architecture Overview
 
-NornWeave uses a thematic architecture inspired by Norse mythology:
-
 | Component | Name | Purpose |
 |-----------|------|---------|
 | Storage Layer | **Urdr** (The Well) | Database adapters (PostgreSQL, SQLite) |
@@ -27,7 +25,9 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 | Gateway | **Yggdrasil** | API router connecting all providers |
 | MCP Tools | **Huginn & Muninn** | Read/write tools for AI agents |
 
-## Supported Providers
+For detailed data flows and sequence diagrams, see [Concepts → Architecture]({{< relref "concepts/architecture" >}}).
+
+## Supported Mail Providers
 
 | Provider | Sending | Receiving | Auto-Route Setup |
 |----------|---------|-----------|------------------|
