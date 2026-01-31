@@ -1,0 +1,1 @@
+"""Message endpoints. Placeholder."""

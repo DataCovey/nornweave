@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ .Site.Title }} — {{ .Site.Params.description }}</title>
+  <meta name="description" content="{{ .Site.Params.description }}">
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --fg: #e4e4e7;
+      --muted: #71717a;
+      --accent: #6366f1;
+      --font: system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    main {
+      max-width: 42rem;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .tagline {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+    .quote {
+      font-style: italic;
+      color: var(--muted);
+      margin: 2rem 0;
+      padding: 0 1rem;
+    }
+    .quote cite { font-size: 0.875rem; }
+    img.hero {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 2rem 0;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+    .credit {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 3rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 2rem 0;
+    }
+    ul li { margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{{ .Site.Title }}</h1>
+    <p class="tagline">{{ .Site.Params.description }}</p>
+    {{ with .Site.Params.image_credit }}
+      {{ $img := "images/Nornorna_spinner.jpg" }}
+      {{ if fileExists (path.Join "static" $img) }}
+        <img class="hero" src="/{{ $img }}" alt="The Norns weaving fate at Yggdrasil" width="400">
+      {{ end }}
+    {{ end }}
+    <div class="quote">
+      <p>{{ .Site.Params.tagline }}</p>
+      <cite>— {{ .Site.Params.quote_source }}</cite>
+    </div>
+    {{ .Content }}
+    <p class="credit">
+      {{ with .Site.Params.image_credit }}{{ . }}{{ end }}
+      {{ with .Site.Params.image_credit_url }} — <a href="{{ . }}" target="_blank" rel="noopener">{{ $.Site.Params.image_license }}</a>{{ end }}
+    </p>
+  </main>
+</body>
+</html>

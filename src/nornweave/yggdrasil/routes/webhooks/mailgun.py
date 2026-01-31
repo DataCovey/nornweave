@@ -1,0 +1,1 @@
+"""Mailgun webhook handler. Placeholder."""

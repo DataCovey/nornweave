@@ -1,0 +1,2 @@
+# Copy res/Nornorna_spinner.jpg here for the landing page hero image:
+# cp ../res/Nornorna_spinner.jpg web/static/images/

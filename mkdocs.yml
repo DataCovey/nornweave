@@ -1,0 +1,69 @@
+# MkDocs configuration for NornWeave
+# https://www.mkdocs.org/user-guide/configuration/
+
+site_name: NornWeave
+site_description: Open-source Inbox-as-a-Service API for AI Agents
+site_url: https://nornweave.github.io/nornweave/
+repo_url: https://github.com/nornweave/nornweave
+repo_name: nornweave/nornweave
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quickstart: getting-started/quickstart.md
+    - Configuration: getting-started/configuration.md
+  - API:
+    - REST: api/rest.md
+    - MCP: api/mcp.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - Adapters: architecture/adapters.md
+  - Guides:
+    - Mailgun: guides/mailgun.md
+    - AWS SES: guides/ses.md
+    - SendGrid: guides/sendgrid.md
+  - Contributing: contributing.md

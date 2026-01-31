@@ -1,0 +1,18 @@
+# Hugo configuration for NornWeave landing page
+# https://gohugo.io/getting-started/configuration/
+
+baseURL = "https://nornweave.github.io/nornweave/"
+languageCode = "en-us"
+title = "NornWeave"
+theme = ""  # no theme; use layouts in web/layouts
+
+[params]
+description = "Open-source, self-hosted Inbox-as-a-Service API for AI Agents"
+tagline = "Laws they made there, and life allotted / To the sons of men, and set their fates."
+quote_source = "Voluspa (The Prophecy of the Seeress), Poetic Edda, Stanza 20"
+image_credit = "Nornorna spinner odet tradar vid Yggdrasil by L. B. Hansen"
+image_credit_url = "https://commons.wikimedia.org/w/index.php?curid=164065"
+image_license = "Public Domain"
+
+[build]
+publishDir = "public"

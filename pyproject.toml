@@ -1,0 +1,188 @@
+[project]
+name = "nornweave"
+version = "0.1.0"
+description = "Open-source, self-hosted Inbox-as-a-Service API for AI Agents"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "NornWeave Contributors" }]
+maintainers = [{ name = "NornWeave Contributors" }]
+keywords = ["email", "api", "ai", "agents", "mcp", "inbox", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Email",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "alembic>=1.14.0",
+    "asyncpg>=0.30.0",
+    "httpx>=0.28.0",
+    "python-multipart>=0.0.18",
+    "html2text>=2024.2.26",
+    "email-validator>=2.2.0",
+]
+
+[project.optional-dependencies]
+# Phase 2: MCP Server
+mcp = [
+    "mcp>=1.0.0",
+]
+# Phase 2: Attachment processing
+attachments = [
+    "pypdf>=5.1.0",
+    "python-magic>=0.4.27",
+]
+# Phase 3: Semantic search
+search = [
+    "pgvector>=0.3.6",
+    "openai>=1.57.0",
+]
+# Phase 3: Rate limiting
+ratelimit = [
+    "redis>=5.2.0",
+]
+# All optional dependencies
+all = [
+    "nornweave[mcp,attachments,search,ratelimit]",
+]
+# Development dependencies
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+    "httpx>=0.28.0",
+    "aiosqlite>=0.20.0",
+]
+# Documentation
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.27.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/nornweave/nornweave"
+Documentation = "https://nornweave.github.io/nornweave"
+Repository = "https://github.com/nornweave/nornweave"
+Issues = "https://github.com/nornweave/nornweave/issues"
+Changelog = "https://github.com/nornweave/nornweave/blob/main/CHANGELOG.md"
+
+[project.scripts]
+nornweave = "nornweave.yggdrasil.app:main"
+
+[project.entry-points."mcp.servers"]
+nornweave = "nornweave.huginn.server:serve"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nornweave"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+]
+
+# Ruff configuration
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+    "B904",   # raise without from inside except
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["nornweave"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["src/nornweave"]
+branch = true
+omit = ["*/migrations/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@abstractmethod",
+]
+
+# MyPy configuration
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = [
+    "html2text.*",
+    "mcp.*",
+]
+ignore_missing_imports = true
