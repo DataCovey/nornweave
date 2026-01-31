@@ -25,10 +25,7 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --frozen --no-install-project
-
-      - name: Install project
-        run: uv sync --frozen
+        run: uv sync --frozen --extra dev
 
       - name: Run ruff (lint)
         run: uv run ruff check src tests
