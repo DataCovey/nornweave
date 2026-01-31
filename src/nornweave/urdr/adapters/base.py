@@ -67,12 +67,7 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         offset: int = 0,
     ) -> list[Inbox]:
         """List all inboxes."""
-        stmt = (
-            select(InboxORM)
-            .order_by(InboxORM.email_address)
-            .limit(limit)
-            .offset(offset)
-        )
+        stmt = select(InboxORM).order_by(InboxORM.email_address).limit(limit).offset(offset)
         result = await self._session.execute(stmt)
         return [row.to_pydantic() for row in result.scalars().all()]
 
@@ -253,10 +248,6 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         stmt = select(EventORM)
         if event_type is not None:
             stmt = stmt.where(EventORM.type == event_type.value)
-        stmt = (
-            stmt.order_by(EventORM.created_at.desc())
-            .limit(limit)
-            .offset(offset)
-        )
+        stmt = stmt.order_by(EventORM.created_at.desc()).limit(limit).offset(offset)
         result = await self._session.execute(stmt)
         return [row.to_pydantic() for row in result.scalars().all()]

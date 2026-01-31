@@ -1,6 +1,5 @@
 """SendGrid webhook handler."""
 
-
 from fastapi import APIRouter, Request, status
 
 router = APIRouter()

@@ -227,9 +227,7 @@ class TestThreadOperations:
         )
         await storage.create_thread(thread)
 
-        result = await storage.get_thread_by_participant_hash(
-            inbox.id, "unique-hash-123"
-        )
+        result = await storage.get_thread_by_participant_hash(inbox.id, "unique-hash-123")
 
         assert result is not None
         assert result.id == thread.id
@@ -239,9 +237,7 @@ class TestThreadOperations:
         self, storage: SQLiteAdapter, inbox: Inbox
     ) -> None:
         """Test getting by non-existent participant hash returns None."""
-        result = await storage.get_thread_by_participant_hash(
-            inbox.id, "non-existent-hash"
-        )
+        result = await storage.get_thread_by_participant_hash(inbox.id, "non-existent-hash")
         assert result is None
 
     @pytest.mark.asyncio
@@ -265,9 +261,7 @@ class TestThreadOperations:
         assert updated.last_message_at is not None
 
     @pytest.mark.asyncio
-    async def test_list_threads_for_inbox(
-        self, storage: SQLiteAdapter, inbox: Inbox
-    ) -> None:
+    async def test_list_threads_for_inbox(self, storage: SQLiteAdapter, inbox: Inbox) -> None:
         """Test listing threads for an inbox, ordered by last_message_at DESC."""
         # Create threads with different timestamps
         now = datetime.now(UTC)
@@ -343,9 +337,7 @@ class TestMessageOperations:
         assert created.content_clean == "Hello World"
 
     @pytest.mark.asyncio
-    async def test_get_message(
-        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
-    ) -> None:
+    async def test_get_message(self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread) -> None:
         """Test getting a message by ID."""
         message = Message(
             id=str(uuid.uuid4()),
@@ -458,9 +450,7 @@ class TestMessageOperations:
         )
         await storage.create_message(message)
 
-        results = await storage.search_messages(
-            inbox.id, "xyznonexistent", limit=10, offset=0
-        )
+        results = await storage.search_messages(inbox.id, "xyznonexistent", limit=10, offset=0)
 
         assert len(results) == 0
 
@@ -559,9 +549,7 @@ class TestEventOperations:
         assert all(e.type == EventType.THREAD_NEW_MESSAGE for e in message_events)
 
     @pytest.mark.asyncio
-    async def test_list_events_ordered_by_created_at_desc(
-        self, storage: SQLiteAdapter
-    ) -> None:
+    async def test_list_events_ordered_by_created_at_desc(self, storage: SQLiteAdapter) -> None:
         """Test events are ordered by created_at DESC."""
         now = datetime.now(UTC)
         for i in range(3):

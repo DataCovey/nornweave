@@ -46,9 +46,7 @@ def get_database_url(settings: Settings) -> str:
             url = url.replace("postgresql://", "postgresql+asyncpg://")
     elif settings.db_driver == "sqlite":
         if not url.startswith("sqlite"):
-            raise ValueError(
-                f"DATABASE_URL must start with 'sqlite' for sqlite driver, got: {url}"
-            )
+            raise ValueError(f"DATABASE_URL must start with 'sqlite' for sqlite driver, got: {url}")
         # Ensure async driver
         if "aiosqlite" not in url:
             url = url.replace("sqlite://", "sqlite+aiosqlite://")
