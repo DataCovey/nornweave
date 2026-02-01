@@ -1114,7 +1114,10 @@ Would Tuesday at 2pm work for you?""",
 
         # Original message marker should be stripped (or content after it)
         # Note: The exact behavior depends on Talon or our fallback implementation
-        assert "-----Original Message-----" not in clean_content or "Would Tuesday at 2pm" not in clean_content
+        assert (
+            "-----Original Message-----" not in clean_content
+            or "Would Tuesday at 2pm" not in clean_content
+        )
 
     async def test_signature_stripped(
         self,
@@ -1141,7 +1144,7 @@ Would Tuesday at 2pm work for you?""",
 
 Thanks!
 
--- 
+--
 Dave Johnson
 Senior Manager
 ACME Corporation

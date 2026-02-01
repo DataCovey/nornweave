@@ -9,13 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Project bootstrap: repository structure, configuration, and boilerplate
-- Python package layout under `src/nornweave/` with thematic components (Urdr, Verdandi, Skuld, Yggdrasil, Huginn, Muninn)
-- Root configuration: `pyproject.toml`, `.env.example`, `Makefile`, `docker-compose.yml`, `Dockerfile`, `alembic.ini`
-- Community files: `README.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `CHANGELOG.md`
-- GitHub configuration: workflows, issue templates, PR template, dependabot, pre-commit
-- Documentation structure under `docs/` (MkDocs)
-- Landing page structure under `web/` (Hugo)
+- (None yet)
 
 ### Changed
 

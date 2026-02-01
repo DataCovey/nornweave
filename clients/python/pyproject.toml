@@ -36,7 +36,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/DataCovey/nornweave"
-Documentation = "https://nornweave.github.io/nornweave"
+Documentation = "https://nornweave.datacovey.com/docs/"
 Repository = "https://github.com/DataCovey/nornweave"
 Issues = "https://github.com/DataCovey/nornweave/issues"
 

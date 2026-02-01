@@ -15,8 +15,6 @@
 
 <p align="center">
   <a href="https://github.com/DataCovey/nornweave/actions"><img src="https://github.com/DataCovey/nornweave/workflows/CI/badge.svg" alt="CI Status"></a>
-  <a href="https://pypi.org/project/nornweave/"><img src="https://img.shields.io/pypi/v/nornweave.svg" alt="PyPI Version"></a>
-  <a href="https://pypi.org/project/nornweave/"><img src="https://img.shields.io/pypi/pyversions/nornweave.svg" alt="Python Versions"></a>
   <a href="https://github.com/DataCovey/nornweave/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License"></a>
 </p>
 
@@ -199,10 +197,10 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 
 ## Documentation
 
-- [Getting Started Guide](https://nornweave.github.io/nornweave/getting-started/)
-- [API Reference](https://nornweave.github.io/nornweave/api/)
-- [Architecture Overview](https://nornweave.github.io/nornweave/architecture/)
-- [Provider Setup Guides](https://nornweave.github.io/nornweave/guides/)
+- [Getting Started Guide](https://nornweave.datacovey.com/docs/getting-started/)
+- [API Reference](https://nornweave.datacovey.com/docs/api/)
+- [Architecture Overview](https://nornweave.datacovey.com/docs/architecture/)
+- [Provider Setup Guides](https://nornweave.datacovey.com/docs/guides/)
 
 ## Contributing
 

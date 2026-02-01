@@ -317,6 +317,6 @@ Releases are managed by maintainers following [Semantic Versioning](https://semv
 
 - Open a [GitHub Discussion](https://github.com/DataCovey/nornweave/discussions)
 - Check existing [issues](https://github.com/DataCovey/nornweave/issues)
-- Read the [documentation](https://nornweave.github.io/nornweave/)
+- Read the [documentation](https://nornweave.datacovey.com/docs/)
 
 Thank you for contributing to NornWeave!

@@ -13,7 +13,7 @@ import mimetypes
 import re
 from dataclasses import dataclass, field
 from email import policy
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from nornweave.core.interfaces import InboundAttachment
 from nornweave.models.attachment import AttachmentDisposition
@@ -166,11 +166,11 @@ def parse_content_id_map(content_id_map_json: str | dict[str, str] | None) -> di
         import json
 
         try:
-            return json.loads(content_id_map_json)
+            return cast("dict[str, str]", json.loads(content_id_map_json))
         except (json.JSONDecodeError, ValueError):
             return {}
 
-    return dict(content_id_map_json)
+    return cast("dict[str, str]", dict(content_id_map_json))
 
 
 def normalize_content_id(content_id: str | None) -> str | None:
@@ -449,11 +449,11 @@ def parse_attachment_info_json(
         import json
 
         try:
-            return json.loads(attachment_info)
+            return cast("dict[str, dict[str, Any]]", json.loads(attachment_info))
         except (json.JSONDecodeError, ValueError):
             return {}
 
-    return dict(attachment_info)
+    return cast("dict[str, dict[str, Any]]", dict(attachment_info))
 
 
 def guess_content_type(filename: str, default: str = "application/octet-stream") -> str:

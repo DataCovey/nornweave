@@ -1,7 +1,7 @@
 """Google Cloud Storage backend for attachments."""
 
 from datetime import timedelta
-from typing import Any
+from typing import Any, cast
 
 from nornweave.core.storage import AttachmentMetadata, AttachmentStorageBackend, StorageResult
 
@@ -104,7 +104,7 @@ class GCSStorage(AttachmentStorageBackend):
         if not blob.exists():
             raise FileNotFoundError(f"Attachment not found: {storage_key}")
 
-        return blob.download_as_bytes()
+        return cast("bytes", blob.download_as_bytes())
 
     async def delete(self, storage_key: str) -> bool:
         """Delete attachment from GCS."""
@@ -135,10 +135,10 @@ class GCSStorage(AttachmentStorageBackend):
             kwargs["response_disposition"] = f'attachment; filename="{filename}"'
 
         url = blob.generate_signed_url(**kwargs)
-        return url
+        return cast("str", url)
 
     async def exists(self, storage_key: str) -> bool:
         """Check if attachment exists in GCS."""
         _, bucket = self._get_client()
         blob = bucket.blob(storage_key)
-        return blob.exists()
+        return cast("bool", blob.exists())

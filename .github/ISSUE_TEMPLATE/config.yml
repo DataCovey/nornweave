@@ -1,7 +1,7 @@
 blank_issues_enabled: true
 contact_links:
   - name: Documentation
-    url: https://nornweave.github.io/nornweave/
+    url: https://nornweave.datacovey.com/docs/
     about: Project documentation
   - name: Discussions
     url: https://github.com/DataCovey/nornweave/discussions

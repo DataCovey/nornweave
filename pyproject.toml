@@ -73,7 +73,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/DataCovey/nornweave"
-Documentation = "https://nornweave.github.io/nornweave"
+Documentation = "https://nornweave.datacovey.com/docs/"
 Repository = "https://github.com/DataCovey/nornweave"
 Issues = "https://github.com/DataCovey/nornweave/issues"
 Changelog = "https://github.com/DataCovey/nornweave/blob/main/CHANGELOG.md"
@@ -180,5 +180,15 @@ plugins = ["pydantic.mypy"]
 module = [
     "html2text.*",
     "mcp.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "talon",
+    "talon.*",
+    "boto3",
+    "google.cloud.*",
+    "pdfplumber",
 ]
 ignore_missing_imports = true

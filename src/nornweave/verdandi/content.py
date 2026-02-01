@@ -9,6 +9,7 @@ Reference: https://github.com/mailgun/talon
 
 import logging
 from dataclasses import dataclass
+from typing import cast
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +129,7 @@ def extract_reply(body: str, content_type: str = "text/plain") -> str:
     try:
         from talon import quotations
 
-        return quotations.extract_from(body, content_type)
+        return cast("str", quotations.extract_from(body, content_type))
     except ImportError:
         if "html" in content_type.lower():
             return body

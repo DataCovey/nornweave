@@ -1,7 +1,7 @@
 """AWS S3 storage backend for attachments."""
 
 from datetime import timedelta
-from typing import Any
+from typing import Any, cast
 
 from nornweave.core.storage import AttachmentMetadata, AttachmentStorageBackend, StorageResult
 
@@ -111,7 +111,7 @@ class S3Storage(AttachmentStorageBackend):
 
         try:
             response = client.get_object(Bucket=self.bucket, Key=storage_key)
-            return response["Body"].read()
+            return cast("bytes", response["Body"].read())
         except client.exceptions.NoSuchKey:
             raise FileNotFoundError(f"Attachment not found: {storage_key}")
 
@@ -151,7 +151,7 @@ class S3Storage(AttachmentStorageBackend):
             ExpiresIn=int(expires_in.total_seconds()),
         )
 
-        return url
+        return cast("str", url)
 
     async def exists(self, storage_key: str) -> bool:
         """Check if attachment exists in S3."""
