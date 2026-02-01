@@ -821,3 +821,435 @@ class TestLLMAgentWorkflow:
 
         # Verify response was sent
         assert any("refund" in e.body.lower() for e in mock_provider.sent_emails)
+
+
+@pytest.mark.asyncio
+class TestGmailThreadingBehavior:
+    """Test Gmail-style threading behavior.
+
+    Reference: res-local/email-references.md
+    - Subject matching when headers are missing (mobile client scenario)
+    - 7-day window for subject-only threading
+    """
+
+    async def test_subject_only_threading_within_window(
+        self,
+        e2e_client: AsyncClient,
+        e2e_storage: SQLiteAdapter,
+    ) -> None:
+        """
+        Test Gmail mobile client scenario: threading by subject only.
+
+        When In-Reply-To and References headers are missing (common on mobile),
+        Gmail threads messages with matching subjects within a 7-day window.
+        """
+        # Create inbox
+        inbox_response = await e2e_client.post(
+            "/v1/inboxes",
+            json={"name": "Subject Threading Test", "email_username": "subjectthread"},
+        )
+        inbox_id = inbox_response.json()["id"]
+        inbox_email = inbox_response.json()["email_address"]
+
+        # Message 1: Initial email creates a new thread
+        initial_msg = InboundMessage(
+            from_address="mobile-user@example.com",
+            to_address=inbox_email,
+            subject="Budget Question",
+            body_plain="What's the budget for the project?",
+            message_id="<initial-budget@example.com>",
+            timestamp=datetime.utcnow(),
+        )
+        msg1 = await ingest_inbound_message(e2e_storage, inbox_id, initial_msg)
+        original_thread_id = msg1.thread_id
+
+        # Message 2: Reply from mobile client - NO In-Reply-To/References headers
+        # (This simulates a mobile email client that doesn't set threading headers)
+        mobile_reply = InboundMessage(
+            from_address="mobile-user@example.com",
+            to_address=inbox_email,
+            subject="Re: Budget Question",  # Same subject with Re: prefix
+            body_plain="Also, can we discuss the timeline?",
+            message_id="<mobile-reply@example.com>",
+            timestamp=datetime.utcnow() + timedelta(hours=2),
+            # Intentionally NO in_reply_to or references
+            in_reply_to=None,
+            references=None,
+        )
+        msg2 = await ingest_inbound_message(e2e_storage, inbox_id, mobile_reply)
+
+        # Verify: Message 2 should join the same thread via subject matching
+        assert msg2.thread_id == original_thread_id, (
+            "Mobile reply without headers should thread by subject"
+        )
+
+        # Verify thread has both messages
+        thread_response = await e2e_client.get(f"/v1/threads/{original_thread_id}")
+        assert thread_response.status_code == 200
+        assert len(thread_response.json()["messages"]) == 2
+
+    async def test_subject_threading_7_day_window_respected(
+        self,
+        e2e_client: AsyncClient,
+        e2e_storage: SQLiteAdapter,
+    ) -> None:
+        """
+        Test Gmail's 7-day window for subject-only threading.
+
+        Messages with matching subjects should NOT thread together if the
+        last message in the thread was more than 7 days ago.
+        """
+        # Create inbox
+        inbox_response = await e2e_client.post(
+            "/v1/inboxes",
+            json={"name": "7-Day Window Test", "email_username": "sevendaywindow"},
+        )
+        inbox_id = inbox_response.json()["id"]
+        inbox_email = inbox_response.json()["email_address"]
+
+        # Message 1: Old email from 10 days ago
+        old_timestamp = datetime.utcnow() - timedelta(days=10)
+        old_msg = InboundMessage(
+            from_address="alice@example.com",
+            to_address=inbox_email,
+            subject="Weekly Report",
+            body_plain="Here's the weekly report for last week.",
+            message_id="<old-report@example.com>",
+            timestamp=old_timestamp,
+        )
+        msg1 = await ingest_inbound_message(e2e_storage, inbox_id, old_msg)
+        old_thread_id = msg1.thread_id
+
+        # Message 2: New email with same subject, but NO headers (subject-only match)
+        new_msg = InboundMessage(
+            from_address="alice@example.com",
+            to_address=inbox_email,
+            subject="Weekly Report",  # Same subject
+            body_plain="Here's this week's report.",
+            message_id="<new-report@example.com>",
+            timestamp=datetime.utcnow(),  # Today
+            # NO in_reply_to or references - would require subject matching
+            in_reply_to=None,
+            references=None,
+        )
+        msg2 = await ingest_inbound_message(e2e_storage, inbox_id, new_msg)
+
+        # Verify: Message 2 should be in a DIFFERENT thread
+        # because the old thread is outside the 7-day window
+        assert msg2.thread_id != old_thread_id, (
+            "Subject-only match should fail for threads older than 7 days"
+        )
+
+        # Verify each thread has exactly 1 message
+        old_thread = await e2e_client.get(f"/v1/threads/{old_thread_id}")
+        new_thread = await e2e_client.get(f"/v1/threads/{msg2.thread_id}")
+
+        assert len(old_thread.json()["messages"]) == 1
+        assert len(new_thread.json()["messages"]) == 1
+
+    async def test_headers_override_7_day_window(
+        self,
+        e2e_client: AsyncClient,
+        e2e_storage: SQLiteAdapter,
+    ) -> None:
+        """
+        Test that explicit References/In-Reply-To headers ALWAYS thread,
+        even outside the 7-day window.
+
+        The 7-day limit only applies to subject-only matching.
+        """
+        # Create inbox
+        inbox_response = await e2e_client.post(
+            "/v1/inboxes",
+            json={"name": "Headers Override Test", "email_username": "headersoverride"},
+        )
+        inbox_id = inbox_response.json()["id"]
+        inbox_email = inbox_response.json()["email_address"]
+
+        # Message 1: Old email from 30 days ago
+        old_timestamp = datetime.utcnow() - timedelta(days=30)
+        old_msg = InboundMessage(
+            from_address="alice@example.com",
+            to_address=inbox_email,
+            subject="Contract Discussion",
+            body_plain="Let's discuss the contract terms.",
+            message_id="<old-contract@example.com>",
+            timestamp=old_timestamp,
+        )
+        msg1 = await ingest_inbound_message(e2e_storage, inbox_id, old_msg)
+        old_thread_id = msg1.thread_id
+
+        # Message 2: Reply 30 days later WITH proper References header
+        # This should still thread correctly despite the time gap
+        late_reply = InboundMessage(
+            from_address="alice@example.com",
+            to_address=inbox_email,
+            subject="Re: Contract Discussion",
+            body_plain="Sorry for the late reply! I agree with the terms.",
+            message_id="<late-reply@example.com>",
+            timestamp=datetime.utcnow(),
+            in_reply_to="<old-contract@example.com>",
+            references=["<old-contract@example.com>"],
+        )
+        msg2 = await ingest_inbound_message(e2e_storage, inbox_id, late_reply)
+
+        # Verify: Message 2 SHOULD be in the same thread
+        # because References header takes precedence over time window
+        assert msg2.thread_id == old_thread_id, (
+            "References header should override 7-day window limit"
+        )
+
+
+@pytest.mark.asyncio
+class TestQuoteStripping:
+    """Test that quoted content is properly stripped for LLM consumption.
+
+    Reference: res-local/email-references.md - Talon library for de-duplication
+    """
+
+    async def test_gmail_style_quote_stripped(
+        self,
+        e2e_client: AsyncClient,
+        e2e_storage: SQLiteAdapter,
+    ) -> None:
+        """
+        Test Gmail-style quoted text is stripped from extracted_text.
+
+        Gmail quotes look like:
+        "On Jan 31, 2026, Alice wrote:
+        > original message"
+        """
+        # Create inbox
+        inbox_response = await e2e_client.post(
+            "/v1/inboxes",
+            json={"name": "Quote Strip Test", "email_username": "quotestrip"},
+        )
+        inbox_id = inbox_response.json()["id"]
+        inbox_email = inbox_response.json()["email_address"]
+
+        # Email with quoted text
+        reply_with_quote = InboundMessage(
+            from_address="bob@example.com",
+            to_address=inbox_email,
+            subject="Re: Project Update",
+            body_plain="""Thanks for the update! I have a few questions.
+
+Can we schedule a call tomorrow?
+
+On Fri, Jan 31, 2026 at 10:00 AM Alice wrote:
+> Here's the project update you requested.
+> We've completed phase 1 and are starting phase 2.
+> Let me know if you have any questions.""",
+            message_id="<quoted-reply@example.com>",
+            timestamp=datetime.utcnow(),
+        )
+        msg = await ingest_inbound_message(e2e_storage, inbox_id, reply_with_quote)
+
+        # Retrieve message via API
+        msg_response = await e2e_client.get(f"/v1/messages/{msg.message_id}")
+        assert msg_response.status_code == 200
+        msg_data = msg_response.json()
+
+        # The raw text (content_raw) should contain the quote
+        raw_content = msg_data.get("content_raw", "")
+        assert "On Fri, Jan 31" in raw_content or "Alice wrote" in raw_content
+
+        # The extracted text (content_clean) should NOT contain the quoted part
+        clean_content = msg_data.get("content_clean", "")
+        assert "Thanks for the update" in clean_content
+        assert "schedule a call" in clean_content
+
+        # The quoted historical content should be stripped
+        # (This tests Talon or our fallback quote removal)
+        assert "Here's the project update you requested" not in clean_content, (
+            "Quoted text should be stripped from content_clean"
+        )
+
+    async def test_outlook_style_quote_stripped(
+        self,
+        e2e_client: AsyncClient,
+        e2e_storage: SQLiteAdapter,
+    ) -> None:
+        """
+        Test Outlook-style quoted text is stripped.
+
+        Outlook quotes use separators like:
+        "-----Original Message-----"
+        """
+        # Create inbox
+        inbox_response = await e2e_client.post(
+            "/v1/inboxes",
+            json={"name": "Outlook Quote Test", "email_username": "outlookquote"},
+        )
+        inbox_id = inbox_response.json()["id"]
+        inbox_email = inbox_response.json()["email_address"]
+
+        # Email with Outlook-style quote
+        outlook_reply = InboundMessage(
+            from_address="carol@example.com",
+            to_address=inbox_email,
+            subject="RE: Meeting Request",
+            body_plain="""Yes, Tuesday works for me. See you then!
+
+-----Original Message-----
+From: Support Team
+Sent: Friday, January 31, 2026 9:00 AM
+To: carol@example.com
+Subject: Meeting Request
+
+Would Tuesday at 2pm work for you?""",
+            message_id="<outlook-reply@example.com>",
+            timestamp=datetime.utcnow(),
+        )
+        msg = await ingest_inbound_message(e2e_storage, inbox_id, outlook_reply)
+
+        # Retrieve and verify
+        msg_response = await e2e_client.get(f"/v1/messages/{msg.message_id}")
+        msg_data = msg_response.json()
+
+        clean_content = msg_data.get("content_clean", "")
+
+        # New content should be present
+        assert "Tuesday works for me" in clean_content
+
+        # Original message marker should be stripped (or content after it)
+        # Note: The exact behavior depends on Talon or our fallback implementation
+        assert "-----Original Message-----" not in clean_content or "Would Tuesday at 2pm" not in clean_content
+
+    async def test_signature_stripped(
+        self,
+        e2e_client: AsyncClient,
+        e2e_storage: SQLiteAdapter,
+    ) -> None:
+        """
+        Test that email signatures are stripped from extracted_text.
+        """
+        # Create inbox
+        inbox_response = await e2e_client.post(
+            "/v1/inboxes",
+            json={"name": "Signature Strip Test", "email_username": "sigstrip"},
+        )
+        inbox_id = inbox_response.json()["id"]
+        inbox_email = inbox_response.json()["email_address"]
+
+        # Email with signature
+        email_with_sig = InboundMessage(
+            from_address="dave@example.com",
+            to_address=inbox_email,
+            subject="Quick question",
+            body_plain="""Can you send me the latest report?
+
+Thanks!
+
+-- 
+Dave Johnson
+Senior Manager
+ACME Corporation
+Phone: (555) 123-4567
+Email: dave@example.com""",
+            message_id="<sig-email@example.com>",
+            timestamp=datetime.utcnow(),
+        )
+        msg = await ingest_inbound_message(e2e_storage, inbox_id, email_with_sig)
+
+        # Retrieve and verify
+        msg_response = await e2e_client.get(f"/v1/messages/{msg.message_id}")
+        msg_data = msg_response.json()
+
+        clean_content = msg_data.get("content_clean", "")
+
+        # Main content should be present
+        assert "send me the latest report" in clean_content
+
+        # Signature content should be stripped
+        # The standard "-- " delimiter should trigger signature removal
+        assert "ACME Corporation" not in clean_content or "(555) 123-4567" not in clean_content, (
+            "Signature should be stripped from content_clean"
+        )
+
+    async def test_thread_messages_show_clean_content(
+        self,
+        e2e_client: AsyncClient,
+        e2e_storage: SQLiteAdapter,
+        mock_provider: MockEmailProvider,
+    ) -> None:
+        """
+        Test that thread API returns clean content without duplicated quotes.
+
+        When an LLM reads a thread, it shouldn't see the same content repeated
+        in every reply's quoted section.
+        """
+        # Create inbox
+        inbox_response = await e2e_client.post(
+            "/v1/inboxes",
+            json={"name": "Thread Clean Content", "email_username": "threadclean"},
+        )
+        inbox_id = inbox_response.json()["id"]
+        inbox_email = inbox_response.json()["email_address"]
+
+        # Message 1: Initial question
+        msg1 = InboundMessage(
+            from_address="customer@example.com",
+            to_address=inbox_email,
+            subject="Product Question",
+            body_plain="Does your product support feature X?",
+            message_id="<question@example.com>",
+            timestamp=datetime.utcnow(),
+        )
+        ingested1 = await ingest_inbound_message(e2e_storage, inbox_id, msg1)
+        thread_id = ingested1.thread_id
+
+        # Message 2: Reply with quote of message 1
+        await e2e_client.post(
+            "/v1/messages",
+            json={
+                "inbox_id": inbox_id,
+                "to": ["customer@example.com"],
+                "subject": "Re: Product Question",
+                "body": "Yes, feature X is fully supported!",
+                "reply_to_thread_id": thread_id,
+            },
+        )
+
+        # Message 3: Customer reply with quoted history
+        msg3 = InboundMessage(
+            from_address="customer@example.com",
+            to_address=inbox_email,
+            subject="Re: Product Question",
+            body_plain="""Great, thanks! One more question - what about feature Y?
+
+On Sat, Jan 31, 2026 at 2:00 PM Support wrote:
+> Yes, feature X is fully supported!
+>
+> On Sat, Jan 31, 2026 at 1:00 PM Customer wrote:
+>> Does your product support feature X?""",
+            message_id="<followup@example.com>",
+            timestamp=datetime.utcnow() + timedelta(minutes=30),
+            in_reply_to=mock_provider.sent_emails[-1].provider_message_id,
+        )
+        await ingest_inbound_message(e2e_storage, inbox_id, msg3)
+
+        # Get the full thread
+        thread_response = await e2e_client.get(f"/v1/threads/{thread_id}")
+        assert thread_response.status_code == 200
+        thread_data = thread_response.json()
+
+        # Thread should have 3 messages
+        assert len(thread_data["messages"]) == 3
+
+        # The third message's content should show ONLY the new question
+        # not the entire quoted history
+        msg3_content = thread_data["messages"][2]["content"]
+        assert "feature Y" in msg3_content
+
+        # The quoted content should NOT be duplicated
+        # (counting occurrences of the original question)
+        all_content = " ".join(m["content"] for m in thread_data["messages"])
+        occurrences = all_content.lower().count("does your product support feature x")
+
+        # The original question should appear only once (in message 1)
+        # not repeated in message 3's quoted section
+        assert occurrences == 1, (
+            f"Original question appeared {occurrences} times but should appear only once. "
+            "Quoted content should be stripped for de-duplication."
+        )
