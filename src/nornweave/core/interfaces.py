@@ -301,9 +301,7 @@ class StorageInterface(ABC):
         ...
 
     @abstractmethod
-    async def list_attachments_for_message(
-        self, message_id: str
-    ) -> list[dict[str, Any]]:
+    async def list_attachments_for_message(self, message_id: str) -> list[dict[str, Any]]:
         """List attachments for a message."""
         ...
 
@@ -327,7 +325,8 @@ class StorageInterface(ABC):
         self,
         inbox_id: str,
         normalized_subject: str,
-        since: datetime,
+        *,
+        since: datetime | None = None,
     ) -> Thread | None:
         """Get thread by normalized subject within time window (for subject-based threading)."""
         ...

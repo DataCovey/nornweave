@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -19,6 +19,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from nornweave.models.attachment import (
     Attachment as PydanticAttachment,
+)
+from nornweave.models.attachment import (
     AttachmentDisposition,
     AttachmentMeta,
 )
@@ -28,9 +30,6 @@ from nornweave.models.inbox import Inbox as PydanticInbox
 from nornweave.models.message import Message as PydanticMessage
 from nornweave.models.message import MessageDirection
 from nornweave.models.thread import Thread as PydanticThread
-
-if TYPE_CHECKING:
-    pass
 
 
 def generate_uuid() -> str:
@@ -68,12 +67,12 @@ class InboxORM(Base):
     )
 
     # Relationships
-    threads: Mapped[list["ThreadORM"]] = relationship(
+    threads: Mapped[list[ThreadORM]] = relationship(
         "ThreadORM",
         back_populates="inbox",
         cascade="all, delete-orphan",
     )
-    messages: Mapped[list["MessageORM"]] = relationship(
+    messages: Mapped[list[MessageORM]] = relationship(
         "MessageORM",
         back_populates="inbox",
         cascade="all, delete-orphan",
@@ -89,7 +88,7 @@ class InboxORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, inbox: PydanticInbox) -> "InboxORM":
+    def from_pydantic(cls, inbox: PydanticInbox) -> InboxORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=inbox.id,
@@ -185,8 +184,8 @@ class ThreadORM(Base):
     )
 
     # Relationships
-    inbox: Mapped["InboxORM"] = relationship("InboxORM", back_populates="threads")
-    messages: Mapped[list["MessageORM"]] = relationship(
+    inbox: Mapped[InboxORM] = relationship("InboxORM", back_populates="threads")
+    messages: Mapped[list[MessageORM]] = relationship(
         "MessageORM",
         back_populates="thread",
         cascade="all, delete-orphan",
@@ -223,7 +222,7 @@ class ThreadORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, thread: PydanticThread) -> "ThreadORM":
+    def from_pydantic(cls, thread: PydanticThread) -> ThreadORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=thread.thread_id,
@@ -353,9 +352,9 @@ class MessageORM(Base):
     )
 
     # Relationships
-    thread: Mapped["ThreadORM"] = relationship("ThreadORM", back_populates="messages")
-    inbox: Mapped["InboxORM"] = relationship("InboxORM", back_populates="messages")
-    attachments: Mapped[list["AttachmentORM"]] = relationship(
+    thread: Mapped[ThreadORM] = relationship("ThreadORM", back_populates="messages")
+    inbox: Mapped[InboxORM] = relationship("InboxORM", back_populates="messages")
+    attachments: Mapped[list[AttachmentORM]] = relationship(
         "AttachmentORM",
         back_populates="message",
         cascade="all, delete-orphan",
@@ -378,7 +377,7 @@ class MessageORM(Base):
 
     def to_pydantic(self) -> PydanticMessage:
         """Convert ORM model to Pydantic model.
-        
+
         Note: Attachments are not loaded by default to avoid lazy loading issues.
         Use explicit queries or eager loading if attachments are needed.
         """
@@ -411,7 +410,7 @@ class MessageORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, message: PydanticMessage) -> "MessageORM":
+    def from_pydantic(cls, message: PydanticMessage) -> MessageORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=message.message_id,
@@ -489,7 +488,7 @@ class AttachmentORM(Base):
     )
 
     # Relationships
-    message: Mapped["MessageORM"] = relationship("MessageORM", back_populates="attachments")
+    message: Mapped[MessageORM] = relationship("MessageORM", back_populates="attachments")
 
     __table_args__ = (
         Index("ix_attachments_message_id", "message_id"),
@@ -527,7 +526,7 @@ class AttachmentORM(Base):
         content: bytes | None = None,
         storage_path: str | None = None,
         storage_backend: str | None = None,
-    ) -> "AttachmentORM":
+    ) -> AttachmentORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=attachment.attachment_id,
@@ -627,7 +626,7 @@ class EventORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, event: PydanticEvent) -> "EventORM":
+    def from_pydantic(cls, event: PydanticEvent) -> EventORM:
         """Create ORM model from Pydantic model."""
         return cls(
             id=event.id,

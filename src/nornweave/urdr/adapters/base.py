@@ -265,11 +265,11 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         filename: str,
         content_type: str,
         size_bytes: int,
-        storage_path: str,
-        storage_backend: str,
         *,
-        content_id: str | None = None,
         disposition: str = "attachment",
+        content_id: str | None = None,
+        storage_path: str | None = None,
+        storage_backend: str | None = None,
         content_hash: str | None = None,
         content: bytes | None = None,
     ) -> str:
@@ -371,11 +371,15 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         if since is None:
             since = datetime.now(UTC) - timedelta(days=7)
 
-        stmt = select(ThreadORM).where(
-            ThreadORM.inbox_id == inbox_id,
-            ThreadORM.normalized_subject == normalized_subject,
-            ThreadORM.last_message_at >= since,
-        ).order_by(ThreadORM.last_message_at.desc())
+        stmt = (
+            select(ThreadORM)
+            .where(
+                ThreadORM.inbox_id == inbox_id,
+                ThreadORM.normalized_subject == normalized_subject,
+                ThreadORM.last_message_at >= since,
+            )
+            .order_by(ThreadORM.last_message_at.desc())
+        )
         result = await self._session.execute(stmt)
         orm_thread = result.scalar_one_or_none()
         return orm_thread.to_pydantic() if orm_thread else None

@@ -3,14 +3,13 @@
 Thread models for email conversation grouping.
 """
 
-from datetime import datetime
+from datetime import datetime  # noqa: TC003 - needed at runtime for Pydantic
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field
 
-from nornweave.models.attachment import AttachmentMeta
-
 if TYPE_CHECKING:
+    from nornweave.models.attachment import AttachmentMeta
     from nornweave.models.message import Message
 
 
@@ -76,16 +75,14 @@ class Thread(BaseModel):
     recipients: list[str] = Field(default_factory=list, description="Recipients in thread")
     subject: str | None = Field(None, description="Subject of thread")
     preview: str | None = Field(None, description="Text preview of last message in thread")
-    attachments: list[AttachmentMeta] | None = Field(
-        None, description="All attachments in thread"
-    )
+    attachments: list[AttachmentMeta] | None = Field(None, description="All attachments in thread")
     last_message_id: str | None = Field(None, description="ID of last message in thread")
     message_count: int = Field(0, description="Number of messages in thread")
     size: int = Field(0, description="Size of thread in bytes")
     updated_at: datetime | None = Field(None, description="Time at which thread was last updated")
     created_at: datetime | None = Field(None, description="Time at which thread was created")
     # Optional for full thread response - messages ordered by timestamp ascending
-    messages: list["Message"] | None = Field(
+    messages: list[Message] | None = Field(
         None, description="Messages in thread, ordered by timestamp ascending"
     )
     # Internal fields for threading
@@ -155,9 +152,7 @@ class ThreadCreate(BaseModel):
     participant_hash: str | None = Field(None, description="Hash of participants for grouping")
     senders: list[str] = Field(default_factory=list, description="Senders in thread")
     recipients: list[str] = Field(default_factory=list, description="Recipients in thread")
-    normalized_subject: str | None = Field(
-        None, description="Normalized subject for threading"
-    )
+    normalized_subject: str | None = Field(None, description="Normalized subject for threading")
 
     model_config = {"extra": "forbid"}
 

@@ -94,7 +94,9 @@ def upgrade() -> None:
     op.add_column("threads", sa.Column("normalized_subject", sa.String(512), nullable=True))
     op.add_column("threads", sa.Column("preview", sa.String(255), nullable=True))
     op.add_column("threads", sa.Column("last_message_id", sa.String(36), nullable=True))
-    op.add_column("threads", sa.Column("message_count", sa.Integer(), nullable=True, server_default="0"))
+    op.add_column(
+        "threads", sa.Column("message_count", sa.Integer(), nullable=True, server_default="0")
+    )
     op.add_column("threads", sa.Column("size", sa.Integer(), nullable=True, server_default="0"))
 
     # Create index on normalized_subject

@@ -1,7 +1,5 @@
 """Unit tests for attachment parsing and validation."""
 
-import pytest
-
 from nornweave.core.interfaces import InboundAttachment
 from nornweave.models.attachment import AttachmentDisposition
 from nornweave.verdandi.attachments import (
@@ -146,7 +144,7 @@ class TestValidateAttachments:
         # Create attachments that individually pass but together exceed limit
         size_per_file = MAX_SINGLE_ATTACHMENT_SIZE - 1
         num_files = (MAX_TOTAL_ATTACHMENT_SIZE // size_per_file) + 2
-        
+
         attachments = [
             InboundAttachment(
                 filename=f"file{i}.bin",
@@ -213,7 +211,7 @@ class TestResolveCidUrls:
         """Test unmatched cid: is preserved."""
         html = '<img src="cid:unknown" alt="Missing">'
         result = resolve_cid_urls_in_html(html, [])
-        assert 'cid:unknown' in result
+        assert "cid:unknown" in result
 
     def test_empty_html(self) -> None:
         """Test empty HTML."""
@@ -225,11 +223,11 @@ class TestParseAttachmentInfoJson:
 
     def test_json_string(self) -> None:
         """Test parsing JSON string."""
-        json_str = '''{"attachment1": {
+        json_str = """{"attachment1": {
             "filename": "image.jpg",
             "type": "image/jpeg",
             "content-id": "ii_abc123"
-        }}'''
+        }}"""
         result = parse_attachment_info_json(json_str)
         assert "attachment1" in result
         assert result["attachment1"]["filename"] == "image.jpg"

@@ -54,7 +54,8 @@ from nornweave.models.thread import (
 
 # Rebuild models with forward references now that all models are imported.
 # This is necessary because some models have circular references (e.g., Thread->Message,
-# MessageReceivedEvent->Message) which cannot be resolved at module load time.
+# Message->Attachment, MessageReceivedEvent->Message) which cannot be resolved at module load time.
+Message.model_rebuild()
 Thread.model_rebuild()
 MessageReceivedEvent.model_rebuild()
 
@@ -66,7 +67,6 @@ __all__ = [
     "AttachmentMeta",
     "AttachmentResponse",
     "AttachmentUpload",
-    "SendAttachment",
     # Event models
     "BounceEvent",
     "ComplaintEvent",
@@ -74,39 +74,40 @@ __all__ = [
     "Event",
     "EventCreate",
     "EventType",
+    # Inbox models
+    "Inbox",
+    "InboxBase",
+    "InboxCreate",
     "ListEventsResponse",
+    # Message models
+    "ListMessagesResponse",
+    # Thread models
+    "ListThreadsResponse",
+    "Message",
+    "MessageBase",
     "MessageBouncedEvent",
     "MessageComplainedEvent",
+    "MessageCreate",
     "MessageDeliveredEvent",
+    "MessageDirection",
+    "MessageInCreate",
+    "MessageItem",
     "MessageReceivedEvent",
     "MessageRejectedEvent",
     "MessageSentEvent",
     "Recipient",
     "RejectEvent",
-    "SendEvent",
-    "WebhookEvent",
-    # Inbox models
-    "Inbox",
-    "InboxBase",
-    "InboxCreate",
-    # Message models
-    "ListMessagesResponse",
-    "Message",
-    "MessageBase",
-    "MessageCreate",
-    "MessageDirection",
-    "MessageInCreate",
-    "MessageItem",
     "ReplyToMessageRequest",
+    "SendAttachment",
+    "SendEvent",
     "SendMessageRequest",
     "SendMessageResponse",
-    "UpdateMessageRequest",
-    # Thread models
-    "ListThreadsResponse",
     "Thread",
     "ThreadBase",
     "ThreadCreate",
     "ThreadItem",
     "ThreadSummary",
+    "UpdateMessageRequest",
     "UpdateThreadRequest",
+    "WebhookEvent",
 ]

@@ -1,16 +1,13 @@
 """Unit tests for content extraction (quote/signature removal)."""
 
-import pytest
-
 from nornweave.verdandi.content import (
     ExtractedContent,
+    _basic_quote_removal,
+    _basic_signature_removal,
     calculate_message_size,
     extract_content,
     extract_reply_text,
     generate_preview,
-    remove_signature_bruteforce,
-    _basic_quote_removal,
-    _basic_signature_removal,
 )
 
 
@@ -37,7 +34,7 @@ On Sat, Jan 31, 2026 at 10:35 AM Bob wrote:
 
     def test_outlook_style_quote(self) -> None:
         """Test Outlook-style quote removal using fallback.
-        
+
         Note: The basic fallback is permissive and may retain some
         content after quote headers. Full Talon handles this better.
         """
@@ -66,7 +63,7 @@ class TestRemoveSignatureBruteforce:
         """Test signature with -- delimiter."""
         text = """Thanks for your help!
 
--- 
+--
 John Doe
 CEO, Acme Corp"""
 
@@ -255,5 +252,5 @@ Sent from my iPhone"""
 Thanks,
 Bob"""
 
-        clean, sig = _basic_signature_removal(text)
+        clean, _sig = _basic_signature_removal(text)
         assert "See you tomorrow" in clean

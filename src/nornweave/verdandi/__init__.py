@@ -28,18 +28,18 @@ from nornweave.verdandi.threading import (
 )
 
 __all__ = [
-    # Content extraction
-    "extract_content",
-    "generate_preview",
-    "init_talon",
-    # Attachment handling
-    "parse_mime_attachments",
-    "validate_attachments",
     # Header utilities
     "build_reply_headers",
+    # Content extraction
+    "extract_content",
     "generate_message_id",
-    "parse_email_address",
+    "generate_preview",
+    "init_talon",
     # Threading
     "normalize_subject",
+    "parse_email_address",
+    # Attachment handling
+    "parse_mime_attachments",
     "resolve_thread",
+    "validate_attachments",
 ]

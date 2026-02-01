@@ -1,8 +1,6 @@
 """Unit tests for threading algorithm."""
 
-from datetime import datetime, timedelta
-
-import pytest
+from datetime import timedelta
 
 from nornweave.verdandi.threading import (
     SUBJECT_MATCH_WINDOW_DAYS,
@@ -89,7 +87,7 @@ class TestNormalizeMessageId:
 
     def test_malformed_without_at(self) -> None:
         """Test Message-ID without @ is still normalized (permissive).
-        
+
         The function normalizes format but doesn't validate RFC 5322 compliance.
         This allows handling of malformed but usable IDs from real-world emails.
         """
@@ -227,19 +225,25 @@ class TestShouldThreadTogether:
 
     def test_time_window_valid(self) -> None:
         """Test within time window."""
-        assert should_thread_together(
-            "Hello",
-            "Re: Hello",
-            time_diff=timedelta(days=3),
-        ) is True
+        assert (
+            should_thread_together(
+                "Hello",
+                "Re: Hello",
+                time_diff=timedelta(days=3),
+            )
+            is True
+        )
 
     def test_time_window_exceeded(self) -> None:
         """Test outside time window."""
-        assert should_thread_together(
-            "Hello",
-            "Re: Hello",
-            time_diff=timedelta(days=SUBJECT_MATCH_WINDOW_DAYS + 1),
-        ) is False
+        assert (
+            should_thread_together(
+                "Hello",
+                "Re: Hello",
+                time_diff=timedelta(days=SUBJECT_MATCH_WINDOW_DAYS + 1),
+            )
+            is False
+        )
 
     def test_empty_subject(self) -> None:
         """Test empty subjects."""

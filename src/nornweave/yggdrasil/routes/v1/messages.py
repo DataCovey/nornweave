@@ -149,10 +149,10 @@ async def send_message(
     else:
         # Create a new thread
         new_thread = Thread(
-            id=str(uuid.uuid4()),
+            thread_id=str(uuid.uuid4()),
             inbox_id=payload.inbox_id,
             subject=payload.subject,
-            last_message_at=datetime.now(UTC),
+            timestamp=datetime.now(UTC),
             participant_hash=None,  # Will be set when we have participants
         )
         created_thread = await storage.create_thread(new_thread)
@@ -171,15 +171,15 @@ async def send_message(
 
     # Create message record
     message = Message(
-        id=str(uuid.uuid4()),
+        message_id=str(uuid.uuid4()),
         thread_id=thread_id,
         inbox_id=payload.inbox_id,
         provider_message_id=provider_message_id,
         direction=MessageDirection.OUTBOUND,
-        content_raw=payload.body,
-        content_clean=payload.body,  # Already markdown
-        metadata={
-            "to": payload.to,
+        text=payload.body,
+        extracted_text=payload.body,  # Already markdown
+        headers={
+            "to": ",".join(payload.to),  # Join list into comma-separated string
             "subject": payload.subject,
         },
         created_at=datetime.now(UTC),

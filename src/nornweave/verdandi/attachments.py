@@ -13,11 +13,13 @@ import mimetypes
 import re
 from dataclasses import dataclass, field
 from email import policy
-from email.message import EmailMessage
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from nornweave.core.interfaces import InboundAttachment
 from nornweave.models.attachment import AttachmentDisposition
+
+if TYPE_CHECKING:
+    from email.message import EmailMessage
 
 # Blocked file extensions for security
 BLOCKED_EXTENSIONS = {
@@ -111,10 +113,12 @@ def _extract_attachments_from_message(msg: EmailMessage) -> list[InboundAttachme
         if content_disposition in ("attachment", "inline"):
             filename = part.get_filename() or "unnamed"
             content_type = part.get_content_type()
-            content = part.get_payload(decode=True)
+            payload = part.get_payload(decode=True)
 
-            if content is None:
+            # get_payload returns bytes when decode=True for non-multipart
+            if payload is None or not isinstance(payload, bytes):
                 continue
+            content: bytes = payload
 
             # Get Content-ID for inline attachments
             content_id = part.get("Content-ID")

@@ -1,8 +1,11 @@
 """Resend email provider adapter."""
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from nornweave.core.interfaces import EmailProvider, InboundMessage
+
+if TYPE_CHECKING:
+    from nornweave.models.attachment import SendAttachment
 
 
 class ResendAdapter(EmailProvider):
@@ -25,6 +28,13 @@ class ResendAdapter(EmailProvider):
         from_address: str,
         reply_to: str | None = None,
         headers: dict[str, str] | None = None,
+        message_id: str | None = None,
+        in_reply_to: str | None = None,
+        references: list[str] | None = None,
+        cc: list[str] | None = None,
+        bcc: list[str] | None = None,
+        attachments: list[SendAttachment] | None = None,
+        html_body: str | None = None,
     ) -> str:
         """Send email via Resend API.
 

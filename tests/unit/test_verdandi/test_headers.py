@@ -1,8 +1,6 @@
 """Unit tests for email header utilities."""
 
-from datetime import datetime, timedelta
-
-import pytest
+from datetime import datetime
 
 from nornweave.verdandi.headers import (
     OutboundHeaders,
@@ -13,7 +11,6 @@ from nornweave.verdandi.headers import (
     generate_message_id,
     get_header,
     headers_list_to_dict,
-    normalize_message_id,
     parse_email_address,
     parse_email_list,
     parse_header_list,
@@ -158,10 +155,12 @@ class TestParseHeaderList:
 
     def test_dict_format(self) -> None:
         """Test dict list format."""
-        headers = parse_header_list([
-            {"name": "From", "value": "alice@example.com"},
-            {"name": "To", "value": "bob@example.com"},
-        ])
+        headers = parse_header_list(
+            [
+                {"name": "From", "value": "alice@example.com"},
+                {"name": "To", "value": "bob@example.com"},
+            ]
+        )
         assert len(headers) == 2
 
     def test_empty(self) -> None:

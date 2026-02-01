@@ -182,13 +182,13 @@ async def resolve_thread(
     storage: StorageInterface,
     inbox_id: str,
     *,
-    message_id: str | None = None,
+    message_id: str | None = None,  # noqa: ARG001 - reserved for future use
     in_reply_to: str | None = None,
     references: list[str] | None = None,
     subject: str = "",
     timestamp: datetime | None = None,
-    from_address: str = "",
-    to_addresses: list[str] | None = None,
+    from_address: str = "",  # noqa: ARG001 - reserved for future use
+    to_addresses: list[str] | None = None,  # noqa: ARG001 - reserved for future use
 ) -> ThreadResolutionResult:
     """
     Resolve thread ID using JWZ algorithm with Gmail-like heuristics.
@@ -221,9 +221,9 @@ async def resolve_thread(
     if references:
         # Check references in reverse order (most recent parent first)
         for ref in reversed(references):
-            ref = normalize_message_id(ref)
-            if ref:
-                parent_msg = await storage.get_message_by_provider_id(inbox_id, ref)
+            normalized_ref = normalize_message_id(ref)
+            if normalized_ref:
+                parent_msg = await storage.get_message_by_provider_id(inbox_id, normalized_ref)
                 if parent_msg:
                     return ThreadResolutionResult(
                         thread_id=parent_msg.thread_id,
@@ -248,8 +248,8 @@ async def resolve_thread(
         normalized = normalize_subject(subject)
         if normalized:
             # Only match subjects within 7-day window
-            since = timestamp - timedelta(days=SUBJECT_MATCH_WINDOW_DAYS)
-            thread = await storage.get_thread_by_subject(inbox_id, normalized, since)
+            since_time = timestamp - timedelta(days=SUBJECT_MATCH_WINDOW_DAYS)
+            thread = await storage.get_thread_by_subject(inbox_id, normalized, since=since_time)
             if thread:
                 return ThreadResolutionResult(
                     thread_id=thread.thread_id,

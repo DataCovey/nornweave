@@ -119,8 +119,9 @@ async def get_thread(
         # Determine role and author based on direction
         if msg.direction == MessageDirection.INBOUND:
             role = "user"
-            # Try to get from address from metadata
-            author = msg.metadata.get("from", "unknown@example.com")
+            # Try to get from address from metadata (headers)
+            metadata = msg.metadata or {}
+            author = metadata.get("from", "unknown@example.com")
         else:
             role = "assistant"
             author = inbox_email

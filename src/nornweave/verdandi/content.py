@@ -167,9 +167,7 @@ def remove_signature_bruteforce(text: str) -> tuple[str, str | None]:
         return text, None
 
 
-def remove_signature_ml(
-    text: str, sender_email: str | None = None
-) -> tuple[str, str | None]:
+def remove_signature_ml(text: str, sender_email: str | None = None) -> tuple[str, str | None]:
     """
     Remove signature using ML classifier (~98% accuracy).
 
@@ -384,10 +382,7 @@ def _is_quote_header(line: str) -> bool:
         return True
 
     # Outlook style (beginning of separator)
-    if line.strip().startswith("From:") or line.strip().startswith("Sent:"):
-        return True
-
-    return False
+    return bool(line.strip().startswith("From:") or line.strip().startswith("Sent:"))
 
 
 def _basic_signature_removal(text: str) -> tuple[str, str | None]:

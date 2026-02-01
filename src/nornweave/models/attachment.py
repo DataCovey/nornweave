@@ -4,10 +4,13 @@ Attachment models for file handling in messages.
 """
 
 import base64
-from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class AttachmentDisposition(str, Enum):

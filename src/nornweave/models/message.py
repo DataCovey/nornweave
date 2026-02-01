@@ -3,13 +3,14 @@
 Message models for email content and metadata.
 """
 
-from datetime import datetime
+from datetime import datetime  # noqa: TC003 - needed at runtime for Pydantic
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, Field
 
-from nornweave.models.attachment import Attachment, AttachmentMeta, SendAttachment
+if TYPE_CHECKING:
+    from nornweave.models.attachment import Attachment, AttachmentMeta, SendAttachment
 
 
 class MessageDirection(str, Enum):
@@ -39,7 +40,9 @@ class MessageItem(BaseModel):
     preview: str | None = Field(None, description="Text preview of message")
     attachments: list[AttachmentMeta] | None = Field(None, description="Attachments in message")
     in_reply_to: str | None = Field(None, description="Message-ID of message being replied to")
-    references: list[str] | None = Field(None, description="Message-IDs of previous messages in thread")
+    references: list[str] | None = Field(
+        None, description="Message-IDs of previous messages in thread"
+    )
     headers: dict[str, str] | None = Field(None, description="Headers in message")
     size: int = Field(..., description="Size of message in bytes")
     updated_at: datetime = Field(..., description="Time at which message was last updated")
@@ -59,7 +62,9 @@ class Message(BaseModel):
     thread_id: str = Field(..., description="ID of thread")
     message_id: str = Field(..., alias="id", description="ID of message")
     labels: list[str] = Field(default_factory=list, description="Labels of message")
-    timestamp: datetime | None = Field(None, description="Time at which message was sent or drafted")
+    timestamp: datetime | None = Field(
+        None, description="Time at which message was sent or drafted"
+    )
     from_address: str | None = Field(None, alias="from", description="Sender address")
     reply_to: list[str] | None = Field(None, description="Reply-to addresses")
     to: list[str] = Field(default_factory=list, description="Recipient addresses")
@@ -70,7 +75,9 @@ class Message(BaseModel):
     text: str | None = Field(None, alias="content_raw", description="Plain text body of message")
     html: str | None = Field(None, description="HTML body of message")
     extracted_text: str | None = Field(
-        None, alias="content_clean", description="Extracted new text content (without quoted replies)"
+        None,
+        alias="content_clean",
+        description="Extracted new text content (without quoted replies)",
     )
     extracted_html: str | None = Field(
         None, description="Extracted new HTML content (without quoted replies)"
@@ -80,7 +87,9 @@ class Message(BaseModel):
     references: list[str] | None = Field(
         None, description="Message-IDs of previous messages in thread"
     )
-    headers: dict[str, str] | None = Field(None, alias="metadata", description="All headers in message")
+    headers: dict[str, str] | None = Field(
+        None, alias="metadata", description="All headers in message"
+    )
     size: int = Field(0, description="Size of message in bytes")
     direction: MessageDirection = Field(
         default=MessageDirection.INBOUND, description="Inbound or outbound"

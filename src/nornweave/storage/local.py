@@ -82,10 +82,10 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
         full_path.unlink()
 
         # Try to clean up empty parent directories
-        try:
+        import contextlib
+
+        with contextlib.suppress(OSError):
             full_path.parent.rmdir()
-        except OSError:
-            pass  # Directory not empty
 
         return True
 
@@ -98,10 +98,7 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
         """Generate a signed download URL."""
         # Extract attachment_id from storage key
         parts = storage_key.split("/")
-        if len(parts) >= 2:
-            attachment_id = parts[-2]
-        else:
-            attachment_id = storage_key
+        attachment_id = parts[-2] if len(parts) >= 2 else storage_key
 
         # Create signed token
         expiry = int(time.time() + expires_in.total_seconds())

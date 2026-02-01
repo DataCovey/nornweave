@@ -2,8 +2,6 @@
 
 from datetime import datetime
 
-import pytest
-
 from nornweave.models.event import (
     BounceEvent,
     ComplaintEvent,
@@ -14,7 +12,6 @@ from nornweave.models.event import (
     MessageBouncedEvent,
     MessageComplainedEvent,
     MessageDeliveredEvent,
-    MessageReceivedEvent,
     MessageRejectedEvent,
     MessageSentEvent,
     Recipient,
