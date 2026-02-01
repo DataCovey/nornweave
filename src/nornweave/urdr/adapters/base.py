@@ -1,13 +1,13 @@
 """Base storage adapter with shared SQLAlchemy functionality."""
 
 import uuid
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import or_, select
 
 from nornweave.core.interfaces import StorageInterface
-from nornweave.urdr.orm import EventORM, InboxORM, MessageORM, ThreadORM
+from nornweave.urdr.orm import AttachmentORM, EventORM, InboxORM, MessageORM, ThreadORM
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -255,3 +255,127 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         stmt = stmt.order_by(EventORM.created_at.desc()).limit(limit).offset(offset)
         result = await self._session.execute(stmt)
         return [row.to_pydantic() for row in result.scalars().all()]
+
+    # -------------------------------------------------------------------------
+    # Attachment methods
+    # -------------------------------------------------------------------------
+    async def create_attachment(
+        self,
+        message_id: str,
+        filename: str,
+        content_type: str,
+        size_bytes: int,
+        storage_path: str,
+        storage_backend: str,
+        *,
+        content_id: str | None = None,
+        disposition: str = "attachment",
+        content_hash: str | None = None,
+        content: bytes | None = None,
+    ) -> str:
+        """Create an attachment record."""
+        attachment_id = generate_uuid()
+        orm_attachment = AttachmentORM(
+            id=attachment_id,
+            message_id=message_id,
+            filename=filename,
+            content_type=content_type,
+            size_bytes=size_bytes,
+            disposition=disposition,
+            content_id=content_id,
+            storage_path=storage_path,
+            storage_backend=storage_backend,
+            content_hash=content_hash,
+            content=content,
+            created_at=datetime.now(UTC),
+        )
+        self._session.add(orm_attachment)
+        await self._session.flush()
+        return attachment_id
+
+    async def get_attachment(self, attachment_id: str) -> dict[str, Any] | None:
+        """Get an attachment by id."""
+        result = await self._session.get(AttachmentORM, attachment_id)
+        if result is None:
+            return None
+        return {
+            "id": result.id,
+            "message_id": result.message_id,
+            "filename": result.filename,
+            "content_type": result.content_type,
+            "size_bytes": result.size_bytes,
+            "disposition": result.disposition,
+            "content_id": result.content_id,
+            "storage_path": result.storage_path,
+            "storage_backend": result.storage_backend,
+            "content_hash": result.content_hash,
+            "content": result.content,
+            "created_at": result.created_at,
+        }
+
+    async def list_attachments_for_message(self, message_id: str) -> list[dict[str, Any]]:
+        """List attachments for a message."""
+        stmt = select(AttachmentORM).where(AttachmentORM.message_id == message_id)
+        result = await self._session.execute(stmt)
+        return [
+            {
+                "id": row.id,
+                "message_id": row.message_id,
+                "filename": row.filename,
+                "content_type": row.content_type,
+                "size_bytes": row.size_bytes,
+                "disposition": row.disposition,
+                "content_id": row.content_id,
+                "storage_path": row.storage_path,
+                "storage_backend": row.storage_backend,
+                "content_hash": row.content_hash,
+                "created_at": row.created_at,
+            }
+            for row in result.scalars().all()
+        ]
+
+    async def delete_attachment(self, attachment_id: str) -> bool:
+        """Delete an attachment."""
+        orm_attachment = await self._session.get(AttachmentORM, attachment_id)
+        if orm_attachment is None:
+            return False
+        await self._session.delete(orm_attachment)
+        await self._session.flush()
+        return True
+
+    # -------------------------------------------------------------------------
+    # Additional threading/message lookup methods
+    # -------------------------------------------------------------------------
+    async def get_message_by_provider_id(
+        self,
+        inbox_id: str,
+        provider_message_id: str,
+    ) -> Message | None:
+        """Get a message by provider message ID (e.g., Mailgun ID, SES ID)."""
+        stmt = select(MessageORM).where(
+            MessageORM.inbox_id == inbox_id,
+            MessageORM.provider_message_id == provider_message_id,
+        )
+        result = await self._session.execute(stmt)
+        orm_message = result.scalar_one_or_none()
+        return orm_message.to_pydantic() if orm_message else None
+
+    async def get_thread_by_subject(
+        self,
+        inbox_id: str,
+        normalized_subject: str,
+        *,
+        since: datetime | None = None,
+    ) -> Thread | None:
+        """Get a thread by normalized subject within a time window."""
+        if since is None:
+            since = datetime.now(UTC) - timedelta(days=7)
+
+        stmt = select(ThreadORM).where(
+            ThreadORM.inbox_id == inbox_id,
+            ThreadORM.normalized_subject == normalized_subject,
+            ThreadORM.last_message_at >= since,
+        ).order_by(ThreadORM.last_message_at.desc())
+        result = await self._session.execute(stmt)
+        orm_thread = result.scalar_one_or_none()
+        return orm_thread.to_pydantic() if orm_thread else None

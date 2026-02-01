@@ -1,0 +1,18 @@
+{
+  "sender": "alice@gmail.com",
+  "from": "Alice Smith <alice@gmail.com>",
+  "recipient": "support@mycompany.com",
+  "subject": "Invoice for January",
+  "body-plain": "Please find the invoice attached.\n\nThanks,\nAlice",
+  "body-html": "<div dir=\"ltr\">Please find the invoice attached.<br><br>Thanks,<br>Alice</div>",
+  "stripped-text": "Please find the invoice attached.\n\nThanks,\nAlice",
+  "Message-Id": "<CADfE8z+invoice123@mail.gmail.com>",
+  "In-Reply-To": "",
+  "References": "",
+  "message-headers": "[[\"Message-Id\",\"<CADfE8z+invoice123@mail.gmail.com>\"],[\"From\",\"Alice Smith <alice@gmail.com>\"],[\"To\",\"support@mycompany.com\"],[\"Subject\",\"Invoice for January\"],[\"Date\",\"Sat, 31 Jan 2026 12:00:00 -0500\"]]",
+  "timestamp": 1738339200,
+  "signature": "hmac-signature-here",
+  "token": "random-token-50-chars",
+  "attachment-count": 1,
+  "content-id-map": "{}"
+}

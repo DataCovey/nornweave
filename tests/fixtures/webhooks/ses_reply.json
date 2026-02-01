@@ -1,0 +1,34 @@
+{
+  "notificationType": "Received",
+  "receipt": {
+    "timestamp": "2026-01-31T16:45:00.000Z",
+    "recipients": ["support@mycompany.com"],
+    "spamVerdict": {"status": "PASS"},
+    "virusVerdict": {"status": "PASS"},
+    "spfVerdict": {"status": "PASS"},
+    "dkimVerdict": {"status": "PASS"},
+    "dmarcVerdict": {"status": "PASS"}
+  },
+  "mail": {
+    "timestamp": "2026-01-31T16:45:00.000Z",
+    "source": "alice@gmail.com",
+    "messageId": "ses-internal-id-xyz",
+    "destination": ["support@mycompany.com"],
+    "headers": [
+      {"name": "Message-ID", "value": "<CADfE8z+def456@mail.gmail.com>"},
+      {"name": "In-Reply-To", "value": "<20260131153500.agent123@mycompany.com>"},
+      {"name": "References", "value": "<CADfE8z+abc123@mail.gmail.com> <20260131153500.agent123@mycompany.com>"},
+      {"name": "Subject", "value": "Re: Question about pricing"},
+      {"name": "From", "value": "Alice Smith <alice@gmail.com>"},
+      {"name": "To", "value": "support@mycompany.com"},
+      {"name": "Date", "value": "Sat, 31 Jan 2026 11:45:00 -0500"}
+    ],
+    "commonHeaders": {
+      "from": ["Alice Smith <alice@gmail.com>"],
+      "to": ["support@mycompany.com"],
+      "subject": "Re: Question about pricing",
+      "messageId": "<CADfE8z+def456@mail.gmail.com>"
+    }
+  },
+  "content": "Return-Path: <alice@gmail.com>\r\nMessage-ID: <CADfE8z+def456@mail.gmail.com>\r\nIn-Reply-To: <20260131153500.agent123@mycompany.com>\r\nReferences: <CADfE8z+abc123@mail.gmail.com> <20260131153500.agent123@mycompany.com>\r\nFrom: Alice Smith <alice@gmail.com>\r\nTo: support@mycompany.com\r\nSubject: Re: Question about pricing\r\nDate: Sat, 31 Jan 2026 11:45:00 -0500\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThanks for the quick response! That pricing works for us.\r\n\r\nOn Sat, Jan 31, 2026 at 10:35 AM Support Agent wrote:\r\n> Our enterprise plan is $99/month..."
+}

@@ -1,0 +1,16 @@
+{
+  "headers": "Message-ID: <CADfE8z+inline123@mail.gmail.com>\nFrom: Bob Designer <bob@gmail.com>\nTo: feedback@mycompany.com\nSubject: New logo design\nDate: Sat, 31 Jan 2026 12:00:00 -0500",
+  "from": "Bob Designer <bob@gmail.com>",
+  "to": "feedback@mycompany.com",
+  "subject": "New logo design",
+  "text": "Here's the new logo design I've been working on.\n\n[image: logo.png]",
+  "html": "<div>Here's the new logo design I've been working on.<br><br><img src=\"cid:ii_logo123\" alt=\"logo.png\" width=\"200\"></div>",
+  "envelope": "{\"to\":[\"feedback@mycompany.com\"],\"from\":\"bob@gmail.com\"}",
+  "charsets": "{\"to\":\"UTF-8\",\"from\":\"UTF-8\",\"subject\":\"UTF-8\",\"text\":\"UTF-8\"}",
+  "SPF": "pass",
+  "dkim": "{@gmail.com : pass}",
+  "spam_score": "0.0",
+  "attachments": "1",
+  "attachment-info": "{\"attachment1\":{\"filename\":\"logo.png\",\"name\":\"logo.png\",\"type\":\"image/png\",\"content-id\":\"ii_logo123\"}}",
+  "content-ids": "{\"ii_logo123\":\"attachment1\"}"
+}

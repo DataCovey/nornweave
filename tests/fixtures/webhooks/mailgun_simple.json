@@ -1,0 +1,18 @@
+{
+  "sender": "alice@gmail.com",
+  "from": "Alice Smith <alice@gmail.com>",
+  "recipient": "support@mycompany.com",
+  "subject": "Question about pricing",
+  "body-plain": "Hi,\n\nI'd like to know your pricing for the enterprise plan.\n\nThanks,\nAlice",
+  "body-html": "<div dir=\"ltr\">Hi,<br><br>I'd like to know your pricing for the enterprise plan.<br><br>Thanks,<br>Alice</div>",
+  "stripped-text": "Hi,\n\nI'd like to know your pricing for the enterprise plan.\n\nThanks,\nAlice",
+  "stripped-html": "<div dir=\"ltr\">Hi,<br><br>I'd like to know your pricing for the enterprise plan.<br><br>Thanks,<br>Alice</div>",
+  "Message-Id": "<CADfE8z+abc123@mail.gmail.com>",
+  "In-Reply-To": "",
+  "References": "",
+  "message-headers": "[[\"Message-Id\",\"<CADfE8z+abc123@mail.gmail.com>\"],[\"From\",\"Alice Smith <alice@gmail.com>\"],[\"To\",\"support@mycompany.com\"],[\"Subject\",\"Question about pricing\"],[\"Date\",\"Sat, 31 Jan 2026 10:30:00 -0500\"],[\"Content-Type\",\"multipart/alternative; boundary=abc123\"]]",
+  "timestamp": 1738333800,
+  "signature": "hmac-signature-here",
+  "token": "random-token-50-chars",
+  "attachment-count": 0
+}

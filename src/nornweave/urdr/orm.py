@@ -1,26 +1,36 @@
 """SQLAlchemy ORM models for Urðr storage layer."""
 
 import uuid
-from datetime import datetime  # noqa: TC003 - needed at runtime for SQLAlchemy ORM
-from typing import Any
+from datetime import datetime
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
     JSON,
     DateTime,
     ForeignKey,
     Index,
+    Integer,
+    LargeBinary,
     String,
     Text,
     func,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from nornweave.models.attachment import (
+    Attachment as PydanticAttachment,
+    AttachmentDisposition,
+    AttachmentMeta,
+)
 from nornweave.models.event import Event as PydanticEvent
 from nornweave.models.event import EventType
 from nornweave.models.inbox import Inbox as PydanticInbox
 from nornweave.models.message import Message as PydanticMessage
 from nornweave.models.message import MessageDirection
 from nornweave.models.thread import Thread as PydanticThread
+
+if TYPE_CHECKING:
+    pass
 
 
 def generate_uuid() -> str:
@@ -58,12 +68,12 @@ class InboxORM(Base):
     )
 
     # Relationships
-    threads: Mapped[list[ThreadORM]] = relationship(
+    threads: Mapped[list["ThreadORM"]] = relationship(
         "ThreadORM",
         back_populates="inbox",
         cascade="all, delete-orphan",
     )
-    messages: Mapped[list[MessageORM]] = relationship(
+    messages: Mapped[list["MessageORM"]] = relationship(
         "MessageORM",
         back_populates="inbox",
         cascade="all, delete-orphan",
@@ -79,7 +89,7 @@ class InboxORM(Base):
         )
 
     @classmethod
-    def from_pydantic(cls, inbox: PydanticInbox) -> InboxORM:
+    def from_pydantic(cls, inbox: PydanticInbox) -> "InboxORM":
         """Create ORM model from Pydantic model."""
         return cls(
             id=inbox.id,
@@ -90,7 +100,7 @@ class InboxORM(Base):
 
 
 class ThreadORM(Base):
-    """Thread table."""
+    """Thread table for email conversation grouping."""
 
     __tablename__ = "threads"
 
@@ -104,19 +114,79 @@ class ThreadORM(Base):
         ForeignKey("inboxes.id", ondelete="CASCADE"),
         nullable=False,
     )
-    subject: Mapped[str] = mapped_column(Text, nullable=False)
-    last_message_at: Mapped[datetime | None] = mapped_column(
+
+    # Labels
+    labels: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    # Timestamps
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=datetime.utcnow,
+    )
+    received_timestamp: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
+    )
+    sent_timestamp: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    # Participants
+    senders: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    recipients: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
     )
     participant_hash: Mapped[str | None] = mapped_column(
         String(64),
         nullable=True,
     )
 
+    # Content
+    subject: Mapped[str | None] = mapped_column(Text, nullable=True)
+    normalized_subject: Mapped[str | None] = mapped_column(
+        String(512),
+        nullable=True,
+        index=True,
+    )
+    preview: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    # Stats
+    last_message_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    message_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    size: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    # Legacy compatibility
+    last_message_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     # Relationships
-    inbox: Mapped[InboxORM] = relationship("InboxORM", back_populates="threads")
-    messages: Mapped[list[MessageORM]] = relationship(
+    inbox: Mapped["InboxORM"] = relationship("InboxORM", back_populates="threads")
+    messages: Mapped[list["MessageORM"]] = relationship(
         "MessageORM",
         back_populates="thread",
         cascade="all, delete-orphan",
@@ -124,36 +194,59 @@ class ThreadORM(Base):
 
     # Indexes for performance
     __table_args__ = (
-        # list_threads_for_inbox: ORDER BY last_message_at DESC
-        Index("ix_threads_inbox_last_message", "inbox_id", last_message_at.desc()),
-        # get_thread_by_participant_hash: lookup by inbox + participant_hash
+        Index("ix_threads_inbox_last_message", "inbox_id", timestamp.desc()),
         Index("ix_threads_inbox_participant_hash", "inbox_id", "participant_hash"),
+        Index("ix_threads_inbox_normalized_subject", "inbox_id", "normalized_subject"),
     )
 
     def to_pydantic(self) -> PydanticThread:
         """Convert ORM model to Pydantic model."""
         return PydanticThread(
-            id=self.id,
             inbox_id=self.inbox_id,
+            thread_id=self.id,
+            labels=self.labels or [],
+            timestamp=self.timestamp or self.last_message_at,  # Can be None
+            received_timestamp=self.received_timestamp,
+            sent_timestamp=self.sent_timestamp,
+            senders=self.senders or [],
+            recipients=self.recipients or [],
             subject=self.subject,
-            last_message_at=self.last_message_at,
+            preview=self.preview,
+            attachments=None,  # Load separately if needed
+            last_message_id=self.last_message_id,
+            message_count=self.message_count,
+            size=self.size,
+            updated_at=self.updated_at,
+            created_at=self.created_at,
             participant_hash=self.participant_hash,
+            normalized_subject=self.normalized_subject,
         )
 
     @classmethod
-    def from_pydantic(cls, thread: PydanticThread) -> ThreadORM:
+    def from_pydantic(cls, thread: PydanticThread) -> "ThreadORM":
         """Create ORM model from Pydantic model."""
         return cls(
-            id=thread.id,
+            id=thread.thread_id,
             inbox_id=thread.inbox_id,
+            labels=thread.labels,
+            timestamp=thread.timestamp,
+            received_timestamp=thread.received_timestamp,
+            sent_timestamp=thread.sent_timestamp,
+            senders=thread.senders,
+            recipients=thread.recipients,
             subject=thread.subject,
-            last_message_at=thread.last_message_at,
+            normalized_subject=thread.normalized_subject,
+            preview=thread.preview,
+            last_message_id=thread.last_message_id,
+            message_count=thread.message_count,
+            size=thread.size,
             participant_hash=thread.participant_hash,
+            last_message_at=thread.timestamp,  # Legacy compatibility
         )
 
 
 class MessageORM(Base):
-    """Message table."""
+    """Message table for email content and metadata."""
 
     __tablename__ = "messages"
 
@@ -172,41 +265,107 @@ class MessageORM(Base):
         ForeignKey("inboxes.id", ondelete="CASCADE"),
         nullable=False,
     )
-    provider_message_id: Mapped[str | None] = mapped_column(
-        String(512),
+
+    # Labels
+    labels: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    # Timestamps
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=datetime.utcnow,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    # Addresses
+    from_address: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    reply_to_addresses: Mapped[list[str] | None] = mapped_column(
+        JSON,
         nullable=True,
     )
+    to_addresses: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    cc_addresses: Mapped[list[str] | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+    bcc_addresses: Mapped[list[str] | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    # Content
+    subject: Mapped[str | None] = mapped_column(Text, nullable=True)
+    preview: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    html: Mapped[str | None] = mapped_column(Text, nullable=True)
+    extracted_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    extracted_html: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Threading headers
+    in_reply_to: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    references: Mapped[list[str] | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+    headers: Mapped[dict[str, str] | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    # Metadata
+    size: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     direction: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
     )
+    provider_message_id: Mapped[str | None] = mapped_column(
+        String(512),
+        nullable=True,
+        index=True,
+    )
+
+    # Legacy fields for backwards compatibility
     content_raw: Mapped[str] = mapped_column(Text, nullable=False, default="")
     content_clean: Mapped[str] = mapped_column(Text, nullable=False, default="")
     message_metadata: Mapped[dict[str, Any]] = mapped_column(
-        "metadata",  # Column name in DB is still "metadata"
+        "metadata",
         JSON,
         nullable=False,
         default=dict,
     )
-    created_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-        server_default=func.now(),
-    )
 
     # Relationships
-    thread: Mapped[ThreadORM] = relationship("ThreadORM", back_populates="messages")
-    inbox: Mapped[InboxORM] = relationship("InboxORM", back_populates="messages")
+    thread: Mapped["ThreadORM"] = relationship("ThreadORM", back_populates="messages")
+    inbox: Mapped["InboxORM"] = relationship("InboxORM", back_populates="messages")
+    attachments: Mapped[list["AttachmentORM"]] = relationship(
+        "AttachmentORM",
+        back_populates="message",
+        cascade="all, delete-orphan",
+    )
 
     # Indexes for performance
     __table_args__ = (
-        # list_messages_for_thread: ORDER BY created_at
         Index("ix_messages_thread_created", "thread_id", "created_at"),
-        # list_messages_for_inbox: ORDER BY created_at
         Index("ix_messages_inbox_created", "inbox_id", "created_at"),
-        # search_messages: filter by inbox
         Index("ix_messages_inbox_id", "inbox_id"),
-        # Deduplication: unique provider_message_id per inbox (optional)
         Index(
             "ix_messages_inbox_provider_msg",
             "inbox_id",
@@ -214,40 +373,180 @@ class MessageORM(Base):
             unique=True,
             postgresql_where=("provider_message_id IS NOT NULL"),
         ),
+        Index("ix_messages_timestamp", "timestamp"),
     )
 
     def to_pydantic(self) -> PydanticMessage:
-        """Convert ORM model to Pydantic model."""
+        """Convert ORM model to Pydantic model.
+        
+        Note: Attachments are not loaded by default to avoid lazy loading issues.
+        Use explicit queries or eager loading if attachments are needed.
+        """
         return PydanticMessage(
-            id=self.id,
-            thread_id=self.thread_id,
             inbox_id=self.inbox_id,
-            provider_message_id=self.provider_message_id,
+            thread_id=self.thread_id,
+            message_id=self.id,
+            labels=self.labels or [],
+            timestamp=self.timestamp,
+            from_address=self.from_address,
+            reply_to=self.reply_to_addresses,
+            to=self.to_addresses or [],
+            cc=self.cc_addresses,
+            bcc=self.bcc_addresses,
+            subject=self.subject,
+            preview=self.preview,
+            text=self.text or self.content_raw,
+            html=self.html,
+            extracted_text=self.extracted_text or self.content_clean,
+            extracted_html=self.extracted_html,
+            attachments=None,  # Loaded separately to avoid lazy loading
+            in_reply_to=self.in_reply_to,
+            references=self.references,
+            headers=self.headers or self.message_metadata,
+            size=self.size,
             direction=MessageDirection(self.direction),
-            content_raw=self.content_raw,
-            content_clean=self.content_clean,
-            metadata=self.message_metadata or {},
+            provider_message_id=self.provider_message_id,
+            updated_at=self.updated_at,
             created_at=self.created_at,
         )
 
     @classmethod
-    def from_pydantic(cls, message: PydanticMessage) -> MessageORM:
+    def from_pydantic(cls, message: PydanticMessage) -> "MessageORM":
         """Create ORM model from Pydantic model."""
         return cls(
-            id=message.id,
+            id=message.message_id,
             thread_id=message.thread_id,
             inbox_id=message.inbox_id,
-            provider_message_id=message.provider_message_id,
+            labels=message.labels,
+            timestamp=message.timestamp,
+            from_address=message.from_address,
+            reply_to_addresses=message.reply_to,
+            to_addresses=message.to,
+            cc_addresses=message.cc,
+            bcc_addresses=message.bcc,
+            subject=message.subject,
+            preview=message.preview,
+            text=message.text,
+            html=message.html,
+            extracted_text=message.extracted_text,
+            extracted_html=message.extracted_html,
+            in_reply_to=message.in_reply_to,
+            references=message.references,
+            headers=message.headers,
+            size=message.size,
             direction=message.direction.value,
-            content_raw=message.content_raw,
-            content_clean=message.content_clean,
-            message_metadata=message.metadata,
-            created_at=message.created_at,
+            provider_message_id=message.provider_message_id,
+            # Legacy fields
+            content_raw=message.text or "",
+            content_clean=message.extracted_text or "",
+            message_metadata=message.headers or {},
+        )
+
+
+class AttachmentORM(Base):
+    """Attachment storage model."""
+
+    __tablename__ = "attachments"
+
+    id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        default=generate_uuid,
+    )
+    message_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("messages.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    # File metadata
+    filename: Mapped[str] = mapped_column(String(512), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(255), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    # Disposition
+    disposition: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="attachment",
+    )
+    content_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    # Storage options
+    # Option 1: Store content in database (for small files or simple deployments)
+    content: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
+
+    # Option 2: Store in external storage (filesystem/S3/GCS)
+    storage_path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    storage_backend: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    # Relationships
+    message: Mapped["MessageORM"] = relationship("MessageORM", back_populates="attachments")
+
+    __table_args__ = (
+        Index("ix_attachments_message_id", "message_id"),
+        Index("ix_attachments_content_id", "content_id"),
+    )
+
+    def to_pydantic(self) -> PydanticAttachment:
+        """Convert ORM model to Pydantic Attachment."""
+        return PydanticAttachment(
+            attachment_id=self.id,
+            filename=self.filename,
+            size=self.size_bytes,
+            content_type=self.content_type,
+            content_disposition=AttachmentDisposition(self.disposition),
+            content_id=self.content_id,
+        )
+
+    def to_meta(self) -> AttachmentMeta:
+        """Convert ORM model to AttachmentMeta (lightweight)."""
+        return AttachmentMeta(
+            attachment_id=self.id,
+            filename=self.filename,
+            content_type=self.content_type,
+            size=self.size_bytes,
+            disposition=AttachmentDisposition(self.disposition),
+            content_id=self.content_id,
+        )
+
+    @classmethod
+    def from_pydantic(
+        cls,
+        attachment: PydanticAttachment,
+        message_id: str,
+        *,
+        content: bytes | None = None,
+        storage_path: str | None = None,
+        storage_backend: str | None = None,
+    ) -> "AttachmentORM":
+        """Create ORM model from Pydantic model."""
+        return cls(
+            id=attachment.attachment_id,
+            message_id=message_id,
+            filename=attachment.filename or "unnamed",
+            content_type=attachment.content_type or "application/octet-stream",
+            size_bytes=attachment.size,
+            disposition=attachment.content_disposition.value
+            if attachment.content_disposition
+            else "attachment",
+            content_id=attachment.content_id,
+            content=content,
+            storage_path=storage_path,
+            storage_backend=storage_backend,
         )
 
 
 class EventORM(Base):
-    """Event table (Phase 3 webhooks)."""
+    """Event table for webhook notifications and tracking."""
 
     __tablename__ = "events"
 
@@ -256,44 +555,88 @@ class EventORM(Base):
         primary_key=True,
         default=generate_uuid,
     )
-    type: Mapped[str] = mapped_column(
+    event_type: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
+    )
+
+    # References
+    inbox_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("inboxes.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    thread_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("threads.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    message_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("messages.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    # Timestamps
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=datetime.utcnow,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
     )
+
+    # Event-specific data
     payload: Mapped[dict[str, Any]] = mapped_column(
         JSON,
         nullable=False,
         default=dict,
     )
 
-    # Indexes for performance
+    # Legacy field name mapping
+    type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="",
+    )
+
+    # Indexes
     __table_args__ = (
-        # list_events: ORDER BY created_at DESC
+        Index("ix_events_event_type", "event_type"),
+        Index("ix_events_inbox_id", "inbox_id"),
+        Index("ix_events_timestamp", timestamp.desc()),
         Index("ix_events_created_at", created_at.desc()),
-        # list_events(type=...): filter by type, ORDER BY created_at DESC
-        Index("ix_events_type_created", "type", created_at.desc()),
+        Index("ix_events_type_created", "event_type", created_at.desc()),
     )
 
     def to_pydantic(self) -> PydanticEvent:
         """Convert ORM model to Pydantic model."""
+        # Use event_type if available, fall back to type for legacy
+        event_type_value = self.event_type or self.type
         return PydanticEvent(
             id=self.id,
-            type=EventType(self.type),
+            type=EventType(event_type_value),
             created_at=self.created_at,
             payload=self.payload or {},
+            inbox_id=self.inbox_id,
+            thread_id=self.thread_id,
+            message_id=self.message_id,
         )
 
     @classmethod
-    def from_pydantic(cls, event: PydanticEvent) -> EventORM:
+    def from_pydantic(cls, event: PydanticEvent) -> "EventORM":
         """Create ORM model from Pydantic model."""
         return cls(
             id=event.id,
-            type=event.type.value,
+            event_type=event.type.value,
+            type=event.type.value,  # Legacy compatibility
+            timestamp=event.created_at,
             created_at=event.created_at,
             payload=event.payload,
+            inbox_id=event.inbox_id,
+            thread_id=event.thread_id,
+            message_id=event.message_id,
         )

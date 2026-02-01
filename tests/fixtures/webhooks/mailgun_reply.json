@@ -1,0 +1,18 @@
+{
+  "sender": "alice@gmail.com",
+  "from": "Alice Smith <alice@gmail.com>",
+  "recipient": "support@mycompany.com",
+  "subject": "Re: Question about pricing",
+  "body-plain": "Thanks for the quick response! That pricing works for us.\n\nOn Sat, Jan 31, 2026 at 10:35 AM Support Agent <support@mycompany.com> wrote:\n\n> Our enterprise plan is $99/month with unlimited users.\n> Let me know if you have any questions.\n>\n> Best,\n> Support Team",
+  "body-html": "<div dir=\"ltr\">Thanks for the quick response! That pricing works for us.<div class=\"gmail_quote\"><div class=\"gmail_attr\">On Sat, Jan 31, 2026 at 10:35 AM Support Agent &lt;support@mycompany.com&gt; wrote:</div><blockquote class=\"gmail_quote\">Our enterprise plan is $99/month with unlimited users.<br>Let me know if you have any questions.<br><br>Best,<br>Support Team</blockquote></div></div>",
+  "stripped-text": "Thanks for the quick response! That pricing works for us.",
+  "stripped-html": "<div dir=\"ltr\">Thanks for the quick response! That pricing works for us.</div>",
+  "Message-Id": "<CADfE8z+def456@mail.gmail.com>",
+  "In-Reply-To": "<20260131153500.agent123@mycompany.com>",
+  "References": "<CADfE8z+abc123@mail.gmail.com> <20260131153500.agent123@mycompany.com>",
+  "message-headers": "[[\"Message-Id\",\"<CADfE8z+def456@mail.gmail.com>\"],[\"In-Reply-To\",\"<20260131153500.agent123@mycompany.com>\"],[\"References\",\"<CADfE8z+abc123@mail.gmail.com> <20260131153500.agent123@mycompany.com>\"],[\"From\",\"Alice Smith <alice@gmail.com>\"],[\"To\",\"support@mycompany.com\"],[\"Subject\",\"Re: Question about pricing\"],[\"Date\",\"Sat, 31 Jan 2026 11:45:00 -0500\"]]",
+  "timestamp": 1738338300,
+  "signature": "hmac-signature-here",
+  "token": "random-token-50-chars",
+  "attachment-count": 0
+}

@@ -1,0 +1,14 @@
+{
+  "headers": "Received: from mail-wr1-f41.google.com...\nMessage-ID: <CADfE8z+abc123@mail.gmail.com>\nFrom: Alice Smith <alice@gmail.com>\nTo: support@mycompany.com\nSubject: Question about pricing\nDate: Sat, 31 Jan 2026 10:30:00 -0500",
+  "from": "Alice Smith <alice@gmail.com>",
+  "to": "support@mycompany.com",
+  "subject": "Question about pricing",
+  "text": "Hi,\n\nI'd like to know your pricing for the enterprise plan.\n\nThanks,\nAlice",
+  "html": "<div dir=\"ltr\">Hi,<br><br>I'd like to know your pricing for the enterprise plan.<br><br>Thanks,<br>Alice</div>",
+  "envelope": "{\"to\":[\"support@mycompany.com\"],\"from\":\"alice@gmail.com\"}",
+  "charsets": "{\"to\":\"UTF-8\",\"from\":\"UTF-8\",\"subject\":\"UTF-8\",\"text\":\"UTF-8\"}",
+  "SPF": "pass",
+  "dkim": "{@gmail.com : pass}",
+  "spam_score": "0.1",
+  "attachments": "0"
+}

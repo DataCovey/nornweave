@@ -1,0 +1,39 @@
+{
+  "type": "email.received",
+  "created_at": "2026-01-31T18:00:00.000Z",
+  "data": {
+    "email_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "created_at": "2026-01-31T17:59:58.000Z",
+    "from": "Carol Manager <carol@gmail.com>",
+    "to": ["reports@mycompany.com"],
+    "cc": ["team@mycompany.com"],
+    "bcc": [],
+    "message_id": "<CACarol456xyz@mail.gmail.com>",
+    "subject": "Q4 Report Files",
+    "text": "Attached are the Q4 reports as requested.\n\nBest,\nCarol",
+    "html": "<div>Attached are the Q4 reports as requested.<br><br>Best,<br>Carol</div>",
+    "attachments": [
+      {
+        "id": "att-uuid-001",
+        "filename": "q4-summary.pdf",
+        "content_type": "application/pdf",
+        "content_disposition": "attachment",
+        "content_id": null
+      },
+      {
+        "id": "att-uuid-002",
+        "filename": "q4-data.xlsx",
+        "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "content_disposition": "attachment",
+        "content_id": null
+      },
+      {
+        "id": "att-uuid-003",
+        "filename": "chart.png",
+        "content_type": "image/png",
+        "content_disposition": "inline",
+        "content_id": "chart001"
+      }
+    ]
+  }
+}
