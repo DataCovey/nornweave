@@ -2,3 +2,25 @@
 html.dark .hextra-nav-container a[href="/"] img {
   filter: invert(1);
 }
+
+/* Tiled texture background with low opacity for readability */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image: url("/images/gray-cloth-fabric-512x512.jpg");
+  background-repeat: repeat;
+  background-size: 512px 512px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* Invert background texture in dark mode for text readability */
+html.dark body::before {
+  filter: invert(1);
+  opacity: 0.10;
+}
