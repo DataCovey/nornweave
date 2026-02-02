@@ -41,7 +41,7 @@ node_modules/
 # -----------------------------------------------------------------------------
 web/public/
 web/resources/_gen/
-web/content/docs/_changelog_content.md
+web/changelog_content.md
 
 # -----------------------------------------------------------------------------
 # Environment and secrets

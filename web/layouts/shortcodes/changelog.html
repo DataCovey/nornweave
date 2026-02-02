@@ -1,6 +1,6 @@
 {{/* Shortcode to render CHANGELOG.md content */}}
 {{/* The file is copied from repo root by Makefile/CI before Hugo build */}}
 {{/* Strips the first "# Changelog" heading since Hugo renders the title from front matter */}}
-{{ $content := readFile "content/docs/_changelog_content.md" }}
+{{ $content := readFile "changelog_content.md" }}
 {{ $content = replaceRE "^# Changelog\\n+" "" $content }}
 {{ $content | markdownify }}

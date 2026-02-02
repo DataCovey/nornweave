@@ -167,8 +167,8 @@ web-image: ## Copy hero image from res/ to web/static/images for landing page
 	elif ls res/Nornorna_spinner*.jpg 1>/dev/null 2>&1; then cp res/Nornorna_spinner*.jpg web/static/images/; \
 	else echo "No Nornorna_spinner image in res/ - add to web/static/images/ for hero"; fi
 
-web-changelog: ## Copy CHANGELOG.md to web content for Hugo
-	@cp CHANGELOG.md web/content/docs/_changelog_content.md
+web-changelog: ## Copy CHANGELOG.md to web root for shortcode (not in content/ so no sidebar page)
+	@cp CHANGELOG.md web/changelog_content.md
 
 web-build: web-image web-changelog ## Build Hugo site (landing page)
 	@command -v hugo >/dev/null 2>&1 || (echo "Install Hugo: https://gohugo.io"; exit 1)
