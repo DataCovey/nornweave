@@ -129,6 +129,43 @@ Response:
 Messages include `direction` to distinguish between `inbound` (received) and `outbound` (sent) emails. The `content_clean` field contains the message body converted to Markdown.
 {{< /callout >}}
 
+## Search Messages
+
+Search for messages containing specific text:
+
+```bash
+curl -X POST "http://localhost:8000/v1/search" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "inbox_id": "ibx_abc123",
+    "query": "pricing"
+  }'
+```
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "id": "msg_001",
+      "thread_id": "th_123",
+      "inbox_id": "ibx_abc123",
+      "direction": "inbound",
+      "content_clean": "Hi, I have a question about your pricing.",
+      "created_at": "2025-01-31T10:00:00Z"
+    }
+  ],
+  "count": 1,
+  "query": "pricing"
+}
+```
+
+{{< callout type="info" >}}
+Search finds messages by matching text in the message content. Use the `thread_id` from the results to reply to a specific conversation.
+{{< /callout >}}
+
 ## Send an Email
 
 Send a new email (creates a new thread):
