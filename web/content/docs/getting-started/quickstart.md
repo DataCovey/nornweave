@@ -94,6 +94,68 @@ When someone sends an email to your inbox address, NornWeave:
 3. Groups the message into a thread
 4. Stores it in the database
 
+## List Messages
+
+View all messages in your inbox:
+
+```bash
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "id": "msg_001",
+      "thread_id": "th_123",
+      "inbox_id": "ibx_abc123",
+      "direction": "inbound",
+      "content_clean": "Hi, I have a question about your pricing.",
+      "metadata": {
+        "From": "Alice <alice@example.com>",
+        "Subject": "Pricing Question"
+      },
+      "created_at": "2025-01-31T10:00:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+{{< callout type="info" >}}
+Messages include `direction` to distinguish between `inbound` (received) and `outbound` (sent) emails. The `content_clean` field contains the message body converted to Markdown.
+{{< /callout >}}
+
+## Send an Email
+
+Send a new email (creates a new thread):
+
+```bash
+curl -X POST http://localhost:8000/v1/messages \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "inbox_id": "ibx_abc123",
+    "to": ["alice@example.com"],
+    "subject": "Welcome to our service!",
+    "body": "Hi Alice!\n\nThanks for signing up. Let us know if you have any questions."
+  }'
+```
+
+Response:
+
+```json
+{
+  "id": "msg_002",
+  "thread_id": "th_456",
+  "provider_message_id": "<abc123@mail.yourdomain.com>",
+  "status": "sent"
+}
+```
+
 ## Read a Thread
 
 Retrieve a conversation thread (optimized for LLM context):
@@ -130,9 +192,9 @@ Response:
 The thread format uses `role: "user"` for incoming emails and `role: "assistant"` for outgoing emails, making it easy to use with LLM chat APIs.
 {{< /callout >}}
 
-## Send a Reply
+## Reply to a Thread
 
-Send a reply to an existing thread:
+To reply to an existing conversation, include the `reply_to_thread_id`:
 
 ```bash
 curl -X POST http://localhost:8000/v1/messages \
@@ -141,14 +203,25 @@ curl -X POST http://localhost:8000/v1/messages \
   -d '{
     "inbox_id": "ibx_abc123",
     "reply_to_thread_id": "th_123",
-    "to": ["bob@gmail.com"],
+    "to": ["alice@example.com"],
     "subject": "Re: Pricing Question",
-    "body": "Thanks for your interest! Our pricing starts at **$20/month** for the basic plan."
+    "body": "Hi there!\n\nThanks for your interest! Our pricing starts at **$20/month** for the basic plan."
   }'
 ```
 
+Response:
+
+```json
+{
+  "id": "msg_003",
+  "thread_id": "th_123",
+  "provider_message_id": "<def456@mail.yourdomain.com>",
+  "status": "sent"
+}
+```
+
 {{< callout type="info" >}}
-NornWeave automatically converts Markdown to HTML for the email body and handles threading headers (`In-Reply-To`, `References`) for you.
+NornWeave automatically converts Markdown to HTML for the email body and handles threading headers (`In-Reply-To`, `References`) so replies appear correctly in the recipient's email client.
 {{< /callout >}}
 
 ## Using MCP
