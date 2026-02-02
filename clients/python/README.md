@@ -21,10 +21,15 @@ The NornWeave Python library provides convenient access to the NornWeave APIs fr
 pip install nornweave-client
 ```
 
-Or install from source:
+Or install from source using [uv](https://docs.astral.sh/uv/) (recommended) or pip:
 
 ```bash
 cd clients/python
+
+# Using uv (recommended)
+uv pip install -e .
+
+# Or with pip
 pip install -e .
 ```
 

@@ -61,11 +61,8 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 2. **Install dependencies**
 
    ```bash
-   # Using uv (recommended)
+   # Install uv if you don't have it: https://docs.astral.sh/uv/
    make install-dev
-
-   # Or with pip
-   pip install -e ".[dev]"
    ```
 
 3. **Set up pre-commit hooks**

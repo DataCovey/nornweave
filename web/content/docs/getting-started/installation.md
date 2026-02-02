@@ -85,7 +85,7 @@ For a comprehensive validation of all API endpoints, you can use the Python SDK 
 
 ```bash
 cd clients/python
-pip install -e .
+uv pip install -e .
 python scripts/validate_local.py
 ```
 
@@ -154,7 +154,7 @@ For a comprehensive validation of all API endpoints, you can use the Python SDK 
 
 ```bash
 cd clients/python
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 python scripts/validate_local.py
 ```
 
