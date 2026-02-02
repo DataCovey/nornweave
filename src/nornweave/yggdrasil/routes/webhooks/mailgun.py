@@ -7,7 +7,9 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from nornweave.adapters.mailgun import MailgunAdapter
-from nornweave.core.interfaces import StorageInterface
+from nornweave.core.interfaces import (
+    StorageInterface,  # noqa: TC001 - needed at runtime for FastAPI
+)
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
 from nornweave.verdandi.parser import html_to_markdown
@@ -33,7 +35,7 @@ async def mailgun_webhook(
     """
     # Parse form data from Mailgun
     form_data = await request.form()
-    payload = {key: value for key, value in form_data.items()}
+    payload = dict(form_data.items())
 
     logger.info("Received Mailgun webhook for recipient: %s", payload.get("recipient"))
     logger.debug("Mailgun payload keys: %s", list(payload.keys()))
