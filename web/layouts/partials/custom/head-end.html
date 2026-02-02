@@ -246,3 +246,79 @@
 }
 </script>
 {{- end }}
+
+{{/* =============================================================================
+    Mermaid Diagram Lightbox Script
+============================================================================= */}}
+<script>
+(function() {
+  // Delay initialization to avoid interfering with theme scripts
+  window.addEventListener('load', function() {
+    // Create lightbox element once
+    const lightbox = document.createElement('div');
+    lightbox.className = 'mermaid-lightbox';
+    lightbox.innerHTML = '<div class="mermaid-lightbox-content"></div>';
+    document.body.appendChild(lightbox);
+    
+    const content = lightbox.querySelector('.mermaid-lightbox-content');
+    
+    // Close lightbox function
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      content.innerHTML = '';
+    }
+    
+    // Close on click anywhere on lightbox
+    lightbox.addEventListener('click', closeLightbox);
+    
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && lightbox.classList.contains('open')) {
+        closeLightbox();
+      }
+    });
+    
+    // Add click handlers to mermaid diagrams
+    function setupMermaidClicks() {
+      document.querySelectorAll('.mermaid').forEach(function(diagram) {
+        if (diagram.dataset.lightboxReady) return;
+        diagram.dataset.lightboxReady = 'true';
+        diagram.setAttribute('title', 'Click to enlarge');
+        
+      diagram.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Clone the SVG for the lightbox
+        const svg = diagram.querySelector('svg');
+        if (svg) {
+          const clone = svg.cloneNode(true);
+          // Set proper dimensions from viewBox for full view
+          const vb = svg.getAttribute('viewBox');
+          if (vb) {
+            const p = vb.split(' ');
+            const w = parseFloat(p[2]);
+            const h = parseFloat(p[3]);
+            // Scale to fit viewport while maintaining aspect ratio
+            const mW = window.innerWidth * 0.9;
+            const mH = window.innerHeight * 0.85;
+            const s = Math.min(mW / w, mH / h, 1);
+            clone.setAttribute('width', Math.round(w * s) + 'px');
+            clone.setAttribute('height', Math.round(h * s) + 'px');
+            clone.removeAttribute('style');
+          }
+          content.innerHTML = '';
+          content.appendChild(clone);
+          lightbox.classList.add('open');
+        }
+      });
+      });
+    }
+    
+    // Initial setup after a short delay to let mermaid render
+    setTimeout(setupMermaidClicks, 500);
+    
+    // Re-check periodically for dynamically rendered diagrams (less aggressive than MutationObserver)
+    setTimeout(setupMermaidClicks, 1500);
+    setTimeout(setupMermaidClicks, 3000);
+  });
+})();
+</script>
