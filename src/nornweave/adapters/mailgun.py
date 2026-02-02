@@ -134,8 +134,61 @@ class MailgunAdapter(EmailProvider):
             return provider_message_id
 
     def parse_inbound_webhook(self, payload: dict[str, Any]) -> InboundMessage:
-        """Parse Mailgun inbound webhook payload.
+        """Parse Mailgun inbound webhook payload into standardized InboundMessage.
 
-        TODO: Implement Mailgun webhook payload parsing.
+        Mailgun sends inbound emails as multipart/form-data with fields like:
+        - sender, from, recipient, subject
+        - body-plain, body-html, stripped-text, stripped-html
+        - Message-Id, In-Reply-To, References
+        - message-headers (JSON array of [name, value] pairs)
+        - timestamp, signature, token
+        - attachment-count, attachment-1, attachment-2, etc.
         """
-        raise NotImplementedError("MailgunAdapter.parse_inbound_webhook")
+        from datetime import UTC, datetime
+
+        # Parse sender - extract email from "Name <email>" format
+        from_field = payload.get("from", payload.get("sender", ""))
+        from_address = from_field
+        if "<" in from_field and ">" in from_field:
+            from_address = from_field.split("<")[1].split(">")[0]
+
+        # Parse recipient
+        to_address = payload.get("recipient", "")
+
+        # Parse headers from JSON array if present
+        headers: dict[str, str] = {}
+        headers_raw = payload.get("message-headers", "")
+        if headers_raw:
+            try:
+                import json
+
+                headers_list = json.loads(headers_raw)
+                headers = {h[0]: h[1] for h in headers_list if len(h) >= 2}
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        # Parse references into list
+        references_str = payload.get("References", "") or ""
+        references = [ref.strip() for ref in references_str.split() if ref.strip()]
+
+        # Parse timestamp
+        timestamp_unix = payload.get("timestamp")
+        if timestamp_unix:
+            timestamp = datetime.fromtimestamp(int(timestamp_unix), tz=UTC)
+        else:
+            timestamp = datetime.now(UTC)
+
+        return InboundMessage(
+            from_address=from_address,
+            to_address=to_address,
+            subject=payload.get("subject", ""),
+            body_plain=payload.get("body-plain", ""),
+            body_html=payload.get("body-html"),
+            stripped_text=payload.get("stripped-text"),
+            stripped_html=payload.get("stripped-html"),
+            message_id=payload.get("Message-Id"),
+            in_reply_to=payload.get("In-Reply-To") or None,
+            references=references,
+            headers=headers,
+            timestamp=timestamp,
+        )

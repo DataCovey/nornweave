@@ -18,7 +18,27 @@ This guide walks you through creating your first inbox, receiving an email, and 
 
 - NornWeave is [installed and running](../installation)
 - You have your API key from the [configuration](../configuration)
-- Your email provider webhook is configured (see [Provider Guides](../../guides))
+- [ngrok](https://ngrok.com/) installed (for exposing your local server to webhooks)
+
+## Expose Your Local Server
+
+Email providers need a public URL to send webhooks. Use ngrok to expose your local NornWeave server:
+
+```bash
+ngrok http 8000
+```
+
+You'll see output like:
+
+```
+Forwarding  https://abc123.ngrok-free.app -> http://localhost:8000
+```
+
+{{< callout type="info" >}}
+Copy your ngrok URL (e.g., `https://abc123.ngrok-free.app`). You'll use this to configure webhooks in your email provider.
+{{< /callout >}}
+
+Keep ngrok running in a separate terminal while you work through this guide.
 
 ## Create an Inbox
 
@@ -51,15 +71,19 @@ The email address format depends on your provider configuration. The `email_user
 
 ## Configure Webhook
 
-Point your email provider's inbound webhook to NornWeave:
+Point your email provider's inbound webhook to your ngrok URL:
 
 | Provider | Webhook URL |
 |----------|-------------|
-| Mailgun | `https://your-server.com/webhooks/mailgun` |
-| SendGrid | `https://your-server.com/webhooks/sendgrid` |
-| AWS SES | `https://your-server.com/webhooks/ses` |
+| Mailgun | `https://abc123.ngrok-free.app/webhooks/mailgun` |
+| SendGrid | `https://abc123.ngrok-free.app/webhooks/sendgrid` |
+| AWS SES | `https://abc123.ngrok-free.app/webhooks/ses` |
 
-See [Provider Guides](../../guides) for detailed setup instructions.
+{{< callout type="warning" >}}
+Replace `abc123.ngrok-free.app` with your actual ngrok URL. The URL changes each time you restart ngrok (unless you have a paid plan with reserved domains).
+{{< /callout >}}
+
+See [Provider Guides](../../guides) for detailed provider-specific setup instructions.
 
 ## Receive an Email
 
