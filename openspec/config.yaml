@@ -1,0 +1,30 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Python, FastAPI, PostgreSQL, SQLite, Alembic, MCP, Cursor/Claude
+  Package manager: uv
+  CLI framework: Click
+
+rules:
+  tasks:
+    - Add a final task to document the changes on the /CHANGELOG.md file
+  proposal:
+    - Keep proposals under 500 words
+    - Always include a "Non-goals" section
+
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     specs:
+#       - Include scenarios for Windows path handling when dealing with file paths
+#       - Requirements involving paths must specify cross-platform behavior
+#     design:
+#       - Document any platform-specific behavior or limitations
+#       - Prefer Node.js path module over string manipulation for paths
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
