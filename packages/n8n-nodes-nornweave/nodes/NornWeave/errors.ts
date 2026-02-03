@@ -1,4 +1,4 @@
-import { NodeApiError, type INode } from 'n8n-workflow';
+import { NodeApiError, type INode, type JsonObject } from 'n8n-workflow';
 
 interface ApiErrorResponse {
   detail?: string | { msg: string; loc?: string[] }[];
@@ -6,23 +6,43 @@ interface ApiErrorResponse {
   error?: string;
 }
 
+type ApiError = Error & { response?: { status?: number; data?: ApiErrorResponse } };
+
+/**
+ * Convert an Error to a JsonObject for NodeApiError
+ */
+function toJsonObject(error: ApiError): JsonObject {
+  return {
+    message: error.message,
+    name: error.name,
+    stack: error.stack,
+    response: error.response
+      ? {
+          status: error.response.status,
+          data: error.response.data as JsonObject,
+        }
+      : undefined,
+  } as JsonObject;
+}
+
 /**
  * Transform NornWeave API errors into user-friendly n8n error messages
  */
 export function handleApiError(
   node: INode,
-  error: Error & { response?: { status?: number; data?: ApiErrorResponse } },
+  error: ApiError,
   resource?: string,
   resourceId?: string,
 ): never {
   const status = error.response?.status;
   const data = error.response?.data;
+  const errorObj = toJsonObject(error);
 
   // HTTP 404 - Not Found
   if (status === 404) {
     const resourceName = resource || 'Resource';
     const idInfo = resourceId ? ` with ID "${resourceId}"` : '';
-    throw new NodeApiError(node, error, {
+    throw new NodeApiError(node, errorObj, {
       message: `${resourceName} not found`,
       description: `The ${resourceName.toLowerCase()}${idInfo} was not found. Please check that the ID is correct and the resource exists.`,
       httpCode: '404',
@@ -31,7 +51,7 @@ export function handleApiError(
 
   // HTTP 409 - Conflict (e.g., duplicate inbox)
   if (status === 409) {
-    throw new NodeApiError(node, error, {
+    throw new NodeApiError(node, errorObj, {
       message: 'Resource conflict',
       description:
         data?.detail?.toString() ||
@@ -56,7 +76,7 @@ export function handleApiError(
       validationMessage = data.detail;
     }
 
-    throw new NodeApiError(node, error, {
+    throw new NodeApiError(node, errorObj, {
       message: 'Validation error',
       description: validationMessage,
       httpCode: '422',
@@ -65,7 +85,7 @@ export function handleApiError(
 
   // HTTP 401/403 - Authentication errors
   if (status === 401 || status === 403) {
-    throw new NodeApiError(node, error, {
+    throw new NodeApiError(node, errorObj, {
       message: 'Authentication failed',
       description:
         'Unable to authenticate with NornWeave. Please check your API key in the credentials.',
@@ -75,7 +95,7 @@ export function handleApiError(
 
   // HTTP 500+ - Server errors
   if (status && status >= 500) {
-    throw new NodeApiError(node, error, {
+    throw new NodeApiError(node, errorObj, {
       message: 'NornWeave server error',
       description:
         'The NornWeave server encountered an error. Please try again later or check the server logs.',
@@ -85,7 +105,7 @@ export function handleApiError(
 
   // Network errors (no response)
   if (!error.response) {
-    throw new NodeApiError(node, error, {
+    throw new NodeApiError(node, errorObj, {
       message: 'Connection failed',
       description:
         'Unable to connect to NornWeave. Please check that:\n' +
@@ -96,7 +116,7 @@ export function handleApiError(
   }
 
   // Default error handling
-  throw new NodeApiError(node, error, {
+  throw new NodeApiError(node, errorObj, {
     message: data?.message || data?.error || 'Request failed',
     description: data?.detail?.toString() || error.message,
     httpCode: status?.toString(),

@@ -1,0 +1,15 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: unless-stopped
+    environment:
+      - N8N_SECURE_COOKIE=false
+      - N8N_CUSTOM_EXTENSIONS=/custom-nodes
+    ports:
+      - 5678:5678
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./custom-nodes:/custom-nodes:ro
+
+volumes:
+  n8n_data:
