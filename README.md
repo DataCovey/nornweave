@@ -201,6 +201,16 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 - [Architecture Overview](https://nornweave.datacovey.com/docs/concepts/architecture/)
 - [Provider Setup Guides](https://nornweave.datacovey.com/docs/guides/)
 
+## Repository Structure
+
+This is a monorepo:
+
+- **`src/nornweave/`** – Main NornWeave server components
+- **`clients/python/`** – Python client SDK (`nornweave-client`)
+- **`packages/n8n-nodes-nornweave/`** – n8n community node (`@nornweave/n8n-nodes-nornweave`)
+
+The root **`credentials`** symlink points to `packages/n8n-nodes-nornweave/credentials` so n8n’s package verification can find the credential file when checking the repo.
+
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
