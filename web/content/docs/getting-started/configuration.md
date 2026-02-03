@@ -69,10 +69,18 @@ AWS_REGION=us-east-1
 
 ### Resend
 
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `RESEND_API_KEY` | Resend API key for sending emails | Required |
+| `RESEND_WEBHOOK_SECRET` | Svix signing secret for webhook verification | Optional |
+
 ```bash
 EMAIL_PROVIDER=resend
-RESEND_API_KEY=your-api-key
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxx  # Optional: for webhook signature verification
 ```
+
+The `RESEND_WEBHOOK_SECRET` is the Svix signing secret from your Resend webhook configuration. When set, NornWeave verifies the signature on incoming webhooks to ensure they originated from Resend.
 
 ## API Configuration
 

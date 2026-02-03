@@ -31,28 +31,33 @@ The diagram below shows how the main components connect and what actions they pe
 ```mermaid
 flowchart LR
     subgraph external [External]
-        Provider[Email Providers\nMailgun, SES, SendGrid, Resend]
-        Agent[AI Agent\nREST or MCP client]
+        Provider[Email Providers<br/>Mailgun, SES, SendGrid, Resend]
     end
 
-    subgraph yggdrasil [Yggdrasil - Gateway]
-        G[API Router]
-    end
+    subgraph internal [Internal Network]
+        subgraph agents [AI Agents]
+            Agent[AI Agent<br/>REST or MCP client]
+        end
 
-    subgraph verdandi [Verdandi - Ingestion]
-        V[Parse webhook\nHTML→Markdown\nThreading]
-    end
+        subgraph yggdrasil [Yggdrasil - Gateway]
+            G[API Router]
+        end
 
-    subgraph urdr [Urdr - Storage]
-        U[(PostgreSQL\nSQLite)]
-    end
+        subgraph verdandi [Verdandi - Ingestion]
+            V[Parse webhook<br/>HTML→Markdown<br/>Threading]
+        end
 
-    subgraph skuld [Skuld - Outbound]
-        S[Send email\nRate limit]
-    end
+        subgraph urdr [Urdr - Storage]
+            U[(PostgreSQL<br/>SQLite)]
+        end
 
-    subgraph mcp [Huginn & Muninn]
-        M[MCP read/write]
+        subgraph skuld [Skuld - Outbound]
+            S[Send email<br/>Rate limit]
+        end
+
+        subgraph mcp [Huginn & Muninn]
+            M[MCP read/write]
+        end
     end
 
     Provider -->|"POST /webhooks/{provider}"| G
@@ -74,46 +79,57 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph providers [Email Providers]
-        MG[Mailgun]
-        SES[AWS SES]
-        SG[SendGrid]
-        RS[Resend]
+    subgraph external [External]
+        subgraph providers [Email Providers]
+            MG[Mailgun]
+            SES[AWS SES]
+            SG[SendGrid]
+            RS[Resend]
+        end
     end
     
-    subgraph yggdrasil [Yggdrasil - API Gateway]
-        WH[Webhook Routes]
-        API[REST API v1]
-    end
-    
-    subgraph verdandi [Verdandi - Ingestion Engine]
-        Parser[HTML Parser]
-        Sanitizer[Cruft Remover]
-        Threader[Threading Logic]
-    end
-    
-    subgraph urdr [Urdr - Storage Layer]
-        PG[(PostgreSQL)]
-        SQLite[(SQLite)]
-    end
-    
-    subgraph skuld [Skuld - Outbound Sender]
-        Sender[Email Sender]
-        RateLimiter[Rate Limiter]
-    end
-    
-    subgraph mcp [Huginn & Muninn - MCP Tools]
-        Resources[Resources]
-        Tools[Tools]
+    subgraph internal [Internal Network]
+        subgraph agents [AI Agents]
+            Agent1[Claude / Cursor]
+            Agent2[Custom Agents]
+        end
+
+        subgraph mcp [Huginn & Muninn - MCP Tools]
+            Resources[Resources]
+            Tools[Tools]
+        end
+
+        subgraph yggdrasil [Yggdrasil - API Gateway]
+            WH[Webhook Routes]
+            API[REST API v1]
+        end
+        
+        subgraph verdandi [Verdandi - Ingestion Engine]
+            Parser[HTML Parser]
+            Sanitizer[Cruft Remover]
+            Threader[Threading Logic]
+        end
+        
+        subgraph urdr [Urdr - Storage Layer]
+            PG[(PostgreSQL)]
+            SQLite[(SQLite)]
+        end
+        
+        subgraph skuld [Skuld - Outbound Sender]
+            Sender[Email Sender]
+            RateLimiter[Rate Limiter]
+        end
     end
     
     providers --> WH
     WH --> verdandi
     verdandi --> urdr
+    Agent1 --> mcp
+    Agent2 --> API
+    mcp --> API
     API --> urdr
     API --> skuld
     skuld --> providers
-    mcp --> API
 ```
 
 ## Data Flow
