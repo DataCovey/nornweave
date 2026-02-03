@@ -1,0 +1,95 @@
+name: Python Client CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'clients/python/**'
+      - '.github/workflows/python-client.yml'
+    tags:
+      - "python-v*"
+  pull_request:
+    paths:
+      - 'clients/python/**'
+      - '.github/workflows/python-client.yml'
+
+defaults:
+  run:
+    working-directory: clients/python
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run linter
+        run: uv run ruff check .
+
+      - name: Run type checker
+        run: uv run mypy src/
+
+      - name: Run tests
+        run: uv run pytest
+
+  publish:
+    name: Publish to PyPI
+    needs: test
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/python-v')
+    runs-on: ubuntu-latest
+    environment: pypi-publish
+    permissions:
+      id-token: write  # Required for OIDC trusted publishing
+      attestations: write
+      contents: write  # For creating GitHub release
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Build package
+        run: uv build
+
+      - name: Publish to PyPI (with attestations)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: clients/python/dist/
+          attestations: true
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/python-v}" >> $GITHUB_OUTPUT
+        working-directory: .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Python Client v${{ steps.version.outputs.version }}
+          body: |
+            ## nornweave-client v${{ steps.version.outputs.version }}
+            
+            Install from PyPI:
+            ```bash
+            pip install nornweave-client==${{ steps.version.outputs.version }}
+            ```
+          draft: false
+          prerelease: false

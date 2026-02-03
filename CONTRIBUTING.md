@@ -28,6 +28,10 @@ Thank you for your interest in contributing to NornWeave! This document provides
     - [Pull Request Process](#pull-request-process)
     - [PR Description Template](#pr-description-template)
   - [Release Process](#release-process)
+    - [Main NornWeave Release](#main-nornweave-release)
+    - [n8n Node Release (`@nornweave/n8n-nodes-nornweave`)](#n8n-node-release-nornweaven8n-nodes-nornweave)
+    - [Python Client Release (`nornweave-client`)](#python-client-release-nornweave-client)
+    - [Version Alignment](#version-alignment)
   - [Questions?](#questions)
 
 ## Code of Conduct
@@ -309,6 +313,103 @@ Releases are managed by maintainers following [Semantic Versioning](https://semv
 - **MAJOR**: Breaking API changes
 - **MINOR**: New features, backward compatible
 - **PATCH**: Bug fixes, backward compatible
+
+### Main NornWeave Release
+
+The main NornWeave server is released via GitHub releases:
+
+1. Update `CHANGELOG.md` with the new version
+2. Create a GitHub release with tag `vX.Y.Z`
+3. CI automatically builds and publishes Docker images
+
+### n8n Node Release (`@nornweave/n8n-nodes-nornweave`)
+
+The n8n community node is published to npm with provenance attestation.
+
+**Release steps:**
+
+```bash
+cd packages/n8n-nodes-nornweave
+
+# 1. Bump version
+npm version patch  # or minor/major
+
+# 2. Commit the version bump
+git add package.json package-lock.json
+git commit -m "chore(n8n): release vX.Y.Z"
+
+# 3. Create and push tag (triggers CI publish)
+git tag n8n-vX.Y.Z
+git push origin main --tags
+```
+
+The GitHub Actions workflow (`.github/workflows/n8n-node.yml`) will:
+- Build and test the package
+- Publish to npm with provenance (OIDC, no token needed)
+- Create a GitHub release
+
+### Python Client Release (`nornweave-client`)
+
+The Python client is published to PyPI using trusted publishing (OIDC).
+
+**Prerequisites (one-time setup):**
+- PyPI project `nornweave-client` exists
+- Trusted publisher configured on PyPI for this repo
+- GitHub environment `pypi-publish` configured
+
+**Release steps:**
+
+```bash
+cd clients/python
+
+# 1. Update version in pyproject.toml
+# Edit: version = "X.Y.Z"
+
+# 2. Update CHANGELOG if needed
+
+# 3. Commit the version bump
+git add pyproject.toml
+git commit -m "chore(python-client): release vX.Y.Z"
+
+# 4. Create and push tag (triggers CI publish)
+git tag python-vX.Y.Z
+git push origin main --tags
+```
+
+The GitHub Actions workflow will:
+- Run tests and linting
+- Build source distribution and wheel
+- Publish to PyPI with OIDC (no token needed)
+
+**First-time publish (local):**
+
+For the initial publish before OIDC is configured:
+
+```bash
+cd clients/python
+
+# Build the package
+uv build
+# or: python -m build
+
+# Upload to PyPI (requires API token)
+uv publish
+# or: twine upload dist/*
+```
+
+Then configure trusted publishing on [PyPI](https://pypi.org/manage/project/nornweave-client/settings/publishing/) by adding the GitHub repository as a trusted publisher.
+
+### Version Alignment
+
+The packages are versioned independently:
+
+| Package | Version Location | Tag Format |
+|---------|------------------|------------|
+| NornWeave Server | `pyproject.toml` | `vX.Y.Z` |
+| n8n Node | `packages/n8n-nodes-nornweave/package.json` | `n8n-vX.Y.Z` |
+| Python Client | `clients/python/pyproject.toml` | `python-vX.Y.Z` |
+
+**Important:** When making breaking API changes to the server, coordinate releases across all packages to ensure compatibility.
 
 ## Questions?
 
