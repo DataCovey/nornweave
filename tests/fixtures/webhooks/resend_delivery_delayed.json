@@ -1,0 +1,18 @@
+{
+  "type": "email.delivery_delayed",
+  "created_at": "2026-01-31T17:35:00.000Z",
+  "data": {
+    "email_id": "delayed-1234-5678-9abc-def012345678",
+    "created_at": "2026-01-31T17:35:00.000Z",
+    "from": "NornWeave <noreply@mail.example.com>",
+    "to": ["recipient@slow-mail-server.com"],
+    "subject": "Important notification",
+    "delay": {
+      "message": "Recipient inbox is full",
+      "timestamp": "2026-01-31T17:35:00.000Z"
+    },
+    "tags": {
+      "category": "notification"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "email.opened",
+  "created_at": "2026-01-31T18:15:00.000Z",
+  "data": {
+    "email_id": "sent-1234-5678-9abc-def012345678",
+    "created_at": "2026-01-31T18:15:00.000Z",
+    "from": "NornWeave <noreply@mail.example.com>",
+    "to": ["recipient@example.com"],
+    "subject": "Welcome to NornWeave",
+    "tags": {
+      "category": "welcome"
+    }
+  }
+}

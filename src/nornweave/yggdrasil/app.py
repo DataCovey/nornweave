@@ -60,11 +60,12 @@ def create_app() -> FastAPI:
     app.include_router(search.router, prefix="/v1", tags=["search"])
 
     # Include webhook routers
-    from nornweave.yggdrasil.routes.webhooks import mailgun, sendgrid, ses
+    from nornweave.yggdrasil.routes.webhooks import mailgun, resend, sendgrid, ses
 
     app.include_router(mailgun.router, prefix="/webhooks", tags=["webhooks"])
     app.include_router(sendgrid.router, prefix="/webhooks", tags=["webhooks"])
     app.include_router(ses.router, prefix="/webhooks", tags=["webhooks"])
+    app.include_router(resend.router, prefix="/webhooks", tags=["webhooks"])
 
     return app
 

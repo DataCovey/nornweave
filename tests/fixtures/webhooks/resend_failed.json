@@ -1,0 +1,15 @@
+{
+  "type": "email.failed",
+  "created_at": "2026-01-31T17:30:00.000Z",
+  "data": {
+    "email_id": "failed-1234-5678-9abc-def012345678",
+    "created_at": "2026-01-31T17:30:00.000Z",
+    "from": "NornWeave <noreply@unverified-domain.com>",
+    "to": ["recipient@example.com"],
+    "subject": "Test email",
+    "error": {
+      "message": "Domain not verified",
+      "code": "domain_not_verified"
+    }
+  }
+}

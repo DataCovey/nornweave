@@ -175,6 +175,9 @@ async def get_email_provider(
             region=settings.aws_region,
         )
     elif provider == "resend":
-        return ResendAdapter(api_key=settings.resend_api_key)
+        return ResendAdapter(
+            api_key=settings.resend_api_key,
+            webhook_secret=settings.resend_webhook_secret,
+        )
     else:
         raise ValueError(f"Unknown email_provider: {provider}")

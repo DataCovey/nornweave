@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     mailgun_domain: str = Field(default="", alias="MAILGUN_DOMAIN")
     sendgrid_api_key: str = Field(default="", alias="SENDGRID_API_KEY")
     resend_api_key: str = Field(default="", alias="RESEND_API_KEY")
+    resend_webhook_secret: str = Field(default="", alias="RESEND_WEBHOOK_SECRET")
     aws_access_key_id: str = Field(default="", alias="AWS_ACCESS_KEY_ID")
     aws_secret_access_key: str = Field(default="", alias="AWS_SECRET_ACCESS_KEY")
     aws_region: str = Field(default="us-east-1", alias="AWS_REGION")

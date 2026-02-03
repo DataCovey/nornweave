@@ -3,11 +3,14 @@
 # Usage with profiles:
 #   Postgres + Mailgun:   docker compose --profile storage_psql --profile mail_mailgun up --build
 #   Postgres + SendGrid:  docker compose --profile storage_psql --profile mail_sendgrid up --build
+#   Postgres + Resend:    docker compose --profile storage_psql --profile mail_resend up --build
 #   SQLite + Mailgun:     docker compose --profile storage_sqlite --profile mail_mailgun up --build
 #   SQLite + SendGrid:    docker compose --profile storage_sqlite --profile mail_sendgrid up --build
+#   SQLite + Resend:      docker compose --profile storage_sqlite --profile mail_resend up --build
 #
-# Run migrations after starting:
-#   docker compose exec api alembic upgrade head
+# Run migrations after starting (use api-psql or api-sqlite depending on profile):
+#   docker compose --profile storage_psql exec api-psql uv run alembic upgrade head
+#   docker compose --profile storage_sqlite exec api-sqlite uv run alembic upgrade head
 
 services:
   # ==========================================================================
@@ -167,6 +170,12 @@ services:
     image: busybox
     profiles: ["mail_sendgrid"]
     command: echo "SendGrid provider selected. Set SENDGRID_API_KEY in .env"
+    restart: "no"
+
+  mail-resend:
+    image: busybox
+    profiles: ["mail_resend"]
+    command: echo "Resend provider selected. Set RESEND_API_KEY and RESEND_WEBHOOK_SECRET in .env"
     restart: "no"
 
 networks:

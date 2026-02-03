@@ -1,0 +1,18 @@
+{
+  "type": "email.suppressed",
+  "created_at": "2026-01-31T17:30:00.000Z",
+  "data": {
+    "email_id": "suppressed-1234-5678-9abc-def012345678",
+    "created_at": "2026-01-31T17:30:00.000Z",
+    "from": "NornWeave <noreply@mail.example.com>",
+    "to": ["bounced-before@example.com"],
+    "subject": "Your account update",
+    "suppression": {
+      "reason": "Previous hard bounce",
+      "list": "bounce"
+    },
+    "tags": {
+      "category": "transactional"
+    }
+  }
+}

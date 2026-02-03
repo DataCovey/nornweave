@@ -34,6 +34,7 @@ dependencies = [
     "html2text>=2024.2.26",
     "email-validator>=2.2.0",
     "markdown>=3.7",
+    "svix>=1.24.0",  # For Resend webhook signature verification
 ]
 
 [project.optional-dependencies]
@@ -191,5 +192,7 @@ module = [
     "boto3",
     "google.cloud.*",
     "pdfplumber",
+    "svix",
+    "svix.*",
 ]
 ignore_missing_imports = true

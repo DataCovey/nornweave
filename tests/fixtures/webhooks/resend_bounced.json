@@ -1,0 +1,19 @@
+{
+  "type": "email.bounced",
+  "created_at": "2026-01-31T17:30:10.000Z",
+  "data": {
+    "email_id": "bounced-1234-5678-9abc-def012345678",
+    "created_at": "2026-01-31T17:30:10.000Z",
+    "from": "NornWeave <noreply@mail.example.com>",
+    "to": ["invalid@nonexistent-domain.com"],
+    "subject": "Your order confirmation",
+    "bounce": {
+      "message": "The recipient's email address does not exist.",
+      "subType": "NoAccount",
+      "type": "Permanent"
+    },
+    "tags": {
+      "category": "transactional"
+    }
+  }
+}

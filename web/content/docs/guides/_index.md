@@ -19,6 +19,7 @@ Detailed setup guides for each supported email provider.
   {{< card link="mailgun" title="Mailgun" icon="mail" subtitle="Setup guide for Mailgun integration" >}}
   {{< card link="sendgrid" title="SendGrid" icon="mail" subtitle="Setup guide for SendGrid integration" >}}
   {{< card link="ses" title="AWS SES" icon="cloud" subtitle="Setup guide for Amazon SES integration" >}}
+  {{< card link="resend" title="Resend" icon="mail" subtitle="Setup guide for Resend integration" >}}
 {{< /cards >}}
 
 ## Provider Comparison
