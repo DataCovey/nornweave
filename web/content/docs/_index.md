@@ -16,7 +16,7 @@ sitemap_changefreq: weekly
 Welcome to the NornWeave documentation. Learn how to set up and use the Inbox-as-a-Service API for your AI agents.
 
 <p style="text-align: center;">
-  <img src="/images/logo-big-blue.jpg" alt="NornWeave" style="max-width: 100%; height: auto;">
+  <img src="/images/logo-big-blue.png" alt="NornWeave" style="width: 50%; max-width: 50%; height: auto;">
 </p>
 
 ## Getting Started

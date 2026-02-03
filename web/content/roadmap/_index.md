@@ -13,7 +13,7 @@ sitemap_changefreq: monthly
 NornWeave is being developed in phases. This page outlines the current status and upcoming features.
 
 <p style="text-align: center;">
-  <img src="/images/logo-big-metallic.jpg" alt="NornWeave" style="max-width: 100%; height: auto;">
+  <img src="/images/logo-big-metallic.png" alt="NornWeave" style="width: 50%; max-width: 50%; height: auto;">
 </p>
 
 ## Phase 1: Foundation (The Mail Proxy) - Available

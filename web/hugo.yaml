@@ -78,7 +78,7 @@ params:
 
   # Open Graph / Social Media
   images:
-    - /images/logo-big-blue.jpg
+    - /images/logo-big-blue.png
   
   # Author information (for structured data)
   author:
@@ -90,7 +90,7 @@ params:
     github: https://github.com/DataCovey/nornweave
   
   # Site logo for structured data
-  logo: /images/logo-big-blue.jpg
+  logo: /images/logo-big-blue.png
   
   navbar:
     displayTitle: true
