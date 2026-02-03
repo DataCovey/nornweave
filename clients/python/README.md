@@ -14,6 +14,7 @@ The NornWeave Python library provides convenient access to the NornWeave APIs fr
   - [Timeouts](#timeouts)
   - [Custom Client](#custom-client)
 - [Pagination](#pagination)
+- [Releasing](#releasing)
 
 ## Installation
 
@@ -228,6 +229,43 @@ for page in client.inboxes.list().iter_pages():
 async for inbox in async_client.inboxes.list():
     print(inbox.name)
 ```
+
+## Releasing
+
+### Version Bumping
+
+```bash
+cd clients/python
+
+# Patch release (0.1.0 → 0.1.1)
+uv version patch
+
+# Minor release (0.1.1 → 0.2.0)
+uv version minor
+
+# Major release (0.2.0 → 1.0.0)
+uv version major
+```
+
+### Publishing
+
+1. Bump version and commit:
+
+   ```bash
+   uv version patch
+   git add pyproject.toml uv.lock
+   git commit -m "chore: release v$(grep '^version' pyproject.toml | cut -d'"' -f2)"
+   ```
+
+2. Create and push tag:
+
+   ```bash
+   VERSION=$(grep '^version' pyproject.toml | cut -d'"' -f2)
+   git tag "v$VERSION"
+   git push origin main --tags
+   ```
+
+3. GitHub Actions automatically publishes to PyPI with attestations.
 
 ## License
 
