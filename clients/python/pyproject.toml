@@ -13,12 +13,16 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Communications :: Email",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.10"
 dependencies = [
     "httpx>=0.28.0",
     "pydantic>=2.10.0",
@@ -35,7 +39,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/DataCovey/nornweave"
+Homepage = "https://nornweave.datacovey.com/"
 Documentation = "https://nornweave.datacovey.com/docs/"
 Repository = "https://github.com/DataCovey/nornweave"
 Issues = "https://github.com/DataCovey/nornweave/issues"
@@ -55,7 +59,7 @@ include = [
 
 # Ruff configuration
 [tool.ruff]
-target-version = "py314"
+target-version = "py310"
 line-length = 100
 src = ["src", "tests"]
 
@@ -93,7 +97,7 @@ addopts = [
 
 # MyPy configuration
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.10"
 strict = true
 warn_return_any = true
 warn_unused_ignores = true

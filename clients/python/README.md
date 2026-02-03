@@ -232,6 +232,8 @@ async for inbox in async_client.inboxes.list():
 
 ## Releasing
 
+Instruction for Python client developers.
+
 ### Version Bumping
 
 ```bash
