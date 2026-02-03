@@ -1,0 +1,59 @@
+{
+  "$schema": "https://mcp-get.com/schemas/server.json",
+  "name": "nornweave",
+  "description": "Email capabilities for AI agents - create inboxes, send emails, search messages, and wait for replies in threads.",
+  "version": "0.1.0",
+  "homepage": "https://nornweave.datacovey.com",
+  "repository": "https://github.com/DataCovey/nornweave",
+  "license": "Apache-2.0",
+  "author": "NornWeave Contributors",
+  "runtime": "python",
+  "install": {
+    "pip": "nornweave[mcp]"
+  },
+  "command": {
+    "name": "nornweave",
+    "args": ["mcp"]
+  },
+  "transports": ["stdio", "sse", "http"],
+  "environment": {
+    "NORNWEAVE_API_URL": {
+      "description": "NornWeave API base URL",
+      "default": "http://localhost:8000",
+      "required": false
+    },
+    "NORNWEAVE_API_KEY": {
+      "description": "API key for authentication",
+      "required": false
+    }
+  },
+  "tools": [
+    {
+      "name": "create_inbox",
+      "description": "Create a new inbox and provision an email address"
+    },
+    {
+      "name": "send_email",
+      "description": "Send an email with Markdown body"
+    },
+    {
+      "name": "search_email",
+      "description": "Search for emails by query text"
+    },
+    {
+      "name": "wait_for_reply",
+      "description": "[Experimental] Wait for a reply in a thread"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "email://inbox/{inbox_id}/recent",
+      "description": "Recent thread summaries for an inbox"
+    },
+    {
+      "uri": "email://thread/{thread_id}",
+      "description": "Thread content in Markdown format"
+    }
+  ],
+  "keywords": ["email", "inbox", "ai-agents", "llm", "automation"]
+}

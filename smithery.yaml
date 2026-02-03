@@ -1,0 +1,106 @@
+# Smithery.ai MCP Server Registry Metadata
+# https://smithery.ai/docs/registry
+
+name: nornweave
+description: Email capabilities for AI agents - create inboxes, send emails, search messages, and wait for replies in threads.
+version: 0.1.0
+author: NornWeave Contributors
+license: Apache-2.0
+repository: https://github.com/DataCovey/nornweave
+homepage: https://nornweave.datacovey.com
+documentation: https://nornweave.datacovey.com/docs/api/mcp/
+
+install:
+  pip: nornweave[mcp]
+
+command:
+  name: nornweave
+  args:
+    - mcp
+
+resources:
+  - uri: "email://inbox/{inbox_id}/recent"
+    description: Get the 10 most recent thread summaries for an inbox
+  - uri: "email://thread/{thread_id}"
+    description: Get full thread content in Markdown format for LLM context
+
+tools:
+  - name: create_inbox
+    description: Create a new inbox and provision an email address
+    parameters:
+      - name: name
+        type: string
+        description: Display name for the inbox
+        required: true
+      - name: username
+        type: string
+        description: Local part of email address (before @)
+        required: true
+
+  - name: send_email
+    description: Send an email with Markdown body (auto-converted to HTML)
+    parameters:
+      - name: inbox_id
+        type: string
+        description: Inbox ID to send from
+        required: true
+      - name: recipient
+        type: string
+        description: Email address to send to
+        required: true
+      - name: subject
+        type: string
+        description: Email subject line
+        required: true
+      - name: body
+        type: string
+        description: Email body in Markdown format
+        required: true
+      - name: thread_id
+        type: string
+        description: Thread ID for replies (optional)
+        required: false
+
+  - name: search_email
+    description: Search for emails by query text
+    parameters:
+      - name: query
+        type: string
+        description: Search query
+        required: true
+      - name: inbox_id
+        type: string
+        description: Inbox to search in
+        required: true
+      - name: limit
+        type: integer
+        description: Maximum results (default 10, max 100)
+        required: false
+
+  - name: wait_for_reply
+    description: "[Experimental] Wait for a reply in a thread using polling"
+    parameters:
+      - name: thread_id
+        type: string
+        description: Thread ID to wait on
+        required: true
+      - name: timeout_seconds
+        type: integer
+        description: Maximum wait time (default 300s / 5 min)
+        required: false
+
+keywords:
+  - email
+  - inbox
+  - ai-agents
+  - llm
+  - automation
+  - mailgun
+  - sendgrid
+  - ses
+  - resend
+
+categories:
+  - communication
+  - email
+  - automation

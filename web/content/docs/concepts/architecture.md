@@ -90,13 +90,15 @@ flowchart TB
     
     subgraph internal [Internal Network]
         subgraph agents [AI Agents]
-            Agent1[Claude / Cursor]
-            Agent2[Custom Agents]
+            Agent1[Claude / Cursor<br/>stdio]
+            Agent2[Web Clients<br/>SSE]
+            Agent3[LangChain / Cloud<br/>HTTP]
         end
 
-        subgraph mcp [Huginn & Muninn - MCP Tools]
-            Resources[Resources]
-            Tools[Tools]
+        subgraph mcp [Huginn & Muninn - MCP Server]
+            Transports[Transports<br/>stdio | SSE | HTTP]
+            Resources[Resources<br/>email://inbox | email://thread]
+            Tools[Tools<br/>create_inbox | send_email | search_email]
         end
 
         subgraph yggdrasil [Yggdrasil - API Gateway]
@@ -124,9 +126,13 @@ flowchart TB
     providers --> WH
     WH --> verdandi
     verdandi --> urdr
-    Agent1 --> mcp
-    Agent2 --> API
-    mcp --> API
+    Agent1 --> Transports
+    Agent2 --> Transports
+    Agent3 --> Transports
+    Transports --> Resources
+    Transports --> Tools
+    Resources --> API
+    Tools --> API
     API --> urdr
     API --> skuld
     skuld --> providers
@@ -163,6 +169,44 @@ flowchart TB
    - Applies rate limiting
 4. **Skuld** sends via the configured provider
 5. **Urdr** stores the sent message
+
+### MCP Transport Options
+
+The MCP server (Huginn & Muninn) supports three transport types to accommodate different deployment scenarios:
+
+| Transport | Use Case | How it Works |
+|-----------|----------|--------------|
+| **stdio** | Claude Desktop, Cursor, local CLI | Communicates via standard input/output |
+| **SSE** | Web-based MCP clients, browser integrations | Server-Sent Events over HTTP |
+| **HTTP** | Cloud deployments, LangChain, load-balanced setups | Streamable HTTP requests |
+
+```mermaid
+flowchart LR
+    subgraph clients [MCP Clients]
+        Claude[Claude Desktop]
+        Cursor[Cursor IDE]
+        Web[Web Clients]
+        Cloud[LangChain / Cloud]
+    end
+    
+    subgraph mcp [MCP Server]
+        stdio[stdio transport]
+        sse[SSE transport]
+        http[HTTP transport]
+    end
+    
+    subgraph api [REST API]
+        Yggdrasil[Yggdrasil]
+    end
+    
+    Claude --> stdio
+    Cursor --> stdio
+    Web --> sse
+    Cloud --> http
+    stdio --> Yggdrasil
+    sse --> Yggdrasil
+    http --> Yggdrasil
+```
 
 ## Sequence Diagram
 

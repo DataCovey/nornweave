@@ -1,0 +1,91 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "name": "nornweave",
+  "description": "Email capabilities for AI agents - create inboxes, send emails, search messages, and wait for replies in threads.",
+  "version": "0.1.0",
+  "repository": "https://github.com/DataCovey/nornweave",
+  "homepage": "https://nornweave.datacovey.com",
+  "documentation": "https://nornweave.datacovey.com/docs/api/mcp/",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "NornWeave Contributors"
+  },
+  "install": {
+    "type": "pip",
+    "package": "nornweave[mcp]"
+  },
+  "run": {
+    "command": "nornweave",
+    "args": ["mcp"]
+  },
+  "capabilities": {
+    "resources": true,
+    "tools": true,
+    "prompts": false
+  },
+  "transports": {
+    "stdio": {
+      "supported": true,
+      "default": true
+    },
+    "sse": {
+      "supported": true,
+      "port": 3000
+    },
+    "http": {
+      "supported": true,
+      "port": 3000
+    }
+  },
+  "configuration": {
+    "environment": [
+      {
+        "name": "NORNWEAVE_API_URL",
+        "description": "NornWeave REST API base URL",
+        "default": "http://localhost:8000",
+        "required": false
+      },
+      {
+        "name": "NORNWEAVE_API_KEY",
+        "description": "API key for authentication (optional)",
+        "required": false
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "create_inbox",
+      "description": "Create a new inbox and provision an email address",
+      "category": "inbox"
+    },
+    {
+      "name": "send_email",
+      "description": "Send an email with Markdown body (auto-converted to HTML)",
+      "category": "messaging"
+    },
+    {
+      "name": "search_email",
+      "description": "Search for emails by query text",
+      "category": "search"
+    },
+    {
+      "name": "wait_for_reply",
+      "description": "[Experimental] Wait for a reply in a thread using polling",
+      "category": "messaging",
+      "experimental": true
+    }
+  ],
+  "resources": [
+    {
+      "uri_template": "email://inbox/{inbox_id}/recent",
+      "description": "Get the 10 most recent thread summaries for an inbox",
+      "mime_type": "application/json"
+    },
+    {
+      "uri_template": "email://thread/{thread_id}",
+      "description": "Get full thread content in Markdown format for LLM context",
+      "mime_type": "text/markdown"
+    }
+  ],
+  "tags": ["email", "inbox", "ai-agents", "llm", "automation", "communication"]
+}

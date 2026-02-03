@@ -102,10 +102,38 @@ LOG_LEVEL=INFO
 
 ## MCP Server Configuration
 
+The MCP server connects AI agents to NornWeave. Configure it using environment variables:
+
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MCP_ENABLED` | Enable MCP server | `true` |
-| `MCP_API_URL` | URL for the REST API | `http://localhost:8000` |
+| `NORNWEAVE_API_URL` | NornWeave REST API base URL | `http://localhost:8000` |
+| `NORNWEAVE_API_KEY` | API key for authentication | (none) |
+| `NORNWEAVE_MCP_HOST` | Host to bind MCP server (SSE/HTTP) | `0.0.0.0` |
+| `NORNWEAVE_MCP_PORT` | Port for MCP server (SSE/HTTP) | `3000` |
+
+### Example
+
+```bash
+# MCP server configuration
+NORNWEAVE_API_URL=http://localhost:8000
+NORNWEAVE_API_KEY=your-api-key
+NORNWEAVE_MCP_HOST=0.0.0.0
+NORNWEAVE_MCP_PORT=3000
+```
+
+### CLI Options
+
+The MCP server also accepts command-line options:
+
+```bash
+nornweave mcp --help
+
+Options:
+  --transport [stdio|sse|http]  MCP transport type [default: stdio]
+  --host TEXT                   Host to bind (SSE/HTTP) [default: 0.0.0.0]
+  --port INTEGER                Port to listen (SSE/HTTP) [default: 3000]
+  --api-url TEXT                NornWeave API URL [default: http://localhost:8000]
+```
 
 ## Complete Example
 
@@ -132,9 +160,9 @@ API_HOST=0.0.0.0
 API_PORT=8000
 LOG_LEVEL=INFO
 
-# MCP
-MCP_ENABLED=true
-MCP_API_URL=http://localhost:8000
+# MCP Server
+NORNWEAVE_API_URL=http://localhost:8000
+NORNWEAVE_API_KEY=nw-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ## Next Steps

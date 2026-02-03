@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **MCP Server implementation** (Huginn & Muninn) for AI agent integration:
+  - FastMCP-based server with 2 resources and 4 tools
+  - Resources: `email://inbox/{id}/recent`, `email://thread/{id}`
+  - Tools: `create_inbox`, `send_email`, `search_email`, `wait_for_reply`
+  - Support for three transports: stdio (default), SSE, HTTP
+  - CLI command `nornweave mcp` with transport selection
+  - Registry metadata for Smithery.ai, mcp-get.com, glama.ai
+  - Full documentation at `web/content/docs/api/mcp.md`
 - n8n community node (`n8n-nodes-nornweave`) for workflow automation:
   - NornWeave action node with Inbox, Message, Thread, and Search operations
   - NornWeave Trigger node for webhook-based workflow triggers

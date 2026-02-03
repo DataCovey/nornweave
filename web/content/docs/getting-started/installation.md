@@ -253,6 +253,55 @@ The API will be available at `http://localhost:8000`.
 
 {{% /steps %}}
 
+## MCP Server (AI Agent Integration)
+
+The MCP (Model Context Protocol) server allows AI agents like Claude, Cursor, and LangChain to interact with NornWeave email capabilities.
+
+### Install MCP Support
+
+```bash
+pip install nornweave[mcp]
+```
+
+### Run the MCP Server
+
+The MCP server supports three transport types:
+
+```bash
+# stdio (default) - for Claude Desktop, Cursor
+nornweave mcp
+
+# SSE - for web-based MCP clients
+nornweave mcp --transport sse --port 3000
+
+# HTTP - for cloud deployments, LangChain
+nornweave mcp --transport http --port 3000
+```
+
+### Configure Claude Desktop / Cursor
+
+Add to your MCP client configuration (`~/.config/claude/config.json` or Cursor settings):
+
+```json
+{
+  "mcpServers": {
+    "nornweave": {
+      "command": "nornweave",
+      "args": ["mcp"],
+      "env": {
+        "NORNWEAVE_API_URL": "http://localhost:8000"
+      }
+    }
+  }
+}
+```
+
+{{< callout type="info" >}}
+The API server must be running for the MCP server to work. Start it with `nornweave api` or `docker compose up`.
+{{< /callout >}}
+
+See the [MCP Integration Guide](/docs/api/mcp/) for detailed usage.
+
 ## Next Steps
 
 {{< cards >}}

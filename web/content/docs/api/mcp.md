@@ -14,28 +14,76 @@ sitemap_priority: 0.85
 sitemap_changefreq: weekly
 ---
 
-NornWeave exposes an MCP (Model Context Protocol) server that allows Claude, Cursor, and other MCP-compatible clients to interact with email directly.
+NornWeave exposes an MCP (Model Context Protocol) server that allows Claude, Cursor, LangChain, and other MCP-compatible clients to interact with email directly.
+
+## Installation
+
+Install NornWeave with MCP support:
+
+```bash
+pip install nornweave[mcp]
+```
 
 ## Configuration
 
 Add NornWeave to your MCP client configuration:
 
-### Cursor / Claude Desktop
+### Claude Desktop / Cursor
 
 ```json
 {
   "mcpServers": {
     "nornweave": {
       "command": "nornweave",
-      "args": ["--api-url", "http://localhost:8000"]
+      "args": ["mcp"],
+      "env": {
+        "NORNWEAVE_API_URL": "http://localhost:8000"
+      }
     }
   }
 }
 ```
 
 {{< callout type="info" >}}
-Make sure NornWeave is installed and the API server is running before using MCP.
+Make sure the NornWeave API server is running before using MCP. Start it with `nornweave api`.
 {{< /callout >}}
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NORNWEAVE_API_URL` | NornWeave REST API URL | `http://localhost:8000` |
+| `NORNWEAVE_API_KEY` | API key for authentication | (none) |
+
+## Transports
+
+NornWeave MCP server supports three transport types:
+
+### stdio (Default)
+
+For Claude Desktop, Cursor, and local CLI usage:
+
+```bash
+nornweave mcp
+# or explicitly:
+nornweave mcp --transport stdio
+```
+
+### SSE (Server-Sent Events)
+
+For web-based MCP clients and browser integrations:
+
+```bash
+nornweave mcp --transport sse --host 0.0.0.0 --port 3000
+```
+
+### HTTP (Streamable)
+
+For cloud deployments, load balancing, and LangChain integration:
+
+```bash
+nornweave mcp --transport http --host 0.0.0.0 --port 3000
+```
 
 ## Resources (Read-Only)
 
@@ -76,14 +124,14 @@ Returns the full thread content in Markdown format, optimized for LLM context.
 ```markdown
 ## Thread: Re: Pricing Question
 
-**From:** bob@gmail.com  
+**From:** bob@gmail.com ←
 **Date:** 2025-01-31 10:00
 
 Hi, how much does your service cost?
 
 ---
 
-**From:** support@mail.yourdomain.com  
+**From:** support@mail.yourdomain.com →
 **Date:** 2025-01-31 10:05
 
 Thanks for reaching out! Our pricing starts at $20/month.
@@ -118,6 +166,7 @@ Send an email, automatically converting Markdown to HTML.
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
+| `inbox_id` | string | Yes | Inbox ID to send from |
 | `recipient` | string | Yes | Email address to send to |
 | `subject` | string | Yes | Email subject |
 | `body` | string | Yes | Markdown content |
@@ -143,12 +192,13 @@ Find relevant messages in your inboxes.
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `query` | string | Yes | Search query |
+| `inbox_id` | string | Yes | Inbox to search in |
 | `limit` | number | No | Max results (default: 10) |
 
 **Example:**
 
 ```
-Search for emails about "invoice" from last week
+Search for emails about "invoice" in the support inbox
 ```
 
 ### wait_for_reply (Experimental)
@@ -169,7 +219,7 @@ Wait for a reply to thread th_123 for up to 5 minutes
 ```
 
 {{< callout type="warning" >}}
-This tool is experimental and uses long-polling. It may not be suitable for all use cases.
+This tool is experimental and uses polling. It may not be suitable for all use cases.
 {{< /callout >}}
 
 ## Usage Examples
@@ -184,7 +234,7 @@ Once configured, you can interact with NornWeave using natural language:
 
 > "Create a new inbox for handling sales inquiries"
 
-> "Search for any emails mentioning 'refund' in the last month"
+> "Search for any emails mentioning 'refund' in the support inbox"
 
 ### Automated Agent Script
 
@@ -206,6 +256,7 @@ for thread in recent:
         
         # 4. Send reply
         mcp.tool("send_email", {
+            "inbox_id": "ibx_support",
             "recipient": thread.participants[0],
             "subject": f"Re: {thread.subject}",
             "body": response,
@@ -213,14 +264,22 @@ for thread in recent:
         })
 ```
 
+## MCP Registries
+
+NornWeave is available on popular MCP registries:
+
+- [Smithery.ai](https://smithery.ai/server/nornweave)
+- [mcp-get.com](https://mcp-get.com/packages/nornweave)
+- [Glama.ai](https://glama.ai/mcp/servers/nornweave)
+
 ## Troubleshooting
 
 ### MCP Server Not Found
 
-Ensure NornWeave is installed and in your PATH:
+Ensure NornWeave is installed with MCP support:
 
 ```bash
-pip install nornweave
+pip install nornweave[mcp]
 which nornweave
 ```
 
@@ -229,9 +288,47 @@ which nornweave
 Make sure the NornWeave API server is running:
 
 ```bash
+# Start the API server
+nornweave api
+
+# Verify it's running
 curl http://localhost:8000/health
 ```
 
 ### Authentication Errors
 
-Verify your API key is set correctly in the environment or configuration.
+Verify your API key is set correctly:
+
+```bash
+export NORNWEAVE_API_KEY=your-api-key
+nornweave mcp
+```
+
+Or in your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "nornweave": {
+      "command": "nornweave",
+      "args": ["mcp"],
+      "env": {
+        "NORNWEAVE_API_URL": "http://localhost:8000",
+        "NORNWEAVE_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+### SSE/HTTP Transport Issues
+
+For network transports, ensure the port is available:
+
+```bash
+# Check if port 3000 is in use
+lsof -i :3000
+
+# Use a different port
+nornweave mcp --transport sse --port 3001
+```

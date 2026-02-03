@@ -36,12 +36,14 @@ dependencies = [
     "markdown>=3.7",
     "svix>=1.24.0",  # For Resend webhook signature verification
     "cryptography>=44.0.0",  # For SES/SendGrid webhook signature verification
+    "click>=8.1.0",  # CLI framework
 ]
 
 [project.optional-dependencies]
 # Phase 2: MCP Server
 mcp = [
     "mcp>=1.0.0",
+    "fastmcp>=2.0.0",
 ]
 # Phase 2: Attachment processing
 attachments = [
@@ -82,10 +84,10 @@ Issues = "https://github.com/DataCovey/nornweave/issues"
 Changelog = "https://github.com/DataCovey/nornweave/blob/main/CHANGELOG.md"
 
 [project.scripts]
-nornweave = "nornweave.yggdrasil.app:main"
+nornweave = "nornweave.cli:main"
 
 [project.entry-points."mcp.servers"]
-nornweave = "nornweave.huginn.server:serve"
+nornweave = "nornweave.huginn.server:serve_stdio"
 
 [build-system]
 requires = ["hatchling"]

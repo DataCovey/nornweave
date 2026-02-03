@@ -411,6 +411,33 @@ The packages are versioned independently:
 
 **Important:** When making breaking API changes to the server, coordinate releases across all packages to ensure compatibility.
 
+## MCP Registry Submission
+
+NornWeave is listed on several MCP registries to help users discover the MCP server. When releasing a new version, update the registry listings:
+
+### Registry Metadata Files
+
+The repository includes metadata files for each registry:
+
+| File | Registry | Documentation |
+|------|----------|---------------|
+| `smithery.yaml` | [Smithery.ai](https://smithery.ai) | [Docs](https://smithery.ai/docs/registry) |
+| `mcp-get.json` | [mcp-get.com](https://mcp-get.com) | [Docs](https://mcp-get.com/docs) |
+| `glama.json` | [Glama.ai](https://glama.ai/mcp) | [Docs](https://glama.ai/docs/mcp) |
+
+### Updating Registry Listings
+
+1. **Update metadata files** - When adding new tools, resources, or changing capabilities, update the corresponding metadata files in the repository root.
+
+2. **Version bump** - Update the `version` field in all metadata files to match the new release version.
+
+3. **Submit updates** - Most registries automatically index from GitHub. For manual submission:
+   - **Smithery.ai**: Submit via [smithery.ai/submit](https://smithery.ai/submit)
+   - **mcp-get.com**: Open a PR to the [mcp-get/packages](https://github.com/mcp-get/packages) repository
+   - **Glama.ai**: Submit via [glama.ai/mcp/submit](https://glama.ai/mcp/submit)
+
+4. **Verify listings** - After release, verify the server appears correctly on each registry.
+
 ## Questions?
 
 - Open a [GitHub Discussion](https://github.com/DataCovey/nornweave/discussions)
