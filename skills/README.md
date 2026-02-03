@@ -20,6 +20,21 @@ These skills work with:
 
 ## Installation
 
+### Using npx (Recommended)
+
+The easiest way to install skills is using the `npx skills` [CLI](https://skills.sh/):
+
+```bash
+# List available skills in this repository
+npx skills add DataCovey/nornweave --list
+
+# Install a specific skill
+npx skills add DataCovey/nornweave --skill nornweave-api
+
+# Install multiple skills at once
+npx skills add DataCovey/nornweave --skill nornweave-api --skill another-skill
+```
+
 ### Cursor
 
 Copy the skill folder to your Cursor skills directory:
