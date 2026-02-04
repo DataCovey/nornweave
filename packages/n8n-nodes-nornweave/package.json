@@ -1,6 +1,6 @@
 {
   "name": "@nornweave/n8n-nodes-nornweave",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n community node for NornWeave - Inbox-as-a-Service API for AI Agents",
   "license": "MIT",
   "homepage": "https://github.com/DataCovey/nornweave",
@@ -36,11 +36,15 @@
     "test": "jest",
     "scan": "npx @n8n/scan-community-package"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
-    "credentials": ["dist/credentials/NornWeaveApi.credentials.js"],
+    "credentials": [
+      "dist/credentials/NornWeaveApi.credentials.js"
+    ],
     "nodes": [
       "dist/nodes/NornWeave/NornWeave.node.js",
       "dist/nodes/NornWeaveTrigger/NornWeaveTrigger.node.js"
@@ -56,5 +60,7 @@
     "ts-jest": "^29.1.2",
     "typescript": "5.9.2"
   },
-  "peerDependencies": { "n8n-workflow": "*" }
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
 }
