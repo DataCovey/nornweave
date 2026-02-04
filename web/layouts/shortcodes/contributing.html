@@ -1,0 +1,7 @@
+{{/* Renders CONTRIBUTING.md from repo root (copied to web/ by Makefile as contributing_content.md) */}}
+{{/* Strips the first "# Contributing to NornWeave" heading so the page title comes from front matter */}}
+{{/* Rewrites CODE_OF_CONDUCT.md to GitHub URL so the link works on the docs site */}}
+{{ $content := readFile "contributing_content.md" }}
+{{ $content = replaceRE "^# Contributing to NornWeave\n+\n*" "" $content }}
+{{ $content = replace "](CODE_OF_CONDUCT.md)" "](https://github.com/DataCovey/nornweave/blob/main/CODE_OF_CONDUCT.md)" $content }}
+{{ $content | markdownify }}

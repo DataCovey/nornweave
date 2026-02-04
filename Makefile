@@ -170,11 +170,14 @@ web-image: ## Copy hero image from res/ to web/static/images for landing page
 web-changelog: ## Copy CHANGELOG.md to web root for shortcode (not in content/ so no sidebar page)
 	@cp CHANGELOG.md web/changelog_content.md
 
-web-build: web-image web-changelog ## Build Hugo site (landing page)
+web-contributing: ## Copy CONTRIBUTING.md to web root for docs shortcode (single source of truth)
+	@cp CONTRIBUTING.md web/contributing_content.md
+
+web-build: web-image web-changelog web-contributing ## Build Hugo site (landing page)
 	@command -v hugo >/dev/null 2>&1 || (echo "Install Hugo: https://gohugo.io"; exit 1)
 	hugo --source web
 
-web-serve: web-image web-changelog ## Serve Hugo site locally
+web-serve: web-image web-changelog web-contributing ## Serve Hugo site locally
 	@command -v hugo >/dev/null 2>&1 || (echo "Install Hugo: https://gohugo.io"; exit 1)
 	hugo server --source web --disableFastRender
 
