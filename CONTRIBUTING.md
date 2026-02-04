@@ -32,6 +32,9 @@ Thank you for your interest in contributing to NornWeave! This document provides
     - [n8n Node Release (`@nornweave/n8n-nodes-nornweave`)](#n8n-node-release-nornweaven8n-nodes-nornweave)
     - [Python Client Release (`nornweave-client`)](#python-client-release-nornweave-client)
     - [Version Alignment](#version-alignment)
+  - [MCP Registry Submission](#mcp-registry-submission)
+    - [Registry Metadata Files](#registry-metadata-files)
+    - [Updating Registry Listings](#updating-registry-listings)
   - [Questions?](#questions)
 
 ## Code of Conduct
@@ -316,11 +319,32 @@ Releases are managed by maintainers following [Semantic Versioning](https://semv
 
 ### Main NornWeave Release
 
-The main NornWeave server is released via GitHub releases:
+The main NornWeave server is released via GitHub releases.
 
-1. Update `CHANGELOG.md` with the new version
-2. Create a GitHub release with tag `vX.Y.Z`
-3. CI automatically builds and publishes Docker images
+**Release steps:**
+
+```bash
+# 1. Update CHANGELOG.md
+# - Move items from [Unreleased] to new version section
+# - Add release date: ## [X.Y.Z] - YYYY-MM-DD
+
+# 2. Commit the changelog
+git add CHANGELOG.md
+git commit -m "chore: release vX.Y.Z"
+
+# 3. Create annotated tag
+git tag -a vX.Y.Z -m "Release vX.Y.Z"
+
+# 4. Push commit and tag
+git push origin main --tags
+```
+
+The GitHub release is created manually:
+1. Go to [Releases](https://github.com/DataCovey/nornweave/releases)
+2. Click "Draft a new release"
+3. Select the tag `vX.Y.Z`
+4. Use "Generate release notes" or copy from CHANGELOG.md
+5. Publish the release
 
 ### n8n Node Release (`@nornweave/n8n-nodes-nornweave`)
 
