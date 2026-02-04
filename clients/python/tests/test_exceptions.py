@@ -175,9 +175,7 @@ class TestClientExceptionHandling:
     def test_exception_preserves_body(self) -> None:
         """Test exception preserves response body."""
         error_body = {
-            "detail": [
-                {"loc": ["body", "name"], "msg": "field required", "type": "missing"}
-            ]
+            "detail": [{"loc": ["body", "name"], "msg": "field required", "type": "missing"}]
         }
 
         mock_response = MagicMock(spec=httpx.Response)

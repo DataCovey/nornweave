@@ -56,7 +56,4 @@ class RawResponse(Generic[T]):
         return self._raw_response
 
     def __repr__(self) -> str:
-        return (
-            f"RawResponse(status_code={self.status_code}, "
-            f"data={self._data.__class__.__name__})"
-        )
+        return f"RawResponse(status_code={self.status_code}, data={self._data.__class__.__name__})"

@@ -18,9 +18,9 @@ from nornweave_client._types import RequestOptions
 RETRYABLE_STATUS_CODES = {408, 429, 500, 502, 503, 504}
 
 # Default configuration
-DEFAULT_TIMEOUT = 60.0
-DEFAULT_MAX_RETRIES = 2
-DEFAULT_BASE_DELAY = 0.5  # seconds
+DEFAULT_TIMEOUT: float = 60.0
+DEFAULT_MAX_RETRIES: int = 2
+DEFAULT_BASE_DELAY: float = 0.5  # seconds
 
 
 class BaseSyncClient:
@@ -87,7 +87,7 @@ class BaseSyncClient:
 
     def _calculate_delay(self, attempt: int) -> float:
         """Calculate exponential backoff delay."""
-        return DEFAULT_BASE_DELAY * (2**attempt)
+        return float(DEFAULT_BASE_DELAY * (2**attempt))
 
     def request(
         self,
@@ -235,7 +235,7 @@ class BaseAsyncClient:
 
     def _calculate_delay(self, attempt: int) -> float:
         """Calculate exponential backoff delay."""
-        return DEFAULT_BASE_DELAY * (2**attempt)
+        return float(DEFAULT_BASE_DELAY * (2**attempt))
 
     async def request(
         self,

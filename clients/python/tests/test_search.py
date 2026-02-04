@@ -67,9 +67,7 @@ class TestSearchResource:
 
         with patch("httpx.Client", return_value=mock_httpx):
             client = NornWeave(base_url="http://localhost:8000")
-            pager = client.search.query(
-                query="invoice", inbox_id="inbox-123", limit=25, offset=10
-            )
+            pager = client.search.query(query="invoice", inbox_id="inbox-123", limit=25, offset=10)
 
             # Access items to trigger fetch
             _ = pager.items
@@ -79,9 +77,7 @@ class TestSearchResource:
             assert call_args.kwargs["json"]["limit"] == 25
             assert call_args.kwargs["json"]["offset"] == 10
 
-    def test_search_with_raw_response(
-        self, sample_search_response: dict[str, Any]
-    ) -> None:
+    def test_search_with_raw_response(self, sample_search_response: dict[str, Any]) -> None:
         """Test search with raw response access."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
@@ -105,9 +101,7 @@ class TestAsyncSearchResource:
     """Test asynchronous search operations."""
 
     @pytest.mark.asyncio
-    async def test_async_search_query(
-        self, sample_search_response: dict[str, Any]
-    ) -> None:
+    async def test_async_search_query(self, sample_search_response: dict[str, Any]) -> None:
         """Test async search."""
         from nornweave_client import AsyncNornWeave
 
@@ -127,9 +121,7 @@ class TestAsyncSearchResource:
             assert "invoice" in results[0].content_clean
 
     @pytest.mark.asyncio
-    async def test_async_search_query_raw(
-        self, sample_search_response: dict[str, Any]
-    ) -> None:
+    async def test_async_search_query_raw(self, sample_search_response: dict[str, Any]) -> None:
         """Test async search with full response."""
         from nornweave_client import AsyncNornWeave
 

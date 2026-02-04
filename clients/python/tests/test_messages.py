@@ -109,9 +109,7 @@ class TestMessagesResource:
             call_args = mock_httpx.request.call_args
             assert call_args.kwargs["params"]["inbox_id"] == "inbox-123"
 
-    def test_send_message_with_raw_response(
-        self, sample_send_response: dict[str, Any]
-    ) -> None:
+    def test_send_message_with_raw_response(self, sample_send_response: dict[str, Any]) -> None:
         """Test sending message with raw response access."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 201

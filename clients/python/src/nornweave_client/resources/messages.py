@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from nornweave_client._pagination import AsyncPager, SyncPager
 from nornweave_client._raw_response import RawResponse
@@ -47,7 +47,7 @@ class MessagesResource(SyncBaseResource):
         Returns:
             The send response with message ID and status.
         """
-        payload: dict = {
+        payload: dict[str, Any] = {
             "inbox_id": inbox_id,
             "to": to,
             "subject": subject,
@@ -137,7 +137,7 @@ class MessagesWithRawResponse:
         request_options: RequestOptions | None = None,
     ) -> RawResponse[SendMessageResponse]:
         """Send an outbound message and return raw response."""
-        payload: dict = {
+        payload: dict[str, Any] = {
             "inbox_id": inbox_id,
             "to": to,
             "subject": subject,
@@ -201,7 +201,7 @@ class AsyncMessagesResource(AsyncBaseResource):
         Returns:
             The send response with message ID and status.
         """
-        payload: dict = {
+        payload: dict[str, Any] = {
             "inbox_id": inbox_id,
             "to": to,
             "subject": subject,
@@ -291,7 +291,7 @@ class AsyncMessagesWithRawResponse:
         request_options: RequestOptions | None = None,
     ) -> RawResponse[SendMessageResponse]:
         """Send an outbound message and return raw response."""
-        payload: dict = {
+        payload: dict[str, Any] = {
             "inbox_id": inbox_id,
             "to": to,
             "subject": subject,

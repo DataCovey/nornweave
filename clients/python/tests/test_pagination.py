@@ -13,6 +13,7 @@ class TestSyncPager:
 
     def test_pager_iteration(self) -> None:
         """Test iterating over all items."""
+
         # Mock fetch_page based on offset
         def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             if offset == 0:
@@ -35,6 +36,7 @@ class TestSyncPager:
 
     def test_pager_single_page(self) -> None:
         """Test pagination with single page."""
+
         def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [Inbox(id="1", email_address="a@test.com")], 1
 
@@ -45,6 +47,7 @@ class TestSyncPager:
 
     def test_pager_empty_results(self) -> None:
         """Test pagination with no results."""
+
         def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [], 0
 
@@ -55,6 +58,7 @@ class TestSyncPager:
 
     def test_pager_items_property(self) -> None:
         """Test accessing items property."""
+
         def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [Inbox(id="1", email_address="a@test.com")], 1
 
@@ -70,6 +74,7 @@ class TestSyncPager:
 
     def test_pager_count_property(self) -> None:
         """Test accessing count property."""
+
         def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [Inbox(id="1", email_address="a@test.com")], 10
 
@@ -78,6 +83,7 @@ class TestSyncPager:
 
     def test_pager_len(self) -> None:
         """Test len() on pager."""
+
         def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [Inbox(id="1", email_address="a@test.com")], 10
 
@@ -86,6 +92,7 @@ class TestSyncPager:
 
     def test_pager_iter_pages(self) -> None:
         """Test iterating page by page."""
+
         def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             if offset == 0:
                 return [
@@ -107,6 +114,7 @@ class TestSyncPager:
 
     def test_pager_to_list(self) -> None:
         """Test converting to list."""
+
         def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [Inbox(id="1", email_address="a@test.com")], 1
 
@@ -123,6 +131,7 @@ class TestAsyncPager:
     @pytest.mark.asyncio
     async def test_async_pager_iteration(self) -> None:
         """Test async iterating over all items."""
+
         async def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             if offset == 0:
                 return [
@@ -145,6 +154,7 @@ class TestAsyncPager:
     @pytest.mark.asyncio
     async def test_async_pager_to_list(self) -> None:
         """Test async converting to list."""
+
         async def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [Inbox(id="1", email_address="a@test.com")], 1
 
@@ -157,6 +167,7 @@ class TestAsyncPager:
     @pytest.mark.asyncio
     async def test_async_pager_iter_pages(self) -> None:
         """Test async iterating page by page."""
+
         async def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             if offset == 0:
                 return [Inbox(id="1", email_address="a@test.com")], 2
@@ -175,6 +186,7 @@ class TestAsyncPager:
     @pytest.mark.asyncio
     async def test_async_pager_get_items(self) -> None:
         """Test async get_items method."""
+
         async def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [Inbox(id="1", email_address="a@test.com")], 1
 
@@ -186,6 +198,7 @@ class TestAsyncPager:
     @pytest.mark.asyncio
     async def test_async_pager_get_count(self) -> None:
         """Test async get_count method."""
+
         async def fetch_page(limit: int, offset: int) -> tuple[list[Inbox], int]:
             return [Inbox(id="1", email_address="a@test.com")], 10
 

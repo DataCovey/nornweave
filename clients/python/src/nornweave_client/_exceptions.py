@@ -30,7 +30,9 @@ class ApiError(Exception):
         return f"{self.status_code}: {self.message}"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(status_code={self.status_code}, message={self.message!r})"
+        return (
+            f"{self.__class__.__name__}(status_code={self.status_code}, message={self.message!r})"
+        )
 
 
 class NotFoundError(ApiError):
@@ -99,9 +101,10 @@ def raise_for_status(status_code: int, body: Any = None) -> None:
         return
 
     # Extract message from body if available
-    message = "API error"
+    message: str = "API error"
     if isinstance(body, dict):
-        message = body.get("detail", body.get("message", str(body)))
+        detail = body.get("detail", body.get("message"))
+        message = str(detail) if detail is not None else str(body)
     elif body is not None:
         message = str(body)
 

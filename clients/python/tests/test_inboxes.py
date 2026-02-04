@@ -110,9 +110,7 @@ class TestInboxesResource:
             assert raw_response.data.id == "inbox-123"
             assert "content-type" in raw_response.headers
 
-    def test_list_inboxes_with_pagination_params(
-        self, sample_inbox_list: dict[str, Any]
-    ) -> None:
+    def test_list_inboxes_with_pagination_params(self, sample_inbox_list: dict[str, Any]) -> None:
         """Test listing inboxes with custom pagination parameters."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200

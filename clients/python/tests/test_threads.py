@@ -80,9 +80,7 @@ class TestThreadsResource:
             assert call_args.kwargs["params"]["limit"] == 50
             assert call_args.kwargs["params"]["offset"] == 10
 
-    def test_get_thread_with_raw_response(
-        self, sample_thread_detail: dict[str, Any]
-    ) -> None:
+    def test_get_thread_with_raw_response(self, sample_thread_detail: dict[str, Any]) -> None:
         """Test getting thread with raw response access."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
