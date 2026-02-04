@@ -21,9 +21,3 @@ Any alternative solutions or features you have considered.
 ## Additional Context
 
 Links to PRD sections, related issues, or external references.
-
-## Phase (if applicable)
-
-- [ ] Phase 1 (Foundation)
-- [ ] Phase 2 (Intelligence / MCP)
-- [ ] Phase 3 (Enterprise)
