@@ -24,6 +24,10 @@ nornweave/
 │   └── yggdrasil/              # FastAPI gateway
 │       ├── middleware/         # Auth and logging middleware
 │       └── routes/             # API routes (v1/, webhooks/)
+├── clients/                    # SDK clients for NornWeave API
+│   └── python/                 # Python client library (nornweave-client)
+├── packages/                   # External platform integrations
+│   └── n8n-nodes-nornweave/    # n8n community node for NornWeave
 ├── tests/                      # Test suite
 │   ├── fixtures/               # Test data (emails, etc.)
 │   ├── integration/            # Integration tests
@@ -31,6 +35,10 @@ nornweave/
 ├── web/                        # Hugo documentation website
 │   └── content/docs/           # Documentation content
 ├── scripts/                    # Utility scripts (DB init, migrations, dev setup)
+├── skills/                     # Distributable AI assistant skills for NornWeave
+├── openspec/                   # OpenSpec artifacts (specs, changes, context for implementations)
+│   ├── specs/                  # Feature specifications and design documents
+│   └── archive/                # Completed and archived changes
 └── .github/                    # CI/CD workflows
 ```
 
@@ -127,6 +135,27 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 - Reference issue numbers when applicable (e.g., `feat: add mailgun webhook (#42)`)
 - Run `make lint` and `make test` before committing
 
+## OpenSpec Workflow
+
+This repository uses **OpenSpec** for structured feature development and change management. OpenSpec artifacts provide detailed specifications, design decisions, and implementation context.
+
+### Directory Structure
+- `openspec/specs/` - Active feature specifications and design documents
+- `openspec/archive/` - Completed changes for historical reference
+
+### When to Use OpenSpec
+- **Before implementing**: Check `openspec/specs/` for existing specifications related to your task
+- **For context**: Specs contain rationale, API designs, data models, and implementation details
+- **As reference**: Archived changes show how similar features were implemented
+
+### Spec Contents
+Each spec typically includes:
+- Problem statement and goals
+- API design and data models
+- Implementation approach and technical decisions
+- Edge cases and error handling
+- Testing strategy
+
 ## Common Commands
 
 ```bash
@@ -147,3 +176,4 @@ When working in this codebase:
 3. **Type hints**: Always include complete type annotations
 4. **Provider abstraction**: Email providers are abstracted in `adapters/` - maintain this pattern
 5. **MCP compatibility**: When adding features, consider MCP tool/resource exposure for AI agents
+6. **OpenSpec context**: Check `openspec/specs/` for detailed specifications before implementing features - specs contain design decisions, API contracts, and implementation guidance
