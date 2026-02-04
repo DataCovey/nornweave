@@ -94,16 +94,76 @@ Add MX record for your receiving subdomain:
 
 {{% /steps %}}
 
-## Step 4: Configure NornWeave
+## Step 4: Secure Inbound Parse (Recommended)
+
+SendGrid supports cryptographic signature verification for Inbound Parse webhooks using ECDSA. This is highly recommended for production deployments.
+
+{{% steps %}}
+
+### Create Security Policy
+
+Use the SendGrid API to create a webhook security policy:
+
+```bash
+curl -X POST https://api.sendgrid.com/v3/user/webhooks/security/policies \
+  -H "Authorization: Bearer YOUR_SENDGRID_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "NornWeave Inbound Parse",
+    "signature": { "enabled": true }
+  }'
+```
+
+The response includes a `public_key` - save this securely:
+
+```json
+{
+  "policy": {
+    "id": "dd677638-a16d-4e19-95ea-20231c35511b",
+    "signature": {
+      "public_key": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE..."
+    }
+  }
+}
+```
+
+### Attach Policy to Parse Webhook
+
+Link the security policy to your Inbound Parse settings:
+
+```bash
+curl -X PATCH "https://api.sendgrid.com/v3/user/webhooks/parse/settings/mail.yourdomain.com" \
+  -H "Authorization: Bearer YOUR_SENDGRID_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-server.com/webhooks/sendgrid",
+    "security_policy": "dd677638-a16d-4e19-95ea-20231c35511b"
+  }'
+```
+
+### Configure Public Key in NornWeave
+
+Add the public key to your environment configuration (see Step 5).
+
+{{% /steps %}}
+
+{{< callout type="info" >}}
+When signature verification is enabled, SendGrid adds `X-Twilio-Email-Event-Webhook-Signature` and `X-Twilio-Email-Event-Webhook-Timestamp` headers to webhook requests. NornWeave validates these automatically when `SENDGRID_WEBHOOK_PUBLIC_KEY` is configured.
+{{< /callout >}}
+
+## Step 5: Configure NornWeave
 
 Update your `.env` file:
 
 ```bash
 EMAIL_PROVIDER=sendgrid
 SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Optional: Webhook signature verification (highly recommended for production)
+SENDGRID_WEBHOOK_PUBLIC_KEY=MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...
 ```
 
-## Step 5: Verify Setup
+## Step 6: Verify Setup
 
 {{% steps %}}
 

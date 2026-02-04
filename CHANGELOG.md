@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- SendGrid webhook and sending implementation
+- Full SendGrid adapter implementation with:
+  - Email sending via v3 Mail Send API (threading headers, CC/BCC, attachments)
+  - Inbound Parse webhook parsing with attachment support
+  - ECDSA webhook signature verification
+  - SPF/DKIM result extraction
 - Resend webhook and sending implementation
 
 ### Changed

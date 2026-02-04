@@ -24,7 +24,6 @@ The foundation layer is complete and provides core email functionality:
 - **Webhook Ingestion**: Receive emails from Mailgun, SES, SendGrid, Resend
 - **Persistent Storage**: PostgreSQL with abstracted storage adapters
 - **Email Sending**: Send replies through your configured provider
-- **API Key Authentication**: Secure your endpoints
 
 ## Phase 2: Intelligence (The Agent Layer) - Available
 
