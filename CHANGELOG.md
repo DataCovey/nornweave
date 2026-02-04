@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **n8n community node** (`n8n-nodes-nornweave`) for workflow automation:
+- n8n community node (`n8n-nodes-nornweave`) for workflow automation:
   - NornWeave action node with Inbox, Message, Thread, and Search operations
   - NornWeave Trigger node for webhook-based workflow triggers
   - Support for email events: received, sent, delivered, bounced, opened, clicked
