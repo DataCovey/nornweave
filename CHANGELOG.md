@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **n8n community node** (`n8n-nodes-nornweave`) for workflow automation:
+  - NornWeave action node with Inbox, Message, Thread, and Search operations
+  - NornWeave Trigger node for webhook-based workflow triggers
+  - Support for email events: received, sent, delivered, bounced, opened, clicked
+  - Declarative-style implementation following n8n best practices
+  - Full documentation at `web/content/docs/integrations/n8n.md`
 - Full SendGrid adapter implementation with:
   - Email sending via v3 Mail Send API (threading headers, CC/BCC, attachments)
   - Inbound Parse webhook parsing with attachment support

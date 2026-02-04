@@ -1,0 +1,60 @@
+{
+  "name": "n8n-nodes-nornweave",
+  "version": "0.1.0",
+  "description": "n8n community node for NornWeave - Inbox-as-a-Service API for AI Agents",
+  "license": "MIT",
+  "homepage": "https://github.com/nornweave/nornweave",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "nornweave",
+    "email",
+    "inbox",
+    "ai-agents"
+  ],
+  "author": {
+    "name": "NornWeave",
+    "email": "hello@nornweave.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nornweave/nornweave.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease",
+    "test": "jest"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/NornWeaveApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/NornWeave/NornWeave.node.js",
+      "dist/nodes/NornWeaveTrigger/NornWeaveTrigger.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "*",
+    "@types/jest": "^29.5.12",
+    "eslint": "9.32.0",
+    "jest": "^29.7.0",
+    "prettier": "3.6.2",
+    "release-it": "^19.0.4",
+    "ts-jest": "^29.1.2",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}

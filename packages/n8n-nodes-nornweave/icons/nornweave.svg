@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="url(#gradient)"/>
+  <!-- Stylized "N" representing threads/weaving -->
+  <path d="M30 70 L30 30 L50 55 L50 30 L70 30 L70 70 L50 45 L50 70 Z" 
+        fill="white" 
+        stroke="white" 
+        stroke-width="2" 
+        stroke-linejoin="round"/>
+  <!-- Three dots representing the Norns -->
+  <circle cx="35" cy="22" r="4" fill="white" opacity="0.8"/>
+  <circle cx="50" cy="18" r="4" fill="white" opacity="0.8"/>
+  <circle cx="65" cy="22" r="4" fill="white" opacity="0.8"/>
+</svg>
