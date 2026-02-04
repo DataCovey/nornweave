@@ -4,8 +4,6 @@ description: "Connect NornWeave with other platforms and tools"
 weight: 50
 ---
 
-# Integrations
-
 NornWeave integrates with popular automation platforms and tools to extend your email workflows.
 
 ## Available Integrations

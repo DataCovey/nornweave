@@ -4,8 +4,6 @@ description: "Connect NornWeave to n8n for workflow automation"
 weight: 10
 ---
 
-# n8n Integration
-
 [n8n](https://n8n.io/) is a popular open-source workflow automation platform. The `n8n-nodes-nornweave` community node lets you integrate NornWeave into your n8n workflows for email automation.
 
 ## Installation
