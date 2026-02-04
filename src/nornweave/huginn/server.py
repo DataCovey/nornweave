@@ -15,7 +15,15 @@ from fastmcp import FastMCP
 
 from nornweave.huginn.client import NornWeaveClient
 from nornweave.huginn.resources import get_recent_threads, get_thread_content
-from nornweave.muninn.tools import create_inbox, search_email, send_email, wait_for_reply
+from nornweave.muninn.tools import (
+    create_inbox,
+    get_attachment_content,
+    list_attachments,
+    search_email,
+    send_email,
+    send_email_with_attachments,
+    wait_for_reply,
+)
 
 # Create the FastMCP server
 mcp = FastMCP(
@@ -153,6 +161,91 @@ async def tool_wait_for_reply(thread_id: str, timeout_seconds: int = 300) -> dic
     """
     client = _get_client()
     return await wait_for_reply(client, thread_id=thread_id, timeout_seconds=timeout_seconds)
+
+
+@mcp.tool()
+async def tool_list_attachments(
+    message_id: str | None = None,
+    thread_id: str | None = None,
+    inbox_id: str | None = None,
+    limit: int = 100,
+) -> dict[str, Any]:
+    """List attachments for a message, thread, or inbox.
+
+    Retrieve metadata for attachments. Exactly one filter must be provided.
+
+    Args:
+        message_id: Filter by message ID
+        thread_id: Filter by thread ID (all messages in thread)
+        inbox_id: Filter by inbox ID (all messages in inbox)
+        limit: Maximum number of results (default: 100)
+
+    Returns:
+        List of attachment metadata with id, message_id, filename, content_type, size.
+    """
+    client = _get_client()
+    return await list_attachments(
+        client,
+        message_id=message_id,
+        thread_id=thread_id,
+        inbox_id=inbox_id,
+        limit=limit,
+    )
+
+
+@mcp.tool()
+async def tool_get_attachment_content(attachment_id: str) -> dict[str, Any]:
+    """Get attachment content as base64.
+
+    Download the binary content of an attachment, returned as base64-encoded data.
+
+    Args:
+        attachment_id: The attachment ID to retrieve
+
+    Returns:
+        Attachment content with base64-encoded data, content_type, and filename.
+    """
+    client = _get_client()
+    return await get_attachment_content(client, attachment_id=attachment_id)
+
+
+@mcp.tool()
+async def tool_send_email_with_attachments(
+    inbox_id: str,
+    recipient: str,
+    subject: str,
+    body: str,
+    attachments: list[dict[str, str]],
+    thread_id: str | None = None,
+) -> dict[str, Any]:
+    """Send an email with attachments.
+
+    Send an email with one or more file attachments.
+
+    Args:
+        inbox_id: The inbox ID to send from
+        recipient: Email address to send to
+        subject: Email subject line
+        body: Email body in Markdown format
+        attachments: List of attachments, each with:
+            - filename: Name of the file (e.g., "report.pdf")
+            - content_type: MIME type (e.g., "application/pdf")
+            - content: Base64-encoded file content
+        thread_id: Optional thread ID if this is a reply
+
+    Returns:
+        Send response with message_id, thread_id, and status.
+    """
+    client = _get_client()
+    return await send_email_with_attachments(
+        client,
+        inbox_id=inbox_id,
+        recipient=recipient,
+        subject=subject,
+        body=body,
+        attachments=attachments,
+        thread_id=thread_id,
+    )
 
 
 # -----------------------------------------------------------------------------

@@ -10,6 +10,8 @@ keywords:
   - AI agent email
   - MCP tools
   - MCP resources
+  - email attachments MCP
+  - AI file attachments
 sitemap_priority: 0.85
 sitemap_changefreq: weekly
 ---
@@ -200,6 +202,101 @@ Find relevant messages in your inboxes.
 ```
 Search for emails about "invoice" in the support inbox
 ```
+
+### send_email_with_attachments
+
+Send an email with file attachments.
+
+**Arguments:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `inbox_id` | string | Yes | Inbox ID to send from |
+| `recipient` | string | Yes | Email address to send to |
+| `subject` | string | Yes | Email subject |
+| `body` | string | Yes | Markdown content |
+| `attachments` | array | Yes | List of attachments |
+| `thread_id` | string | No | Thread ID for replies |
+
+**Attachment Object:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `filename` | string | Yes | Original filename |
+| `content_type` | string | Yes | MIME type (e.g., `application/pdf`) |
+| `content` | string | Yes | Base64-encoded file content |
+
+**Example:**
+
+```
+Send an email to client@example.com with a PDF attachment 
+Subject: "Contract for Review"
+Body: "Please review the attached contract."
+Attach: contract.pdf (application/pdf)
+```
+
+### list_attachments
+
+List attachments for a message, thread, or inbox.
+
+**Arguments:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `message_id` | string | One of these | Filter by message |
+| `thread_id` | string | One of these | Filter by thread |
+| `inbox_id` | string | One of these | Filter by inbox |
+
+**Example:**
+
+```
+List all attachments for message msg_001
+```
+
+**Returns:**
+
+```json
+[
+  {
+    "id": "att_789",
+    "message_id": "msg_001",
+    "filename": "document.pdf",
+    "content_type": "application/pdf",
+    "size": 102400
+  }
+]
+```
+
+### get_attachment_content
+
+Get the content of an attachment.
+
+**Arguments:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `attachment_id` | string | Yes | Attachment ID |
+| `format` | string | No | `base64` (default) or `binary` |
+
+**Example:**
+
+```
+Get the content of attachment att_789 as base64
+```
+
+**Returns (base64):**
+
+```json
+{
+  "content": "JVBERi0xLjQKJeLjz9M...",
+  "content_type": "application/pdf",
+  "filename": "document.pdf"
+}
+```
+
+{{< callout type="info" >}}
+For MCP, `base64` format is recommended as it's easier to handle in JSON-based protocols.
+{{< /callout >}}
 
 ### wait_for_reply (Experimental)
 

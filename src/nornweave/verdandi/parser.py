@@ -22,4 +22,5 @@ def html_to_markdown(html: str) -> str:
     h.inline_links = True
     h.protect_links = True
 
-    return h.handle(html).strip()
+    result: str = h.handle(html).strip()
+    return result

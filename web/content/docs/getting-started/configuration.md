@@ -8,6 +8,9 @@ keywords:
   - API key setup
   - database configuration
   - email provider config
+  - attachment storage
+  - S3 attachments
+  - GCS attachments
 sitemap_priority: 0.85
 sitemap_changefreq: weekly
 ---
@@ -100,6 +103,91 @@ API_PORT=8000
 LOG_LEVEL=INFO
 ```
 
+## Attachment Storage Configuration
+
+NornWeave supports multiple storage backends for email attachments. Choose the one that best fits your deployment:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NORNWEAVE_ATTACHMENT_STORAGE_BACKEND` | Storage backend (`local`, `database`, `s3`, `gcs`) | `local` |
+| `NORNWEAVE_ATTACHMENT_STORAGE_PATH` | Local filesystem path for attachments | `/var/nornweave/attachments` |
+| `NORNWEAVE_ATTACHMENT_URL_EXPIRY` | Signed URL expiry time (seconds) | `3600` |
+| `NORNWEAVE_ATTACHMENT_URL_SECRET` | Secret key for URL signing | Auto-generated |
+
+### Local Filesystem Storage (Default)
+
+Store attachments on the local filesystem. Good for development and single-server deployments.
+
+```bash
+NORNWEAVE_ATTACHMENT_STORAGE_BACKEND=local
+NORNWEAVE_ATTACHMENT_STORAGE_PATH=/var/nornweave/attachments
+```
+
+### Database Storage
+
+Store attachments as BLOBs in the database. Simple deployments without separate storage infrastructure.
+
+```bash
+NORNWEAVE_ATTACHMENT_STORAGE_BACKEND=database
+```
+
+{{< callout type="warning" >}}
+Database storage is suitable for small attachments. For large files or high-volume use, consider S3 or GCS.
+{{< /callout >}}
+
+### AWS S3 Storage
+
+Store attachments in Amazon S3 or any S3-compatible storage (MinIO, DigitalOcean Spaces, etc.).
+
+Requires the `s3` extra:
+
+```bash
+pip install nornweave[s3]
+```
+
+Configuration:
+
+```bash
+NORNWEAVE_ATTACHMENT_STORAGE_BACKEND=s3
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_S3_BUCKET=nornweave-attachments
+AWS_S3_REGION=us-east-1
+
+# Optional: for S3-compatible storage (MinIO, etc.)
+AWS_S3_ENDPOINT_URL=http://localhost:9000
+```
+
+### Google Cloud Storage
+
+Store attachments in Google Cloud Storage.
+
+Requires the `gcs` extra:
+
+```bash
+pip install nornweave[gcs]
+```
+
+Configuration:
+
+```bash
+NORNWEAVE_ATTACHMENT_STORAGE_BACKEND=gcs
+GCS_BUCKET=nornweave-attachments
+GCS_PROJECT=your-project-id
+
+# Optional: explicit credentials path
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
+```
+
+### Storage Backend Comparison
+
+| Backend | Best For | Requires Extra | Notes |
+|---------|----------|----------------|-------|
+| `local` | Development, single server | No | Fast, no external deps |
+| `database` | Simple deployments | No | Small files only |
+| `s3` | Production, scalable | `[s3]` | Presigned URLs |
+| `gcs` | Google Cloud deployments | `[gcs]` | Presigned URLs |
+
 ## MCP Server Configuration
 
 The MCP server connects AI agents to NornWeave. Configure it using environment variables:
@@ -159,6 +247,13 @@ API_KEY=nw-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 API_HOST=0.0.0.0
 API_PORT=8000
 LOG_LEVEL=INFO
+
+# Attachment Storage (S3 example)
+NORNWEAVE_ATTACHMENT_STORAGE_BACKEND=s3
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_S3_BUCKET=nornweave-attachments
+AWS_S3_REGION=us-east-1
 
 # MCP Server
 NORNWEAVE_API_URL=http://localhost:8000

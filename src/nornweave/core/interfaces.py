@@ -291,6 +291,8 @@ class StorageInterface(ABC):
         content_id: str | None = None,
         storage_path: str | None = None,
         storage_backend: str | None = None,
+        content_hash: str | None = None,
+        content: bytes | None = None,
     ) -> str:
         """Create attachment record. Returns attachment ID."""
         ...
@@ -303,6 +305,28 @@ class StorageInterface(ABC):
     @abstractmethod
     async def list_attachments_for_message(self, message_id: str) -> list[dict[str, Any]]:
         """List attachments for a message."""
+        ...
+
+    @abstractmethod
+    async def list_attachments_for_thread(
+        self,
+        thread_id: str,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """List attachments for all messages in a thread."""
+        ...
+
+    @abstractmethod
+    async def list_attachments_for_inbox(
+        self,
+        inbox_id: str,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """List attachments for all messages in an inbox."""
         ...
 
     @abstractmethod

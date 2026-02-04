@@ -9,11 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- (None yet)
+- **Attachment storage adapters** - Pluggable storage backends for email attachments:
+  - `LocalFilesystemStorage` - Store attachments on local filesystem (default)
+  - `DatabaseBlobStorage` - Store as BLOBs in PostgreSQL/SQLite database
+  - `S3Storage` - Store in AWS S3 or S3-compatible storage (MinIO, DigitalOcean Spaces)
+  - `GCSStorage` - Store in Google Cloud Storage
+- **Attachment API endpoints** - New REST API for attachment management:
+  - `GET /v1/attachments` - List attachments by message, thread, or inbox
+  - `GET /v1/attachments/{id}` - Get attachment metadata with download URL
+  - `GET /v1/attachments/{id}/content` - Download attachment content (binary or base64)
+- **Attachment MCP tools** - New MCP tools for AI agents:
+  - `send_email_with_attachments` - Send emails with file attachments
+  - `list_attachments` - List attachments for a message, thread, or inbox
+  - `get_attachment_content` - Retrieve attachment content as base64
+- **Send messages with attachments** - API and MCP support for sending emails with attachments (base64 encoded)
+- **Signed URLs** - Secure, time-limited URLs for attachment downloads (local/database storage)
+- **Presigned URLs** - Native cloud provider URLs for S3/GCS storage backends
+- **MinIO support** - S3-compatible storage for development/testing in docker-compose
+- **PyPI package extras** - New installation options:
+  - `pip install nornweave[s3]` for S3 storage support
+  - `pip install nornweave[gcs]` for GCS storage support
 
 ### Changed
 
-- (None yet)
+- Updated `docker-compose.yml` with MinIO service for S3-compatible attachment storage testing
+- Extended database schema with `attachments` table for metadata storage
+- Updated component architecture diagrams to include attachment storage
 
 ### Deprecated
 

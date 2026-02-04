@@ -8,6 +8,9 @@ keywords:
   - modular architecture
   - data flow diagram
   - component overview
+  - attachment storage
+  - S3 storage architecture
+  - GCS storage architecture
 sitemap_priority: 0.7
 sitemap_changefreq: monthly
 ---
@@ -19,6 +22,7 @@ NornWeave's architecture uses thematic naming inspired by Norse mythology, with 
 | Layer | Name | Roles |
 |-----------|---------------|-------------------|
 | Storage Layer | **Urdr** (The Well) | Database adapters for persistence |
+| Attachment Storage | **Urdr** (Adapters) | File storage (Local, S3, GCS, Database) |
 | Ingestion Engine | **Verdandi** (The Loom) | Webhook processing, HTML to Markdown parsing |
 | API & Outbound | **Skuld** (The Prophecy) | REST API, email sending, rate limiting |
 | API Gateway | **Yggdrasil** | Central router connecting all providers |
@@ -86,6 +90,10 @@ flowchart TB
             SG[SendGrid]
             RS[Resend]
         end
+        subgraph cloudstorage [Cloud Storage]
+            S3[AWS S3]
+            GCS[Google Cloud Storage]
+        end
     end
     
     subgraph internal [Internal Network]
@@ -98,23 +106,28 @@ flowchart TB
         subgraph mcp [Huginn & Muninn - MCP Server]
             Transports[Transports<br/>stdio | SSE | HTTP]
             Resources[Resources<br/>email://inbox | email://thread]
-            Tools[Tools<br/>create_inbox | send_email | search_email]
+            Tools[Tools<br/>create_inbox | send_email | search_email<br/>list_attachments | get_attachment_content]
         end
 
         subgraph yggdrasil [Yggdrasil - API Gateway]
             WH[Webhook Routes]
-            API[REST API v1]
+            API[REST API v1<br/>inboxes | threads | messages | attachments]
         end
         
         subgraph verdandi [Verdandi - Ingestion Engine]
             Parser[HTML Parser]
             Sanitizer[Cruft Remover]
             Threader[Threading Logic]
+            AttExtract[Attachment Extractor]
         end
         
         subgraph urdr [Urdr - Storage Layer]
             PG[(PostgreSQL)]
             SQLite[(SQLite)]
+            subgraph attstorage [Attachment Storage]
+                Local[Local Filesystem]
+                DBBlob[Database BLOB]
+            end
         end
         
         subgraph skuld [Skuld - Outbound Sender]
@@ -126,6 +139,8 @@ flowchart TB
     providers --> WH
     WH --> verdandi
     verdandi --> urdr
+    AttExtract --> attstorage
+    AttExtract -.-> cloudstorage
     Agent1 --> Transports
     Agent2 --> Transports
     Agent3 --> Transports
@@ -135,6 +150,8 @@ flowchart TB
     Tools --> API
     API --> urdr
     API --> skuld
+    API --> attstorage
+    API -.-> cloudstorage
     skuld --> providers
 ```
 
@@ -276,3 +293,60 @@ The storage layer enforces this schema through the `StorageAdapter`:
 | `content_clean` | Text | LLM-ready Markdown |
 | `metadata` | JSON | Headers, attachments, etc. |
 | `created_at` | Timestamp | Message time |
+
+### Attachments Table
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `message_id` | UUID | Foreign key to Message |
+| `filename` | String | Original filename |
+| `content_type` | String | MIME type |
+| `size_bytes` | Integer | File size in bytes |
+| `disposition` | String | `attachment` or `inline` |
+| `content_id` | String | Content-ID for inline images |
+| `storage_backend` | String | `local`, `database`, `s3`, or `gcs` |
+| `storage_path` | String | Path/key in storage backend |
+| `content_hash` | String | SHA-256 hash for deduplication |
+| `content` | Binary | Optional: for database blob storage |
+| `created_at` | Timestamp | Creation time |
+
+## Attachment Storage Architecture
+
+NornWeave supports multiple storage backends for email attachments:
+
+```mermaid
+flowchart LR
+    subgraph API [Attachment API]
+        Upload[Upload/Store]
+        Download[Download/Retrieve]
+    end
+    
+    subgraph Backends [Storage Backends]
+        Local[Local Filesystem]
+        DB[Database BLOB]
+        S3[AWS S3 / MinIO]
+        GCS[Google Cloud Storage]
+    end
+    
+    Upload --> Local
+    Upload --> DB
+    Upload --> S3
+    Upload --> GCS
+    
+    Download --> Local
+    Download --> DB
+    Download -.->|Presigned URL| S3
+    Download -.->|Presigned URL| GCS
+```
+
+| Backend | Best For | URL Type |
+|---------|----------|----------|
+| **Local** | Development, single-server | Signed API URL |
+| **Database** | Simple deployments, small files | Signed API URL |
+| **S3** | Production, scalable | Native presigned URL |
+| **GCS** | Google Cloud deployments | Native presigned URL |
+
+{{< callout type="info" >}}
+For cloud storage backends (S3, GCS), download URLs are presigned directly by the cloud provider, allowing clients to download without passing through NornWeave's API.
+{{< /callout >}}

@@ -253,38 +253,86 @@ class ResendAdapter(EmailProvider):
             result: dict[str, Any] = response.json()
             return result
 
-    async def fetch_attachment_content(self, email_id: str, attachment_id: str) -> bytes:
+    async def fetch_attachment_content(
+        self, email_id: str, attachment_id: str, *, inbound: bool = True
+    ) -> bytes:
         """Fetch attachment content from Resend API.
+
+        The Resend API returns attachment metadata with a download_url.
+        This method fetches the metadata, then downloads the actual content.
+
+        See:
+        - Inbound: https://resend.com/docs/api-reference/emails/retrieve-received-email-attachment
+        - Outbound: https://resend.com/docs/api-reference/emails/retrieve-email-attachment
 
         Args:
             email_id: Resend email ID
             attachment_id: Attachment ID from webhook/email data
+            inbound: If True, use receiving endpoint; if False, use sending endpoint
 
         Returns:
             Attachment binary content
         """
-        url = f"{self._api_url}/emails/receiving/{email_id}/attachments/{attachment_id}"
+        # Step 1: Get attachment metadata (contains download_url)
+        # Use different endpoints for inbound vs outbound emails
+        if inbound:
+            metadata_url = f"{self._api_url}/emails/receiving/{email_id}/attachments/{attachment_id}"
+        else:
+            metadata_url = f"{self._api_url}/emails/{email_id}/attachments/{attachment_id}"
 
-        logger.debug("Fetching attachment %s from email %s", attachment_id, email_id)
+        logger.debug("Fetching attachment metadata %s from email %s", attachment_id, email_id)
 
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                url,
+                metadata_url,
                 headers={
                     "Authorization": f"Bearer {self._api_key}",
                 },
-                timeout=60.0,
+                timeout=30.0,
             )
 
             if response.status_code != 200:
                 logger.error(
-                    "Resend API error fetching attachment: %s - %s",
+                    "Resend API error fetching attachment metadata: %s - %s",
                     response.status_code,
                     response.text,
                 )
                 response.raise_for_status()
 
-            return response.content
+            metadata = response.json()
+            download_url = metadata.get("download_url")
+
+            if not download_url:
+                raise ValueError(f"No download_url in attachment metadata: {metadata}")
+
+            logger.debug(
+                "Got attachment metadata: filename=%s, size=%s, downloading from %s",
+                metadata.get("filename"),
+                metadata.get("size"),
+                download_url[:50] + "..." if len(download_url) > 50 else download_url,
+            )
+
+            # Step 2: Download actual content from the CDN URL
+            content_response = await client.get(
+                download_url,
+                timeout=60.0,
+                follow_redirects=True,
+            )
+
+            if content_response.status_code != 200:
+                logger.error(
+                    "Error downloading attachment content: %s - %s",
+                    content_response.status_code,
+                    content_response.text[:200] if content_response.text else "No content",
+                )
+                content_response.raise_for_status()
+
+            logger.debug(
+                "Downloaded attachment content: %d bytes",
+                len(content_response.content),
+            )
+
+            return content_response.content
 
     def parse_inbound_webhook(self, payload: dict[str, Any]) -> InboundMessage:
         """Parse Resend inbound webhook payload into standardized InboundMessage.

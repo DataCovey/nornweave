@@ -54,7 +54,7 @@ class DatabaseBlobStorage(AttachmentStorageBackend):
         self,
         attachment_id: str,
         content: bytes,
-        _metadata: AttachmentMetadata,
+        metadata: AttachmentMetadata,  # noqa: ARG002 - required by interface
     ) -> StorageResult:
         """
         Store attachment in database.

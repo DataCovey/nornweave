@@ -62,9 +62,17 @@ search = [
 ratelimit = [
     "redis>=5.2.0",
 ]
+# AWS S3 attachment storage
+s3 = [
+    "boto3>=1.35.0",
+]
+# Google Cloud Storage attachment storage
+gcs = [
+    "google-cloud-storage>=2.18.0",
+]
 # All optional dependencies
 all = [
-    "nornweave[postgres,mcp,attachments,search,ratelimit]",
+    "nornweave[postgres,mcp,attachments,search,ratelimit,s3,gcs]",
 ]
 # Development dependencies
 dev = [

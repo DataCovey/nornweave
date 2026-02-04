@@ -14,14 +14,16 @@ from pydantic import BaseModel
 _inboxes: dict[str, dict[str, Any]] = {}
 _threads: dict[str, dict[str, Any]] = {}
 _messages: dict[str, dict[str, Any]] = {}
+_attachments: dict[str, dict[str, Any]] = {}
 
 
 def reset_mock_data() -> None:
     """Reset all mock data."""
-    global _inboxes, _threads, _messages
+    global _inboxes, _threads, _messages, _attachments
     _inboxes = {}
     _threads = {}
     _messages = {}
+    _attachments = {}
 
 
 def seed_mock_data() -> None:
@@ -68,6 +70,49 @@ def seed_mock_data() -> None:
         "created_at": datetime.now(UTC).isoformat(),
     }
 
+    # Create message with attachments
+    _messages["msg_with_attachments"] = {
+        "id": "msg_with_attachments",
+        "thread_id": "th_test",
+        "inbox_id": "ibx_test",
+        "direction": "inbound",
+        "content_raw": "Here is an attachment.",
+        "content_clean": "Here is an attachment.",
+        "metadata": {"from": "sender@example.com"},
+        "created_at": datetime.now(UTC).isoformat(),
+    }
+
+    # Create test attachments
+    import base64
+
+    _attachments["att_test"] = {
+        "id": "att_test",
+        "message_id": "msg_with_attachments",
+        "filename": "test.txt",
+        "content_type": "text/plain",
+        "size": 13,
+        "disposition": "attachment",
+        "content_id": None,
+        "storage_backend": "local",
+        "content_hash": "abc123",
+        "created_at": datetime.now(UTC).isoformat(),
+        "_content": base64.b64encode(b"Hello, World!").decode("ascii"),
+    }
+
+    _attachments["att_test_2"] = {
+        "id": "att_test_2",
+        "message_id": "msg_with_attachments",
+        "filename": "image.png",
+        "content_type": "image/png",
+        "size": 1024,
+        "disposition": "attachment",
+        "content_id": None,
+        "storage_backend": "local",
+        "content_hash": "def456",
+        "created_at": datetime.now(UTC).isoformat(),
+        "_content": base64.b64encode(b"\x89PNG\r\n" + b"\x00" * 100).decode("ascii"),
+    }
+
 
 # Pydantic models for request/response
 class InboxCreate(BaseModel):
@@ -75,6 +120,14 @@ class InboxCreate(BaseModel):
 
     name: str
     email_username: str
+
+
+class AttachmentInput(BaseModel):
+    """Attachment input for sending messages (matches API model)."""
+
+    filename: str
+    content_type: str
+    content_base64: str  # Matches nornweave.models.attachment.AttachmentUpload
 
 
 class SendMessage(BaseModel):
@@ -85,6 +138,7 @@ class SendMessage(BaseModel):
     subject: str
     body: str
     reply_to_thread_id: str | None = None
+    attachments: list[AttachmentInput] | None = None
 
 
 class SearchRequest(BaseModel):
@@ -198,6 +252,9 @@ def list_messages(inbox_id: str, limit: int = 50, offset: int = 0) -> dict[str, 
 @mock_app.post("/v1/messages")
 def send_message(payload: SendMessage) -> dict[str, Any]:
     """Send a message."""
+    import base64
+    import binascii
+
     if payload.inbox_id not in _inboxes:
         raise HTTPException(status_code=404, detail="Inbox not found")
 
@@ -229,6 +286,33 @@ def send_message(payload: SendMessage) -> dict[str, Any]:
         "created_at": datetime.now(UTC).isoformat(),
     }
 
+    # Handle attachments
+    if payload.attachments:
+        for i, att in enumerate(payload.attachments):
+            # Validate base64 content
+            try:
+                content_bytes = base64.b64decode(att.content_base64)
+            except (binascii.Error, ValueError) as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid base64 content in attachment {i}: {e}",
+                )
+
+            att_id = f"att_{len(_attachments) + 1}"
+            _attachments[att_id] = {
+                "id": att_id,
+                "message_id": message_id,
+                "filename": att.filename,
+                "content_type": att.content_type,
+                "size": len(content_bytes),
+                "disposition": "attachment",
+                "content_id": None,
+                "storage_backend": "local",
+                "content_hash": f"hash_{att_id}",
+                "created_at": datetime.now(UTC).isoformat(),
+                "_content": att.content_base64,
+            }
+
     return {
         "id": message_id,
         "thread_id": thread_id,
@@ -259,3 +343,90 @@ def search_messages(payload: SearchRequest) -> dict[str, Any]:
         "count": len(items),
         "query": payload.query,
     }
+
+
+# Attachment endpoints
+@mock_app.get("/v1/attachments")
+def list_attachments(
+    message_id: str | None = None,
+    thread_id: str | None = None,
+    inbox_id: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """List attachments with filters."""
+    # Require exactly one filter
+    filters = [message_id, thread_id, inbox_id]
+    if sum(f is not None for f in filters) != 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Exactly one filter (message_id, thread_id, or inbox_id) is required",
+        )
+
+    if message_id:
+        if message_id not in _messages:
+            raise HTTPException(status_code=404, detail="Message not found")
+        items = [a for a in _attachments.values() if a["message_id"] == message_id]
+    elif thread_id:
+        if thread_id not in _threads:
+            raise HTTPException(status_code=404, detail="Thread not found")
+        thread_messages = [m["id"] for m in _messages.values() if m["thread_id"] == thread_id]
+        items = [a for a in _attachments.values() if a["message_id"] in thread_messages]
+    else:  # inbox_id
+        if inbox_id not in _inboxes:
+            raise HTTPException(status_code=404, detail="Inbox not found")
+        inbox_messages = [m["id"] for m in _messages.values() if m["inbox_id"] == inbox_id]
+        items = [a for a in _attachments.values() if a["message_id"] in inbox_messages]
+
+    # Remove internal _content field from response
+    result_items = [
+        {k: v for k, v in a.items() if not k.startswith("_")} for a in items[offset : offset + limit]
+    ]
+    return {"items": result_items, "count": len(result_items)}
+
+
+@mock_app.get("/v1/attachments/{attachment_id}")
+def get_attachment(attachment_id: str) -> dict[str, Any]:
+    """Get attachment metadata."""
+    if attachment_id not in _attachments:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+
+    attachment = _attachments[attachment_id]
+    # Generate a mock download URL
+    result = {k: v for k, v in attachment.items() if not k.startswith("_")}
+    result["download_url"] = f"/v1/attachments/{attachment_id}/content?token=mock&expires=9999999999"
+    return result
+
+
+@mock_app.get("/v1/attachments/{attachment_id}/content")
+def get_attachment_content(
+    attachment_id: str,
+    format: str = "binary",
+    token: str | None = None,  # noqa: ARG001 - accepted for API compatibility
+    expires: int | None = None,  # noqa: ARG001 - accepted for API compatibility
+) -> Any:
+    """Get attachment content."""
+    import base64
+
+    from fastapi.responses import Response
+
+    if attachment_id not in _attachments:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+
+    # In mock, we don't strictly verify token/expires
+    attachment = _attachments[attachment_id]
+    content_b64 = attachment.get("_content", "")
+
+    if format == "base64":
+        return {
+            "content": content_b64,
+            "content_type": attachment["content_type"],
+            "filename": attachment["filename"],
+        }
+    else:
+        content_bytes = base64.b64decode(content_b64)
+        return Response(
+            content=content_bytes,
+            media_type=attachment["content_type"],
+            headers={"Content-Disposition": f'attachment; filename="{attachment["filename"]}"'},
+        )

@@ -569,3 +569,214 @@ class TestEventOperations:
         # Should be ordered DESC (most recent first)
         if len(events) >= 2:
             assert events[0].created_at >= events[1].created_at
+
+
+# =============================================================================
+# Attachment Tests
+# =============================================================================
+class TestAttachmentOperations:
+    """Tests for attachment CRUD operations."""
+
+    @pytest.fixture
+    async def inbox(self, storage: SQLiteAdapter) -> Inbox:
+        """Create a test inbox."""
+        inbox = Inbox(
+            id=str(uuid.uuid4()),
+            email_address="attachment-test@example.com",
+            name="Attachment Test Inbox",
+            provider_config={},
+        )
+        return await storage.create_inbox(inbox)
+
+    @pytest.fixture
+    async def thread(self, storage: SQLiteAdapter, inbox: Inbox) -> Thread:
+        """Create a test thread."""
+        thread = Thread(
+            id=str(uuid.uuid4()),
+            inbox_id=inbox.id,
+            subject="Attachment Test Thread",
+            last_message_at=None,
+            participant_hash=None,
+        )
+        return await storage.create_thread(thread)
+
+    @pytest.fixture
+    async def message(self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread) -> Message:
+        """Create a test message."""
+        message = Message(
+            id=str(uuid.uuid4()),
+            thread_id=thread.id,
+            inbox_id=inbox.id,
+            provider_message_id=None,
+            direction=MessageDirection.INBOUND,
+            content_raw="Test message with attachment",
+            content_clean="Test message with attachment",
+            metadata={},
+            created_at=datetime.now(UTC),
+        )
+        return await storage.create_message(message)
+
+    @pytest.mark.asyncio
+    async def test_create_attachment(self, storage: SQLiteAdapter, message: Message) -> None:
+        """Test creating an attachment."""
+        attachment_id = await storage.create_attachment(
+            message_id=message.id,
+            filename="test.pdf",
+            content_type="application/pdf",
+            size_bytes=1024,
+            disposition="attachment",
+            content_id=None,
+            storage_path="/attachments/test.pdf",
+            storage_backend="local",
+            content_hash="abc123",
+        )
+
+        assert attachment_id is not None
+        assert len(attachment_id) == 36  # UUID format
+
+    @pytest.mark.asyncio
+    async def test_get_attachment(self, storage: SQLiteAdapter, message: Message) -> None:
+        """Test getting an attachment by ID."""
+        attachment_id = await storage.create_attachment(
+            message_id=message.id,
+            filename="get-test.txt",
+            content_type="text/plain",
+            size_bytes=512,
+        )
+
+        result = await storage.get_attachment(attachment_id)
+
+        assert result is not None
+        assert result["id"] == attachment_id
+        assert result["filename"] == "get-test.txt"
+        assert result["content_type"] == "text/plain"
+        assert result["size_bytes"] == 512
+        assert result["message_id"] == message.id
+
+    @pytest.mark.asyncio
+    async def test_get_attachment_not_found(self, storage: SQLiteAdapter) -> None:
+        """Test getting a non-existent attachment returns None."""
+        result = await storage.get_attachment("non-existent-id")
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_list_attachments_for_message(
+        self, storage: SQLiteAdapter, message: Message
+    ) -> None:
+        """Test listing attachments for a message."""
+        # Create multiple attachments
+        for i in range(3):
+            await storage.create_attachment(
+                message_id=message.id,
+                filename=f"file{i}.txt",
+                content_type="text/plain",
+                size_bytes=100 * (i + 1),
+            )
+
+        attachments = await storage.list_attachments_for_message(message.id)
+
+        assert len(attachments) == 3
+        assert all(a["message_id"] == message.id for a in attachments)
+
+    @pytest.mark.asyncio
+    async def test_list_attachments_for_thread(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test listing attachments for all messages in a thread."""
+        # Create two messages in the thread
+        for i in range(2):
+            msg = Message(
+                id=str(uuid.uuid4()),
+                thread_id=thread.id,
+                inbox_id=inbox.id,
+                provider_message_id=None,
+                direction=MessageDirection.INBOUND,
+                content_raw=f"Message {i}",
+                content_clean=f"Message {i}",
+                metadata={},
+                created_at=datetime.now(UTC),
+            )
+            created_msg = await storage.create_message(msg)
+            # Add attachment to each message
+            await storage.create_attachment(
+                message_id=created_msg.id,
+                filename=f"thread-file{i}.pdf",
+                content_type="application/pdf",
+                size_bytes=200,
+            )
+
+        attachments = await storage.list_attachments_for_thread(thread.id)
+
+        assert len(attachments) >= 2
+
+    @pytest.mark.asyncio
+    async def test_list_attachments_for_inbox(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test listing attachments for all messages in an inbox."""
+        # Create message with attachment
+        msg = Message(
+            id=str(uuid.uuid4()),
+            thread_id=thread.id,
+            inbox_id=inbox.id,
+            provider_message_id=None,
+            direction=MessageDirection.INBOUND,
+            content_raw="Inbox message",
+            content_clean="Inbox message",
+            metadata={},
+            created_at=datetime.now(UTC),
+        )
+        created_msg = await storage.create_message(msg)
+        await storage.create_attachment(
+            message_id=created_msg.id,
+            filename="inbox-file.doc",
+            content_type="application/msword",
+            size_bytes=300,
+        )
+
+        attachments = await storage.list_attachments_for_inbox(inbox.id)
+
+        assert len(attachments) >= 1
+        assert attachments[0]["filename"] == "inbox-file.doc"
+
+    @pytest.mark.asyncio
+    async def test_delete_attachment(self, storage: SQLiteAdapter, message: Message) -> None:
+        """Test deleting an attachment."""
+        attachment_id = await storage.create_attachment(
+            message_id=message.id,
+            filename="delete-test.txt",
+            content_type="text/plain",
+            size_bytes=50,
+        )
+
+        deleted = await storage.delete_attachment(attachment_id)
+
+        assert deleted is True
+        assert await storage.get_attachment(attachment_id) is None
+
+    @pytest.mark.asyncio
+    async def test_delete_attachment_not_found(self, storage: SQLiteAdapter) -> None:
+        """Test deleting a non-existent attachment returns False."""
+        deleted = await storage.delete_attachment("non-existent-id")
+        assert deleted is False
+
+    @pytest.mark.asyncio
+    async def test_attachment_with_database_content(
+        self, storage: SQLiteAdapter, message: Message
+    ) -> None:
+        """Test creating an attachment with content stored in database."""
+        content = b"Hello, this is test content"
+        attachment_id = await storage.create_attachment(
+            message_id=message.id,
+            filename="db-content.txt",
+            content_type="text/plain",
+            size_bytes=len(content),
+            storage_backend="database",
+            content=content,
+        )
+
+        result = await storage.get_attachment(attachment_id)
+
+        assert result is not None
+        assert result["content"] == content
+        assert result["storage_backend"] == "database"

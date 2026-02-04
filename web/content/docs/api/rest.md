@@ -9,6 +9,8 @@ keywords:
   - thread API
   - message API
   - email search API
+  - email attachments API
+  - attachment storage
 sitemap_priority: 0.85
 sitemap_changefreq: weekly
 ---
@@ -231,6 +233,178 @@ GET /v1/messages/{message_id}
   },
   "created_at": "2025-01-31T10:00:00Z"
 }
+```
+
+### Send a Message with Attachments
+
+Send an email with file attachments.
+
+```http
+POST /v1/messages
+```
+
+**Request Body:**
+
+```json
+{
+  "inbox_id": "ibx_abc123",
+  "to": ["client@gmail.com"],
+  "subject": "Contract for Review",
+  "body": "Please review the attached contract.",
+  "attachments": [
+    {
+      "filename": "contract.pdf",
+      "content_type": "application/pdf",
+      "content": "JVBERi0xLjQKJeLjz9M... (base64-encoded content)"
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `inbox_id` | string | Yes | Inbox to send from |
+| `to` | array | Yes | Recipient email addresses |
+| `subject` | string | Yes | Email subject |
+| `body` | string | Yes | Markdown content |
+| `attachments` | array | No | List of attachments |
+| `attachments[].filename` | string | Yes | Original filename |
+| `attachments[].content_type` | string | Yes | MIME type (e.g., `application/pdf`) |
+| `attachments[].content` | string | Yes | Base64-encoded file content |
+
+**Response:**
+
+```json
+{
+  "id": "msg_003",
+  "thread_id": "th_123",
+  "inbox_id": "ibx_abc123",
+  "direction": "OUTBOUND",
+  "to": ["client@gmail.com"],
+  "subject": "Contract for Review",
+  "content_clean": "Please review the attached contract.",
+  "attachments": [
+    {
+      "id": "att_789",
+      "filename": "contract.pdf",
+      "content_type": "application/pdf",
+      "size": 102400
+    }
+  ],
+  "created_at": "2025-01-31T12:00:00Z"
+}
+```
+
+---
+
+## Attachments
+
+### List Attachments
+
+List attachments, filtered by message, thread, or inbox.
+
+```http
+GET /v1/attachments
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `message_id` | string | One of these | Filter by message |
+| `thread_id` | string | One of these | Filter by thread |
+| `inbox_id` | string | One of these | Filter by inbox |
+| `limit` | number | No | Max results (default: 100) |
+| `offset` | number | No | Offset for pagination |
+
+{{< callout type="warning" >}}
+Exactly one of `message_id`, `thread_id`, or `inbox_id` must be provided.
+{{< /callout >}}
+
+**Response:**
+
+```json
+{
+  "items": [
+    {
+      "id": "att_789",
+      "message_id": "msg_001",
+      "filename": "document.pdf",
+      "content_type": "application/pdf",
+      "size": 102400,
+      "created_at": "2025-01-31T10:00:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+### Get Attachment Metadata
+
+```http
+GET /v1/attachments/{attachment_id}
+```
+
+**Response:**
+
+```json
+{
+  "id": "att_789",
+  "message_id": "msg_001",
+  "filename": "document.pdf",
+  "content_type": "application/pdf",
+  "size": 102400,
+  "disposition": "attachment",
+  "storage_backend": "local",
+  "content_hash": "sha256:abc123...",
+  "download_url": "/v1/attachments/att_789/content?token=...&expires=...",
+  "created_at": "2025-01-31T10:00:00Z"
+}
+```
+
+{{< callout type="info" >}}
+For S3 and GCS storage backends, `download_url` will be a presigned URL directly to the cloud storage. For local and database storage, it's a signed URL to the NornWeave API.
+{{< /callout >}}
+
+### Download Attachment Content
+
+```http
+GET /v1/attachments/{attachment_id}/content
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `format` | string | No | `binary` (default) or `base64` |
+| `token` | string | Conditional | Signed URL token (for local/db storage) |
+| `expires` | number | Conditional | Token expiry timestamp |
+
+**Response (format=binary):**
+
+Returns raw binary content with appropriate `Content-Type` and `Content-Disposition` headers.
+
+**Response (format=base64):**
+
+```json
+{
+  "content": "JVBERi0xLjQKJeLjz9M...",
+  "content_type": "application/pdf",
+  "filename": "document.pdf"
+}
+```
+
+**Example:**
+
+```bash
+# Download as binary
+curl -o document.pdf \
+  "http://localhost:8000/v1/attachments/att_789/content?token=abc&expires=1234567890" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Download as base64 JSON
+curl "http://localhost:8000/v1/attachments/att_789/content?format=base64&token=abc&expires=1234567890" \
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ---

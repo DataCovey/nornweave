@@ -13,6 +13,7 @@ from nornweave.core.config import Settings, get_settings
 from nornweave.core.interfaces import (
     StorageInterface,  # noqa: TC001 - needed at runtime for FastAPI
 )
+from nornweave.core.storage import AttachmentMetadata, create_attachment_storage
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
 from nornweave.verdandi.parser import html_to_markdown
@@ -112,7 +113,7 @@ async def resend_webhook(
 
     # Route based on event type
     if event_type == "email.received":
-        return await _handle_inbound_email(adapter, payload, storage)
+        return await _handle_inbound_email(adapter, payload, storage, settings)
     elif event_type in DELIVERY_EVENT_TYPES:
         return _handle_delivery_event(event_type, payload)
     else:
@@ -124,10 +125,12 @@ async def _handle_inbound_email(
     adapter: ResendAdapter,
     payload: dict[str, Any],
     storage: StorageInterface,
+    settings: Settings,
 ) -> dict[str, str]:
     """Handle email.received event.
 
     Fetches full email content from Resend API and stores the message.
+    Stores attachments using the configured storage backend.
     """
     data = payload.get("data", {})
     email_id = data.get("email_id", "unknown")
@@ -186,6 +189,22 @@ async def _handle_inbound_email(
         return {"status": "no_inbox", "recipient": inbound.to_address}
 
     logger.info("Found inbox %s for recipient %s", inbox.id, inbound.to_address)
+
+    # Check for duplicate webhook delivery (idempotency)
+    if inbound.message_id:
+        existing_msg = await storage.get_message_by_provider_id(inbox.id, inbound.message_id)
+        if existing_msg:
+            logger.info(
+                "Duplicate webhook detected: message %s already exists for provider_message_id %s",
+                existing_msg.id,
+                inbound.message_id,
+            )
+            return {
+                "status": "duplicate",
+                "message_id": existing_msg.id,
+                "thread_id": existing_msg.thread_id,
+                "email_id": email_id,
+            }
 
     # Try to find existing thread by Message-ID references (for replies)
     thread_id: str | None = None
@@ -256,21 +275,57 @@ async def _handle_inbound_email(
     created_message = await storage.create_message(message)
     logger.info("Created message %s in thread %s", created_message.id, thread_id)
 
-    # Store attachments if present
-    for att in inbound.attachments:
-        if att.content and att.size_bytes > 0:
-            try:
-                await storage.create_attachment(
-                    message_id=created_message.id,
-                    filename=att.filename,
-                    content_type=att.content_type,
-                    size_bytes=att.size_bytes,
-                    disposition=att.disposition.value,
-                    content_id=att.content_id,
-                )
-                logger.debug("Created attachment record for %s", att.filename)
-            except (ValueError, RuntimeError) as e:
-                logger.warning("Failed to create attachment record: %s", e)
+    # Store attachments if present - using the configured storage backend
+    if inbound.attachments:
+        # Create storage backend for attachments
+        storage_backend = create_attachment_storage(settings)
+
+        for att in inbound.attachments:
+            if att.content and att.size_bytes > 0:
+                try:
+                    # Generate attachment ID
+                    attachment_id = str(uuid.uuid4())
+
+                    # Create metadata for storage backend
+                    metadata = AttachmentMetadata(
+                        attachment_id=attachment_id,
+                        message_id=created_message.id,
+                        filename=att.filename,
+                        content_type=att.content_type,
+                        content_disposition=att.disposition.value,
+                        content_id=att.content_id,
+                    )
+
+                    # Store in configured backend (local, s3, gcs, or database)
+                    storage_result = await storage_backend.store(
+                        attachment_id=attachment_id,
+                        content=att.content,
+                        metadata=metadata,
+                    )
+
+                    # Create database record with storage info
+                    await storage.create_attachment(
+                        message_id=created_message.id,
+                        filename=att.filename,
+                        content_type=att.content_type,
+                        size_bytes=storage_result.size_bytes,
+                        disposition=att.disposition.value,
+                        content_id=att.content_id,
+                        storage_path=storage_result.storage_key,
+                        storage_backend=storage_result.backend,
+                        content_hash=storage_result.content_hash,
+                        # For database backend, also store the content
+                        content=att.content if storage_result.backend == "database" else None,
+                    )
+                    logger.info(
+                        "Stored attachment %s (%s, %d bytes) via %s backend",
+                        att.filename,
+                        att.content_type,
+                        storage_result.size_bytes,
+                        storage_result.backend,
+                    )
+                except (ValueError, RuntimeError) as e:
+                    logger.warning("Failed to store attachment %s: %s", att.filename, e)
 
     # Update thread's last_message_at
     if thread:

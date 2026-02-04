@@ -294,3 +294,121 @@ class NornWeaveClient:
         if not messages:
             return None
         return cast("dict[str, Any]", messages[-1])
+
+    # -------------------------------------------------------------------------
+    # Attachment Operations
+    # -------------------------------------------------------------------------
+
+    async def list_attachments(
+        self,
+        message_id: str | None = None,
+        thread_id: str | None = None,
+        inbox_id: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> dict[str, Any]:
+        """List attachments filtered by message, thread, or inbox.
+
+        Args:
+            message_id: Filter by message ID.
+            thread_id: Filter by thread ID.
+            inbox_id: Filter by inbox ID.
+            limit: Maximum number of attachments to return.
+            offset: Number of attachments to skip.
+
+        Returns:
+            List response with attachment metadata.
+        """
+        client = await self._get_client()
+        params: dict[str, Any] = {"limit": limit, "offset": offset}
+        if message_id:
+            params["message_id"] = message_id
+        elif thread_id:
+            params["thread_id"] = thread_id
+        elif inbox_id:
+            params["inbox_id"] = inbox_id
+
+        response = await client.get("/v1/attachments", params=params)
+        response.raise_for_status()
+        return cast("dict[str, Any]", response.json())
+
+    async def get_attachment(self, attachment_id: str) -> dict[str, Any]:
+        """Get attachment metadata.
+
+        Args:
+            attachment_id: The attachment ID.
+
+        Returns:
+            Attachment metadata with download_url.
+        """
+        client = await self._get_client()
+        response = await client.get(f"/v1/attachments/{attachment_id}")
+        response.raise_for_status()
+        return cast("dict[str, Any]", response.json())
+
+    async def get_attachment_content(
+        self,
+        attachment_id: str,
+        response_format: str = "base64",
+    ) -> dict[str, Any]:
+        """Get attachment content.
+
+        Args:
+            attachment_id: The attachment ID.
+            response_format: Response format - "binary" or "base64" (default: base64).
+
+        Returns:
+            For base64: {"content": "...", "content_type": "...", "filename": "..."}
+            For binary: raw bytes (handled by httpx)
+        """
+        client = await self._get_client()
+        response = await client.get(
+            f"/v1/attachments/{attachment_id}/content",
+            params={"format": response_format},
+        )
+        response.raise_for_status()
+        return cast("dict[str, Any]", response.json())
+
+    async def send_message_with_attachments(
+        self,
+        inbox_id: str,
+        to: list[str],
+        subject: str,
+        body: str,
+        attachments: list[dict[str, str]],
+        reply_to_thread_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Send an outbound message with attachments.
+
+        Args:
+            inbox_id: The inbox ID to send from.
+            to: List of recipient email addresses.
+            subject: Email subject.
+            body: Markdown body content.
+            attachments: List of attachment dicts with filename, content_type, content (base64).
+            reply_to_thread_id: Thread ID if this is a reply.
+
+        Returns:
+            Send response with message_id, thread_id, status.
+        """
+        client = await self._get_client()
+        payload: dict[str, Any] = {
+            "inbox_id": inbox_id,
+            "to": to,
+            "subject": subject,
+            "body": body,
+            "attachments": [
+                {
+                    "filename": att["filename"],
+                    "content_type": att["content_type"],
+                    "content_base64": att["content"],
+                }
+                for att in attachments
+            ],
+        }
+        if reply_to_thread_id:
+            payload["reply_to_thread_id"] = reply_to_thread_id
+
+        response = await client.post("/v1/messages", json=payload)
+        response.raise_for_status()
+        return cast("dict[str, Any]", response.json())

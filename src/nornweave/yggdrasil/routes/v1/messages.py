@@ -1,5 +1,7 @@
 """Message endpoints."""
 
+import base64
+import binascii
 import contextlib
 import uuid
 from datetime import UTC, datetime
@@ -8,10 +10,13 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
+from nornweave.core.config import Settings, get_settings
 from nornweave.core.interfaces import (  # noqa: TC001 - needed at runtime for FastAPI
     EmailProvider,
     StorageInterface,
 )
+from nornweave.core.storage import AttachmentMetadata, create_attachment_storage
+from nornweave.models.attachment import AttachmentUpload, SendAttachment
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
 from nornweave.yggdrasil.dependencies import get_email_provider, get_storage
@@ -48,6 +53,9 @@ class SendMessageRequest(BaseModel):
     subject: str = Field(..., min_length=1)
     body: str = Field(..., description="Markdown body content")
     reply_to_thread_id: str | None = None
+    attachments: list[AttachmentUpload] | None = Field(
+        None, description="Optional list of attachments to send"
+    )
 
 
 class SendMessageResponse(BaseModel):
@@ -122,11 +130,14 @@ async def send_message(
     payload: SendMessageRequest,
     storage: StorageInterface = Depends(get_storage),
     email_provider: EmailProvider = Depends(get_email_provider),
+    settings: Settings = Depends(get_settings),
 ) -> SendMessageResponse:
     """Send an outbound message.
 
     If reply_to_thread_id is provided, the message is added to that thread.
     Otherwise, a new thread is created.
+
+    Supports optional attachments which are stored and sent with the email.
     """
     # Get inbox
     inbox = await storage.get_inbox(payload.inbox_id)
@@ -158,6 +169,80 @@ async def send_message(
         created_thread = await storage.create_thread(new_thread)
         thread_id = created_thread.id
 
+    # Generate message ID early so we can link attachments
+    message_id = str(uuid.uuid4())
+
+    # Process attachments if provided
+    attachment_records: list[dict[str, Any]] = []
+    provider_attachments: list[SendAttachment] = []
+
+    if payload.attachments:
+        # Create storage backend
+        storage_backend = create_attachment_storage(settings)
+
+        for i, attachment in enumerate(payload.attachments):
+            # Validate and decode base64 content
+            try:
+                content_bytes = base64.b64decode(attachment.content_base64)
+            except (binascii.Error, ValueError) as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid base64 content in attachment {i}: {e}",
+                )
+
+            if len(content_bytes) == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Attachment {i} has empty content",
+                )
+
+            # Generate attachment ID and store
+            attachment_id = str(uuid.uuid4())
+
+            metadata = AttachmentMetadata(
+                attachment_id=attachment_id,
+                message_id=message_id,
+                filename=attachment.filename,
+                content_type=attachment.content_type,
+                content_disposition=attachment.disposition.value,
+                content_id=attachment.content_id,
+            )
+
+            # Store in configured backend
+            storage_result = await storage_backend.store(
+                attachment_id=attachment_id,
+                content=content_bytes,
+                metadata=metadata,
+            )
+
+            # Prepare attachment record for database
+            attachment_records.append(
+                {
+                    "attachment_id": attachment_id,
+                    "filename": attachment.filename,
+                    "content_type": attachment.content_type,
+                    "size_bytes": storage_result.size_bytes,
+                    "disposition": attachment.disposition.value,
+                    "content_id": attachment.content_id,
+                    "storage_path": storage_result.storage_key,
+                    "storage_backend": storage_result.backend,
+                    "content_hash": storage_result.content_hash,
+                    # For database backend, also store content
+                    "content": content_bytes if storage_result.backend == "database" else None,
+                }
+            )
+
+            # Prepare attachment for email provider
+            provider_attachments.append(
+                SendAttachment(
+                    filename=attachment.filename,
+                    content_type=attachment.content_type,
+                    content_disposition=attachment.disposition,
+                    content_id=attachment.content_id,
+                    content=attachment.content_base64,  # Keep as base64 for provider
+                )
+            )
+
     # Send email via provider
     # Log error but continue to store the message attempt
     provider_message_id: str | None = None
@@ -167,11 +252,12 @@ async def send_message(
             subject=payload.subject,
             body=payload.body,
             from_address=inbox.email_address,
+            attachments=provider_attachments if provider_attachments else None,
         )
 
     # Create message record
     message = Message(
-        message_id=str(uuid.uuid4()),
+        message_id=message_id,
         thread_id=thread_id,
         inbox_id=payload.inbox_id,
         provider_message_id=provider_message_id,
@@ -185,6 +271,21 @@ async def send_message(
         created_at=datetime.now(UTC),
     )
     created_message = await storage.create_message(message)
+
+    # Create attachment records linked to the message
+    for rec in attachment_records:
+        await storage.create_attachment(
+            message_id=created_message.id,
+            filename=rec["filename"],
+            content_type=rec["content_type"],
+            size_bytes=rec["size_bytes"],
+            disposition=rec["disposition"],
+            content_id=rec["content_id"],
+            storage_path=rec["storage_path"],
+            storage_backend=rec["storage_backend"],
+            content_hash=rec["content_hash"],
+            content=rec["content"],
+        )
 
     # Update thread's last_message_at
     thread = await storage.get_thread(thread_id)

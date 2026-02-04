@@ -334,6 +334,76 @@ class BaseSQLAlchemyAdapter(StorageInterface):
             for row in result.scalars().all()
         ]
 
+    async def list_attachments_for_thread(
+        self,
+        thread_id: str,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """List attachments for all messages in a thread."""
+        # Join attachments with messages to filter by thread_id
+        stmt = (
+            select(AttachmentORM)
+            .join(MessageORM, AttachmentORM.message_id == MessageORM.id)
+            .where(MessageORM.thread_id == thread_id)
+            .order_by(AttachmentORM.created_at)
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self._session.execute(stmt)
+        return [
+            {
+                "id": row.id,
+                "message_id": row.message_id,
+                "filename": row.filename,
+                "content_type": row.content_type,
+                "size_bytes": row.size_bytes,
+                "disposition": row.disposition,
+                "content_id": row.content_id,
+                "storage_path": row.storage_path,
+                "storage_backend": row.storage_backend,
+                "content_hash": row.content_hash,
+                "created_at": row.created_at,
+            }
+            for row in result.scalars().all()
+        ]
+
+    async def list_attachments_for_inbox(
+        self,
+        inbox_id: str,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """List attachments for all messages in an inbox."""
+        # Join attachments with messages to filter by inbox_id
+        stmt = (
+            select(AttachmentORM)
+            .join(MessageORM, AttachmentORM.message_id == MessageORM.id)
+            .where(MessageORM.inbox_id == inbox_id)
+            .order_by(AttachmentORM.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self._session.execute(stmt)
+        return [
+            {
+                "id": row.id,
+                "message_id": row.message_id,
+                "filename": row.filename,
+                "content_type": row.content_type,
+                "size_bytes": row.size_bytes,
+                "disposition": row.disposition,
+                "content_id": row.content_id,
+                "storage_path": row.storage_path,
+                "storage_backend": row.storage_backend,
+                "content_hash": row.content_hash,
+                "created_at": row.created_at,
+            }
+            for row in result.scalars().all()
+        ]
+
     async def delete_attachment(self, attachment_id: str) -> bool:
         """Delete an attachment."""
         orm_attachment = await self._session.get(AttachmentORM, attachment_id)
