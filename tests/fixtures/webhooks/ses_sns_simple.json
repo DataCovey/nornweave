@@ -1,0 +1,12 @@
+{
+  "Type": "Notification",
+  "MessageId": "sns-message-id-123",
+  "TopicArn": "arn:aws:sns:us-east-1:123456789:nornweave-ses-inbound",
+  "Subject": "Amazon SES Email Receipt Notification",
+  "Message": "{\"notificationType\":\"Received\",\"receipt\":{\"timestamp\":\"2026-01-31T15:30:00.000Z\",\"recipients\":[\"support@mycompany.com\"],\"spamVerdict\":{\"status\":\"PASS\"},\"virusVerdict\":{\"status\":\"PASS\"},\"spfVerdict\":{\"status\":\"PASS\"},\"dkimVerdict\":{\"status\":\"PASS\"},\"dmarcVerdict\":{\"status\":\"PASS\"},\"action\":{\"type\":\"SNS\",\"topicArn\":\"arn:aws:sns:us-east-1:123456789:nornweave-ses-inbound\"}},\"mail\":{\"timestamp\":\"2026-01-31T15:30:00.000Z\",\"source\":\"alice@gmail.com\",\"messageId\":\"ses-internal-id-abc\",\"destination\":[\"support@mycompany.com\"],\"headers\":[{\"name\":\"Message-ID\",\"value\":\"<CADfE8z+abc123@mail.gmail.com>\"},{\"name\":\"From\",\"value\":\"Alice Smith <alice@gmail.com>\"},{\"name\":\"To\",\"value\":\"support@mycompany.com\"},{\"name\":\"Subject\",\"value\":\"Question about pricing\"},{\"name\":\"Date\",\"value\":\"Sat, 31 Jan 2026 10:30:00 -0500\"}],\"commonHeaders\":{\"from\":[\"Alice Smith <alice@gmail.com>\"],\"to\":[\"support@mycompany.com\"],\"subject\":\"Question about pricing\",\"messageId\":\"<CADfE8z+abc123@mail.gmail.com>\"}},\"content\":\"Return-Path: <alice@gmail.com>\\r\\nMessage-ID: <CADfE8z+abc123@mail.gmail.com>\\r\\nFrom: Alice Smith <alice@gmail.com>\\r\\nTo: support@mycompany.com\\r\\nSubject: Question about pricing\\r\\nDate: Sat, 31 Jan 2026 10:30:00 -0500\\r\\nContent-Type: text/plain; charset=utf-8\\r\\n\\r\\nHi,\\r\\n\\r\\nI'd like to know your pricing for the enterprise plan.\\r\\n\\r\\nThanks,\\r\\nAlice\"}",
+  "Timestamp": "2026-01-31T15:30:01.000Z",
+  "SignatureVersion": "1",
+  "Signature": "test-signature-base64",
+  "SigningCertURL": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-xxxxx.pem",
+  "UnsubscribeURL": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe"
+}

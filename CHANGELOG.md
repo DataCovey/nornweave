@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ECDSA webhook signature verification
   - SPF/DKIM result extraction
 - Resend webhook and sending implementation
+- Full AWS SES adapter implementation with:
+  - Email sending via SES v2 API with Content.Simple (threading headers, CC/BCC, attachments)
+  - AWS Signature Version 4 authentication
+  - Inbound email via SNS notifications with MIME parsing
+  - SNS signature verification using X.509 certificates
+  - Automatic SNS subscription confirmation
+  - SPF/DKIM/DMARC verdict extraction from SES receipt
+  - Updated SES setup guide with SNS-based inbound email configuration
 
 ### Changed
 
