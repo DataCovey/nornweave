@@ -1,9 +1,9 @@
 {
-  "name": "n8n-nodes-nornweave",
+  "name": "@nornweave/n8n-nodes-nornweave",
   "version": "0.1.0",
   "description": "n8n community node for NornWeave - Inbox-as-a-Service API for AI Agents",
   "license": "MIT",
-  "homepage": "https://github.com/nornweave/nornweave",
+  "homepage": "https://github.com/DataCovey/nornweave",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
@@ -12,10 +12,18 @@
     "inbox",
     "ai-agents"
   ],
-  "author": { "name": "NornWeave", "email": "hello@nornweave.io" },
+  "author": {
+    "name": "NornWeave",
+    "email": "ricardo@rnc.sh"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nornweave/nornweave.git"
+    "url": "https://github.com/DataCovey/nornweave.git",
+    "directory": "packages/n8n-nodes-nornweave"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "n8n-node build",
@@ -24,8 +32,9 @@
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
     "release": "n8n-node release",
-    "prepublishOnly": "n8n-node prerelease",
-    "test": "jest"
+    "prepublishOnly": "npm run lint && npm run build",
+    "test": "jest",
+    "scan": "npx @n8n/scan-community-package"
   },
   "files": ["dist"],
   "n8n": {

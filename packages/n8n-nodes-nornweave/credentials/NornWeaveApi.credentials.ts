@@ -12,7 +12,7 @@ export class NornWeaveApi implements ICredentialType {
 
   icon = 'file:../icons/nornweave.svg' as const;
 
-  documentationUrl = 'https://nornweave.io/docs/integrations/n8n';
+  documentationUrl = 'https://nornweave.datacovey.com/docs/integrations/n8n/';
 
   properties: INodeProperties[] = [
     {

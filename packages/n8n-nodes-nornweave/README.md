@@ -1,6 +1,6 @@
-# n8n-nodes-nornweave
+# @nornweave/n8n-nodes-nornweave
 
-This is an n8n community node for [NornWeave](https://nornweave.io) - an open-source, self-hosted Inbox-as-a-Service API for AI Agents.
+This is an n8n community node for [NornWeave](https://nornweave.datacovey.com/) - an open-source, self-hosted Inbox-as-a-Service API for AI Agents.
 
 NornWeave provides a stateful email layer (Inboxes, Threads, History) and an intelligent layer (Markdown parsing, Semantic Search) for LLMs.
 
@@ -14,7 +14,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 1. Go to **Settings** > **Community Nodes**
 2. Select **Install**
-3. Enter `n8n-nodes-nornweave`
+3. Enter `@nornweave/n8n-nodes-nornweave`
 4. Agree to the risks and select **Install**
 
 ## Credentials
@@ -73,7 +73,7 @@ The NornWeave Trigger requires webhook configuration in your email provider:
 3. Configure your email provider (Mailgun, SendGrid, SES, Resend) to forward webhooks to this URL
 4. Activate your workflow
 
-See the [NornWeave n8n integration guide](https://nornweave.io/docs/integrations/n8n) for detailed setup instructions for each provider.
+See the [NornWeave n8n integration guide](https://nornweave.datacovey.com/docs/integrations/n8n/) for detailed setup instructions for each provider.
 
 ## Example Workflows
 
@@ -104,8 +104,8 @@ Schedule Trigger (weekly)
 
 ## Resources
 
-- [NornWeave Documentation](https://nornweave.io/docs)
-- [NornWeave GitHub](https://github.com/nornweave/nornweave)
+- [NornWeave Documentation](https://nornweave.datacovey.com/docs)
+- [NornWeave GitHub](https://github.com/DataCovey/nornweave)
 - [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
 
 ## License

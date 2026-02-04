@@ -12,13 +12,13 @@ weight: 10
 
 1. Go to **Settings** > **Community Nodes**
 2. Click **Install**
-3. Search for `n8n-nodes-nornweave`
+3. Search for `@nornweave/n8n-nodes-nornweave`
 4. Accept the risks and click **Install**
 
 ### Manual Installation (Self-hosted n8n)
 
 ```bash
-npm install n8n-nodes-nornweave
+npm install @nornweave/n8n-nodes-nornweave
 ```
 
 Then restart your n8n instance.

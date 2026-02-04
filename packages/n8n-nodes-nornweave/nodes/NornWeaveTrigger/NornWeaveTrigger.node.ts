@@ -78,7 +78,7 @@ export class NornWeaveTrigger implements INodeType {
       },
       {
         displayName:
-          'Note: You need to configure your email provider to send webhooks to the URL shown above. See the <a href="https://nornweave.io/docs/integrations/n8n" target="_blank">documentation</a> for setup instructions.',
+          'Note: You need to configure your email provider to send webhooks to the URL shown above. See the <a href="https://https://nornweave.datacovey.com/docs/integrations/n8n" target="_blank">documentation</a> for setup instructions.',
         name: 'notice',
         type: 'notice',
         default: '',
