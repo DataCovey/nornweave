@@ -1,6 +1,7 @@
 """AWS SES email provider adapter."""
 
 import base64
+import contextlib
 import hashlib
 import hmac
 import json
@@ -14,7 +15,7 @@ from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
 import httpx
-import markdown
+import markdown  # type: ignore[import-untyped]
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -40,9 +41,7 @@ SNS_TYPE_SUBSCRIPTION_CONFIRMATION = "SubscriptionConfirmation"
 SNS_TYPE_UNSUBSCRIBE_CONFIRMATION = "UnsubscribeConfirmation"
 
 # SNS SigningCertURL validation pattern
-SNS_CERT_URL_PATTERN = re.compile(
-    r"^https://sns\.[a-z0-9-]+\.amazonaws\.com(\.cn)?/"
-)
+SNS_CERT_URL_PATTERN = re.compile(r"^https://sns\.[a-z0-9-]+\.amazonaws\.com(\.cn)?/")
 
 
 class SESWebhookError(Exception):
@@ -89,11 +88,9 @@ class SESAdapter(EmailProvider):
         """HMAC-SHA256 sign a message."""
         return hmac.new(key, msg.encode("utf-8"), hashlib.sha256).digest()
 
-    def _get_signature_key(
-        self, date_stamp: str, region: str, service: str
-    ) -> bytes:
+    def _get_signature_key(self, date_stamp: str, region: str, service: str) -> bytes:
         """Derive the signing key for AWS SigV4."""
-        k_date = self._sign(f"AWS4{self._secret_access_key}".encode("utf-8"), date_stamp)
+        k_date = self._sign(f"AWS4{self._secret_access_key}".encode(), date_stamp)
         k_region = self._sign(k_date, region)
         k_service = self._sign(k_region, service)
         k_signing = self._sign(k_service, "aws4_request")
@@ -144,24 +141,28 @@ class SESAdapter(EmailProvider):
         payload_hash = hashlib.sha256(payload).hexdigest()
 
         # Create canonical request
-        canonical_request = "\n".join([
-            method,
-            canonical_uri,
-            canonical_querystring,
-            canonical_headers,
-            signed_headers,
-            payload_hash,
-        ])
+        canonical_request = "\n".join(
+            [
+                method,
+                canonical_uri,
+                canonical_querystring,
+                canonical_headers,
+                signed_headers,
+                payload_hash,
+            ]
+        )
 
         # Create string to sign
         algorithm = "AWS4-HMAC-SHA256"
         credential_scope = f"{date_stamp}/{self._region}/{SES_SERVICE}/aws4_request"
-        string_to_sign = "\n".join([
-            algorithm,
-            amz_date,
-            credential_scope,
-            hashlib.sha256(canonical_request.encode("utf-8")).hexdigest(),
-        ])
+        string_to_sign = "\n".join(
+            [
+                algorithm,
+                amz_date,
+                credential_scope,
+                hashlib.sha256(canonical_request.encode("utf-8")).hexdigest(),
+            ]
+        )
 
         # Calculate signature
         signing_key = self._get_signature_key(date_stamp, self._region, SES_SERVICE)
@@ -382,7 +383,7 @@ class SESAdapter(EmailProvider):
 
         try:
             message = json.loads(message_str)
-            notification_type = message.get("notificationType")
+            notification_type: str | None = message.get("notificationType")
             return notification_type == "Received"
         except json.JSONDecodeError:
             return False
@@ -410,9 +411,7 @@ class SESAdapter(EmailProvider):
                 pass
         return "unknown"
 
-    async def handle_subscription_confirmation(
-        self, payload: dict[str, Any]
-    ) -> bool:
+    async def handle_subscription_confirmation(self, payload: dict[str, Any]) -> bool:
         """Handle SNS subscription confirmation by fetching SubscribeURL.
 
         Args:
@@ -477,9 +476,7 @@ class SESAdapter(EmailProvider):
         except Exception as e:
             raise SESWebhookError(f"Failed to fetch signing certificate: {e}") from e
 
-    def _build_sns_string_to_sign(
-        self, payload: dict[str, Any], message_type: str
-    ) -> str:
+    def _build_sns_string_to_sign(self, payload: dict[str, Any], message_type: str) -> str:
         """Build the canonical string to sign for SNS message verification.
 
         Args:
@@ -536,9 +533,7 @@ class SESAdapter(EmailProvider):
 
         # Validate SigningCertURL is from AWS
         if not self._validate_signing_cert_url(signing_cert_url):
-            raise SESWebhookError(
-                "Invalid SigningCertURL: must be from sns.*.amazonaws.com"
-            )
+            raise SESWebhookError("Invalid SigningCertURL: must be from sns.*.amazonaws.com")
 
         # Fetch certificate (cached)
         cert = self._fetch_certificate_sync(signing_cert_url)
@@ -557,6 +552,7 @@ class SESAdapter(EmailProvider):
             public_key = cert.public_key()
             # SNS uses RSA with PKCS1v15 padding and SHA1
             from cryptography.hazmat.primitives.asymmetric import rsa
+
             if isinstance(public_key, rsa.RSAPublicKey):
                 public_key.verify(
                     signature,
@@ -590,8 +586,18 @@ class SESAdapter(EmailProvider):
         if isinstance(content, str):
             # Check if it looks like base64 (no whitespace/newlines at start, all valid b64 chars)
             # Real MIME content starts with headers like "Return-Path:" or "Content-Type:"
-            if content.startswith(("Return-Path:", "Content-Type:", "MIME-Version:",
-                                   "From:", "To:", "Subject:", "Date:", "Message-ID:")):
+            if content.startswith(
+                (
+                    "Return-Path:",
+                    "Content-Type:",
+                    "MIME-Version:",
+                    "From:",
+                    "To:",
+                    "Subject:",
+                    "Date:",
+                    "Message-ID:",
+                )
+            ):
                 # It's plain text MIME, not base64
                 content_bytes = content.encode("utf-8")
             else:
@@ -778,10 +784,8 @@ class SESAdapter(EmailProvider):
         timestamp = datetime.now(UTC)
         date_str = common_headers.get("date")
         if date_str:
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 timestamp = parsedate_to_datetime(date_str)
-            except (ValueError, TypeError):
-                pass
 
         # Parse CC addresses
         cc_list = common_headers.get("cc", [])
@@ -795,9 +799,7 @@ class SESAdapter(EmailProvider):
         content_id_map: dict[str, str] = {}
 
         if content:
-            body_plain, body_html, attachments, content_id_map = self._parse_mime_content(
-                content
-            )
+            body_plain, body_html, attachments, content_id_map = self._parse_mime_content(content)
 
         return InboundMessage(
             from_address=from_address,

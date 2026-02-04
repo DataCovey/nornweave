@@ -1,6 +1,5 @@
 """Unit tests for SESAdapter."""
 
-import base64
 import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -8,10 +7,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from nornweave.adapters.ses import (
-    SESAdapter,
-    SESWebhookError,
     SNS_TYPE_NOTIFICATION,
     SNS_TYPE_SUBSCRIPTION_CONFIRMATION,
+    SESAdapter,
+    SESWebhookError,
 )
 
 # Fixtures directory
@@ -70,7 +69,9 @@ class TestSigV4Signing:
         )
 
         headers = {"Content-Type": "application/json"}
-        signed = adapter._sign_request("POST", "/v2/email/outbound-emails", headers, b'{"test": true}')
+        signed = adapter._sign_request(
+            "POST", "/v2/email/outbound-emails", headers, b'{"test": true}'
+        )
 
         assert "Authorization" in signed
         assert signed["Authorization"].startswith("AWS4-HMAC-SHA256")
@@ -84,7 +85,7 @@ class TestSigV4Signing:
         )
 
         headers = {"Content-Type": "application/json"}
-        signed = adapter._sign_request("POST", "/v2/email/outbound-emails", headers, b'{}')
+        signed = adapter._sign_request("POST", "/v2/email/outbound-emails", headers, b"{}")
 
         assert "X-Amz-Date" in signed
         # Format: 20260131T123456Z
@@ -202,10 +203,7 @@ class TestParseInboundWebhook:
         adapter = SESAdapter(access_key_id="test", secret_access_key="test")
 
         with pytest.raises(SESWebhookError, match="Invalid JSON in Message field"):
-            adapter.parse_inbound_webhook({
-                "Type": "Notification",
-                "Message": "not valid json"
-            })
+            adapter.parse_inbound_webhook({"Type": "Notification", "Message": "not valid json"})
 
 
 class TestVerifyWebhookSignature:
@@ -216,54 +214,63 @@ class TestVerifyWebhookSignature:
         adapter = SESAdapter(access_key_id="test", secret_access_key="test")
 
         with pytest.raises(SESWebhookError, match="Missing Signature field"):
-            adapter.verify_webhook_signature({
-                "Type": "Notification",
-                "SigningCertURL": "https://sns.us-east-1.amazonaws.com/cert.pem"
-            })
+            adapter.verify_webhook_signature(
+                {
+                    "Type": "Notification",
+                    "SigningCertURL": "https://sns.us-east-1.amazonaws.com/cert.pem",
+                }
+            )
 
     def test_raises_for_missing_signing_cert_url(self) -> None:
         """Test that verification raises for missing SigningCertURL."""
         adapter = SESAdapter(access_key_id="test", secret_access_key="test")
 
         with pytest.raises(SESWebhookError, match="Missing SigningCertURL field"):
-            adapter.verify_webhook_signature({
-                "Type": "Notification",
-                "Signature": "test-signature"
-            })
+            adapter.verify_webhook_signature(
+                {"Type": "Notification", "Signature": "test-signature"}
+            )
 
     def test_raises_for_invalid_signing_cert_url(self) -> None:
         """Test that verification raises for non-AWS SigningCertURL."""
         adapter = SESAdapter(access_key_id="test", secret_access_key="test")
 
         with pytest.raises(SESWebhookError, match="Invalid SigningCertURL"):
-            adapter.verify_webhook_signature({
-                "Type": "Notification",
-                "Signature": "test-signature",
-                "SigningCertURL": "https://evil.com/cert.pem"
-            })
+            adapter.verify_webhook_signature(
+                {
+                    "Type": "Notification",
+                    "Signature": "test-signature",
+                    "SigningCertURL": "https://evil.com/cert.pem",
+                }
+            )
 
     def test_validates_signing_cert_url_pattern(self) -> None:
         """Test SigningCertURL validation for various URLs."""
         adapter = SESAdapter(access_key_id="test", secret_access_key="test")
 
         # Valid URLs
-        assert adapter._validate_signing_cert_url(
-            "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-xxx.pem"
-        ) is True
-        assert adapter._validate_signing_cert_url(
-            "https://sns.eu-west-1.amazonaws.com/cert.pem"
-        ) is True
-        assert adapter._validate_signing_cert_url(
-            "https://sns.cn-north-1.amazonaws.com.cn/cert.pem"
-        ) is True
+        assert (
+            adapter._validate_signing_cert_url(
+                "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-xxx.pem"
+            )
+            is True
+        )
+        assert (
+            adapter._validate_signing_cert_url("https://sns.eu-west-1.amazonaws.com/cert.pem")
+            is True
+        )
+        assert (
+            adapter._validate_signing_cert_url("https://sns.cn-north-1.amazonaws.com.cn/cert.pem")
+            is True
+        )
 
         # Invalid URLs
-        assert adapter._validate_signing_cert_url(
-            "https://evil.com/cert.pem"
-        ) is False
-        assert adapter._validate_signing_cert_url(
-            "http://sns.us-east-1.amazonaws.com/cert.pem"  # http not https
-        ) is False
+        assert adapter._validate_signing_cert_url("https://evil.com/cert.pem") is False
+        assert (
+            adapter._validate_signing_cert_url(
+                "http://sns.us-east-1.amazonaws.com/cert.pem"  # http not https
+            )
+            is False
+        )
 
 
 class TestSubscriptionConfirmation:
@@ -277,7 +284,7 @@ class TestSubscriptionConfirmation:
         payload = {
             "Type": SNS_TYPE_SUBSCRIPTION_CONFIRMATION,
             "TopicArn": "arn:aws:sns:us-east-1:123456789:test-topic",
-            "SubscribeURL": "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&Token=xxx"
+            "SubscribeURL": "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&Token=xxx",
         }
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -301,7 +308,7 @@ class TestSubscriptionConfirmation:
 
         payload = {
             "Type": SNS_TYPE_SUBSCRIPTION_CONFIRMATION,
-            "TopicArn": "arn:aws:sns:us-east-1:123456789:test-topic"
+            "TopicArn": "arn:aws:sns:us-east-1:123456789:test-topic",
         }
 
         result = await adapter.handle_subscription_confirmation(payload)
@@ -487,13 +494,9 @@ class TestMIMEParsing:
         """Test parsing simple text MIME content."""
         adapter = SESAdapter(access_key_id="test", secret_access_key="test")
 
-        mime_content = (
-            "Content-Type: text/plain; charset=utf-8\r\n"
-            "\r\n"
-            "Hello, this is a test email."
-        )
+        mime_content = "Content-Type: text/plain; charset=utf-8\r\n\r\nHello, this is a test email."
 
-        body_plain, body_html, attachments, content_id_map = adapter._parse_mime_content(
+        body_plain, body_html, attachments, _content_id_map = adapter._parse_mime_content(
             mime_content.encode("utf-8")
         )
 
@@ -519,7 +522,7 @@ class TestMIMEParsing:
             "--boundary123--"
         )
 
-        body_plain, body_html, attachments, content_id_map = adapter._parse_mime_content(
+        body_plain, body_html, _attachments, _content_id_map = adapter._parse_mime_content(
             mime_content.encode("utf-8")
         )
 

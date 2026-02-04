@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 import httpx
-import markdown
+import markdown  # type: ignore[import-untyped]
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -176,7 +176,9 @@ class SendGridAdapter(EmailProvider):
                 # Handle disposition (inline vs attachment)
                 if hasattr(att, "disposition") and att.disposition:
                     attachment_data["disposition"] = att.disposition.value
-                    if att.disposition == AttachmentDisposition.INLINE and hasattr(att, "content_id"):
+                    if att.disposition == AttachmentDisposition.INLINE and hasattr(
+                        att, "content_id"
+                    ):
                         attachment_data["content_id"] = att.content_id
 
                 attachment_list.append(attachment_data)
@@ -254,6 +256,7 @@ class SendGridAdapter(EmailProvider):
         if date_header:
             try:
                 from email.utils import parsedate_to_datetime
+
                 timestamp = parsedate_to_datetime(date_header)
             except (ValueError, TypeError):
                 pass
@@ -305,7 +308,9 @@ class SendGridAdapter(EmailProvider):
 
         # Parse CC from headers
         cc_header = headers.get("Cc", "")
-        cc_addresses = [addr.strip() for addr in cc_header.split(",") if addr.strip()] if cc_header else []
+        cc_addresses = (
+            [addr.strip() for addr in cc_header.split(",") if addr.strip()] if cc_header else []
+        )
 
         # Parse SPF and DKIM results
         spf_result = payload.get("SPF")
@@ -435,6 +440,7 @@ class SendGridAdapter(EmailProvider):
             # Try loading as raw public key bytes (EC point)
             # SendGrid provides the key in SubjectPublicKeyInfo DER format
             from cryptography.hazmat.primitives.serialization import load_der_public_key
+
             public_key = load_der_public_key(public_key_bytes)
         except Exception as e:
             raise SendGridWebhookError(f"Invalid public key: {e}")

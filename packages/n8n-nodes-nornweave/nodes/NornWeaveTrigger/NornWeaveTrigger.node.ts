@@ -45,6 +45,26 @@ export class NornWeaveTrigger implements INodeType {
         description: 'The events to listen for',
         options: [
           {
+            name: 'Email Bounced',
+            value: 'email.bounced',
+            description: 'Triggered when an email bounces (permanent failure)',
+          },
+          {
+            name: 'Email Clicked',
+            value: 'email.clicked',
+            description: 'Triggered when a recipient clicks a link in the email',
+          },
+          {
+            name: 'Email Delivered',
+            value: 'email.delivered',
+            description: 'Triggered when an email is successfully delivered',
+          },
+          {
+            name: 'Email Opened',
+            value: 'email.opened',
+            description: 'Triggered when a recipient opens the email',
+          },
+          {
             name: 'Email Received',
             value: 'email.received',
             description: 'Triggered when a new inbound email arrives',
@@ -53,26 +73,6 @@ export class NornWeaveTrigger implements INodeType {
             name: 'Email Sent',
             value: 'email.sent',
             description: 'Triggered when an outbound email is accepted for delivery',
-          },
-          {
-            name: 'Email Delivered',
-            value: 'email.delivered',
-            description: 'Triggered when an email is successfully delivered',
-          },
-          {
-            name: 'Email Bounced',
-            value: 'email.bounced',
-            description: 'Triggered when an email bounces (permanent failure)',
-          },
-          {
-            name: 'Email Opened',
-            value: 'email.opened',
-            description: 'Triggered when a recipient opens the email',
-          },
-          {
-            name: 'Email Clicked',
-            value: 'email.clicked',
-            description: 'Triggered when a recipient clicks a link in the email',
           },
         ],
       },
@@ -84,6 +84,7 @@ export class NornWeaveTrigger implements INodeType {
         default: '',
       },
     ],
+		usableAsTool: true,
   };
 
   webhookMethods = {

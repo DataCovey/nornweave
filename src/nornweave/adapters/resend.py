@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 import httpx
-import markdown
+import markdown  # type: ignore[import-untyped]
 from svix.webhooks import Webhook, WebhookVerificationError
 
 from nornweave.core.interfaces import (
@@ -134,9 +134,12 @@ class ResendAdapter(EmailProvider):
         if attachments:
             attachment_list: list[dict[str, Any]] = []
             for att in attachments:
+                # SendAttachment.content is already base64-encoded
+                if att.content is None:
+                    continue
                 attachment_data: dict[str, Any] = {
                     "filename": att.filename,
-                    "content": base64.b64encode(att.content).decode("utf-8"),
+                    "content": att.content,
                 }
                 if att.content_type:
                     attachment_data["content_type"] = att.content_type
@@ -165,7 +168,7 @@ class ResendAdapter(EmailProvider):
                 response.raise_for_status()
 
             result = response.json()
-            email_id = result.get("id", "")
+            email_id: str = result.get("id", "")
             logger.info("Email sent via Resend: %s", email_id)
             return email_id
 
@@ -205,8 +208,8 @@ class ResendAdapter(EmailProvider):
 
         try:
             wh = Webhook(self._webhook_secret)
-            verified_payload = wh.verify(payload, svix_headers)
-            return verified_payload  # type: ignore[return-value]
+            verified_payload: dict[str, Any] = wh.verify(payload, svix_headers)
+            return verified_payload
         except WebhookVerificationError as e:
             logger.warning("Webhook signature verification failed: %s", e)
             raise ResendWebhookError(f"Signature verification failed: {e}") from e
@@ -248,7 +251,8 @@ class ResendAdapter(EmailProvider):
                 )
                 response.raise_for_status()
 
-            return response.json()
+            result: dict[str, Any] = response.json()
+            return result
 
     async def fetch_attachment_content(self, email_id: str, attachment_id: str) -> bytes:
         """Fetch attachment content from Resend API.
@@ -491,7 +495,8 @@ class ResendAdapter(EmailProvider):
         Returns:
             Event type string (e.g., 'email.received', 'email.bounced')
         """
-        return payload.get("type", "unknown")
+        event_type: str = payload.get("type", "unknown")
+        return event_type
 
     @staticmethod
     def is_inbound_event(payload: dict[str, Any]) -> bool:

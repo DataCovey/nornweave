@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 import httpx
-import markdown
+import markdown  # type: ignore[import-untyped]
 
 from nornweave.core.interfaces import EmailProvider, InboundMessage
 
@@ -107,7 +107,9 @@ class MailgunAdapter(EmailProvider):
         files: list[tuple[str, tuple[str, bytes, str]]] = []
         if attachments:
             for att in attachments:
-                files.append(("attachment", (att.filename, att.content, att.content_type)))
+                content_bytes = att.get_content_bytes()
+                if att.filename and content_bytes and att.content_type:
+                    files.append(("attachment", (att.filename, content_bytes, att.content_type)))
 
         logger.debug("Sending email via Mailgun to %s", to)
 
@@ -129,7 +131,7 @@ class MailgunAdapter(EmailProvider):
                 response.raise_for_status()
 
             result = response.json()
-            provider_message_id = result.get("id", "")
+            provider_message_id: str = result.get("id", "")
             logger.info("Email sent via Mailgun: %s", provider_message_id)
             return provider_message_id
 

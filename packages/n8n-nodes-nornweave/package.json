@@ -12,10 +12,7 @@
     "inbox",
     "ai-agents"
   ],
-  "author": {
-    "name": "NornWeave",
-    "email": "hello@nornweave.io"
-  },
+  "author": { "name": "NornWeave", "email": "hello@nornweave.io" },
   "repository": {
     "type": "git",
     "url": "https://github.com/nornweave/nornweave.git"
@@ -30,15 +27,11 @@
     "prepublishOnly": "n8n-node prerelease",
     "test": "jest"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
-    "credentials": [
-      "dist/credentials/NornWeaveApi.credentials.js"
-    ],
+    "credentials": ["dist/credentials/NornWeaveApi.credentials.js"],
     "nodes": [
       "dist/nodes/NornWeave/NornWeave.node.js",
       "dist/nodes/NornWeaveTrigger/NornWeaveTrigger.node.js"
@@ -54,7 +47,5 @@
     "ts-jest": "^29.1.2",
     "typescript": "5.9.2"
   },
-  "peerDependencies": {
-    "n8n-workflow": "*"
-  }
+  "peerDependencies": { "n8n-workflow": "*" }
 }

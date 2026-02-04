@@ -23,18 +23,20 @@ logger = logging.getLogger(__name__)
 
 
 # Event types for email delivery tracking
-DELIVERY_EVENT_TYPES = frozenset({
-    "email.sent",
-    "email.delivered",
-    "email.bounced",
-    "email.complained",
-    "email.failed",
-    "email.opened",
-    "email.clicked",
-    "email.delivery_delayed",
-    "email.scheduled",
-    "email.suppressed",
-})
+DELIVERY_EVENT_TYPES = frozenset(
+    {
+        "email.sent",
+        "email.delivered",
+        "email.bounced",
+        "email.complained",
+        "email.failed",
+        "email.opened",
+        "email.clicked",
+        "email.delivery_delayed",
+        "email.scheduled",
+        "email.suppressed",
+    }
+)
 
 
 def _get_resend_adapter(settings: Settings) -> ResendAdapter:
