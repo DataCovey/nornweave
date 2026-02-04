@@ -35,6 +35,7 @@ dependencies = [
     "email-validator>=2.2.0",
     "markdown>=3.7",
     "svix>=1.24.0",  # For Resend webhook signature verification
+    "cryptography>=44.0.0",  # For SES/SendGrid webhook signature verification
 ]
 
 [project.optional-dependencies]
