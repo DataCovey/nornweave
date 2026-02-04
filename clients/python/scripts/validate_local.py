@@ -24,8 +24,8 @@ import argparse
 import asyncio
 import sys
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 # Add the src directory to the path for development
 sys.path.insert(0, "src")
@@ -33,8 +33,8 @@ sys.path.insert(0, "src")
 from nornweave_client import (
     ApiError,
     AsyncNornWeave,
-    NotFoundError,
     NornWeave,
+    NotFoundError,
     ValidationError,
 )
 
@@ -104,7 +104,7 @@ class ValidationRunner:
         print("\n" + "=" * 60)
         print(f"SUMMARY: {passed}/{total} tests passed")
         if failed > 0:
-            print(f"\nFailed tests:")
+            print("\nFailed tests:")
             for r in self.results:
                 if not r.passed:
                     print(f"  - {r.name}: {r.error}")

@@ -9,8 +9,8 @@ import pytest
 
 from nornweave_client import (
     ApiError,
-    NotFoundError,
     NornWeave,
+    NotFoundError,
     RateLimitError,
     ServerError,
     ValidationError,
@@ -168,7 +168,7 @@ class TestClientExceptionHandling:
             client = NornWeave(base_url="http://localhost:8000")
 
             with pytest.raises(ServerError) as exc_info:
-                client.inboxes.list().items
+                _ = client.inboxes.list().items
 
             assert exc_info.value.status_code == 500
 
