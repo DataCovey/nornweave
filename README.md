@@ -37,7 +37,6 @@ In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Y
 - **Webhook Ingestion**: Receive emails from Mailgun, SES, SendGrid, Resend
 - **Persistent Storage**: PostgreSQL with abstracted storage adapters
 - **Email Sending**: Send replies through your configured provider
-- **API Key Authentication**: Secure your endpoints
 
 ### Intelligence (The Agent Layer)
 - **Content Parsing**: HTML to clean Markdown, cruft removal
@@ -199,7 +198,7 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 
 - [Getting Started Guide](https://nornweave.datacovey.com/docs/getting-started/)
 - [API Reference](https://nornweave.datacovey.com/docs/api/)
-- [Architecture Overview](https://nornweave.datacovey.com/docs/architecture/)
+- [Architecture Overview](https://nornweave.datacovey.com/docs/concepts/architecture/)
 - [Provider Setup Guides](https://nornweave.datacovey.com/docs/guides/)
 
 ## Contributing
