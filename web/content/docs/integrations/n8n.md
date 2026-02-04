@@ -211,4 +211,4 @@ Add error handling nodes to manage cases where:
 
 - [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
 - [NornWeave API Reference](/docs/api)
-- [npm package](https://www.npmjs.com/package/n8n-nodes-nornweave)
+- [npm package](https://www.npmjs.com/package/@nornweave/n8n-nodes-nornweave)
