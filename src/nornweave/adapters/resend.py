@@ -1,6 +1,5 @@
 """Resend email provider adapter."""
 
-import base64
 import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
