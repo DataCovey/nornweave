@@ -80,10 +80,12 @@ jobs:
           name: dist
           path: packages/n8n-nodes-nornweave/dist
 
-      # npm trusted publishing with OIDC - no NPM_TOKEN needed!
-      # First publish must be done locally, then configure OIDC on npmjs.com
+      # npm publish with provenance attestation
+      # Requires NPM_TOKEN secret with publish permissions for @nornweave scope
       - name: Publish to npm (with provenance)
         run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Run n8n community package scan
         run: npx @n8n/scan-community-package @nornweave/n8n-nodes-nornweave
