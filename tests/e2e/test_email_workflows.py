@@ -1050,8 +1050,8 @@ On Fri, Jan 31, 2026 at 10:00 AM Alice wrote:
         assert msg_response.status_code == 200
         msg_data = msg_response.json()
 
-        # The raw text (content_raw) should contain the quote
-        raw_content = msg_data.get("content_raw", "")
+        # The raw text should contain the quote
+        raw_content = msg_data.get("text", "")
         assert "On Fri, Jan 31" in raw_content or "Alice wrote" in raw_content
 
         # The extracted text (content_clean) should NOT contain the quoted part
