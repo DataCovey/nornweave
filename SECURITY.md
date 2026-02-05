@@ -2,11 +2,7 @@
 
 ## Supported Versions
 
-We release patches for security vulnerabilities for the following versions:
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+We release patches for security vulnerabilities for the latest major version only.
 
 Older versions may receive best-effort support. Upgrade to a supported version when possible.
 
