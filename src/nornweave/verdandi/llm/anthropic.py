@@ -31,7 +31,7 @@ class AnthropicSummaryProvider:
         try:
             from anthropic import APIError
         except ImportError:
-            APIError = Exception  # type: ignore[assignment,misc]
+            APIError = Exception
 
         try:
             response = await self.client.messages.create(

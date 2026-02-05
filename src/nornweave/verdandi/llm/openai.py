@@ -41,7 +41,7 @@ class OpenAISummaryProvider:
                 ],
             )
         except APIError as e:
-            logger.error("OpenAI API error: %s %s", e.status_code, e.message)
+            logger.error("OpenAI API error: %s %s", getattr(e, "status_code", None), e.message)
             raise
 
         choice = response.choices[0]

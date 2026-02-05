@@ -46,7 +46,11 @@ class GeminiSummaryProvider:
             )
 
         if response.status_code != 200:
-            body = response.json() if response.headers.get("content-type", "").startswith("application/json") else {}
+            body = (
+                response.json()
+                if response.headers.get("content-type", "").startswith("application/json")
+                else {}
+            )
             error_msg = body.get("error", {}).get("message", response.text[:200])
             logger.error("Gemini API error %d: %s", response.status_code, error_msg)
             msg = f"Gemini API returned {response.status_code}: {error_msg}"
