@@ -30,9 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - (None yet)
+
 ---
 
-## [0.1.1] - 2026-02-04
+## [0.1.2] - 2026-02-04
 
 ### Added
 
@@ -52,6 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Dockerfile to explicitly install `[postgres,mcp]` extras
 - Updated Makefile with new install targets (`install-postgres`, `install-mcp`, `install-prod`)
 - Aligned MCP configuration examples across all documentation
+
+---
+
+## [0.1.1] - 2026-02-04
+
+### Changed
+
 - **MCP Server implementation** (Huginn & Muninn) for AI agent integration:
   - FastMCP-based server with 2 resources and 4 tools
   - Resources: `email://inbox/{id}/recent`, `email://thread/{id}`
