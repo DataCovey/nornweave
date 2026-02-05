@@ -104,14 +104,14 @@ flowchart TB
         end
 
         subgraph mcp [Huginn & Muninn - MCP Server]
-            Transports[Transports<br/>stdio | SSE | HTTP]
-            Resources[Resources<br/>email://inbox | email://thread]
-            Tools[Tools<br/>create_inbox | send_email | search_email<br/>list_attachments | get_attachment_content]
+            Transports["Transports<br/>stdio | SSE | HTTP"]
+            Resources["Resources<br/>email://inbox | email://thread"]
+            Tools["Tools<br/>create_inbox | send_email | search_email<br/>list_attachments | get_attachment_content"]
         end
 
         subgraph yggdrasil [Yggdrasil - API Gateway]
             WH[Webhook Routes]
-            API[REST API v1<br/>inboxes | threads | messages | attachments]
+            API["REST API v1<br/>inboxes | threads | messages | attachments"]
         end
         
         subgraph verdandi [Verdandi - Ingestion Engine]
