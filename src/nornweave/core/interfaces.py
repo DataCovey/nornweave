@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from typing import TYPE_CHECKING, Any
 
 from nornweave.models.attachment import AttachmentDisposition, SendAttachment
@@ -378,6 +378,19 @@ class StorageInterface(ABC):
         since: datetime | None = None,
     ) -> Thread | None:
         """Get thread by normalized subject within time window (for subject-based threading)."""
+        ...
+
+    # -------------------------------------------------------------------------
+    # LLM Token Usage methods
+    # -------------------------------------------------------------------------
+    @abstractmethod
+    async def get_token_usage(self, usage_date: date) -> int:
+        """Get total tokens used for a given date. Returns 0 if no record exists."""
+        ...
+
+    @abstractmethod
+    async def record_token_usage(self, usage_date: date, tokens: int) -> None:
+        """Record token usage for a given date. Creates or increments the daily counter."""
         ...
 
 

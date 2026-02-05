@@ -52,6 +52,7 @@ async def get_recent_threads(client: NornWeaveClient, inbox_id: str) -> str:
                     "last_message_at": thread.get("last_message_at"),
                     "message_count": message_count,
                     "participants": participants,
+                    "summary": thread.get("summary"),
                 }
             )
 
@@ -113,6 +114,14 @@ def format_thread_markdown(thread: dict[str, Any]) -> str:
     subject = thread.get("subject", "(no subject)")
     lines.append(f"## Thread: {subject}")
     lines.append("")
+
+    # Include summary if available
+    summary = thread.get("summary")
+    if summary:
+        lines.append("## Summary")
+        lines.append("")
+        lines.append(summary)
+        lines.append("")
 
     messages = thread.get("messages", [])
     if not messages:

@@ -19,6 +19,7 @@ from nornweave.core.storage import AttachmentMetadata, create_attachment_storage
 from nornweave.models.attachment import AttachmentUpload, SendAttachment
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
+from nornweave.verdandi.summarize import generate_thread_summary
 from nornweave.yggdrasil.dependencies import get_email_provider, get_storage
 
 router = APIRouter()
@@ -347,6 +348,9 @@ async def send_message(
     if thread:
         thread.last_message_at = created_message.created_at
         await storage.update_thread(thread)
+
+    # Fire-and-forget thread summarization
+    await generate_thread_summary(storage, thread_id)
 
     return SendMessageResponse(
         id=created_message.id,

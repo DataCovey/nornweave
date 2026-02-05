@@ -1,13 +1,20 @@
 """Base storage adapter with shared SQLAlchemy functionality."""
 
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import func, or_, select
 
 from nornweave.core.interfaces import StorageInterface
-from nornweave.urdr.orm import AttachmentORM, EventORM, InboxORM, MessageORM, ThreadORM
+from nornweave.urdr.orm import (
+    AttachmentORM,
+    EventORM,
+    InboxORM,
+    LlmTokenUsageORM,
+    MessageORM,
+    ThreadORM,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -115,6 +122,13 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         orm_thread.subject = thread.subject
         orm_thread.last_message_at = thread.last_message_at
         orm_thread.participant_hash = thread.participant_hash
+        if thread.timestamp is not None:
+            orm_thread.timestamp = thread.timestamp
+        orm_thread.message_count = thread.message_count
+        orm_thread.preview = thread.preview
+        orm_thread.senders = thread.senders
+        orm_thread.recipients = thread.recipients
+        orm_thread.summary = thread.summary
         await self._session.flush()
         await self._session.refresh(orm_thread)
         return orm_thread.to_pydantic()
@@ -510,3 +524,32 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         result = await self._session.execute(stmt)
         orm_thread = result.scalar_one_or_none()
         return orm_thread.to_pydantic() if orm_thread else None
+
+    # -------------------------------------------------------------------------
+    # LLM Token Usage methods
+    # -------------------------------------------------------------------------
+    async def get_token_usage(self, usage_date: date) -> int:
+        """Get total tokens used for a given date."""
+        stmt = select(LlmTokenUsageORM.tokens_used).where(
+            LlmTokenUsageORM.date == usage_date,
+        )
+        result = await self._session.execute(stmt)
+        row = result.scalar_one_or_none()
+        return row if row is not None else 0
+
+    async def record_token_usage(self, usage_date: date, tokens: int) -> None:
+        """Record token usage for a given date (upsert: create or increment)."""
+        stmt = select(LlmTokenUsageORM).where(LlmTokenUsageORM.date == usage_date)
+        result = await self._session.execute(stmt)
+        usage_row = result.scalar_one_or_none()
+
+        if usage_row is None:
+            usage_row = LlmTokenUsageORM(
+                date=usage_date,
+                tokens_used=tokens,
+            )
+            self._session.add(usage_row)
+        else:
+            usage_row.tokens_used = usage_row.tokens_used + tokens
+
+        await self._session.flush()

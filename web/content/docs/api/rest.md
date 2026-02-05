@@ -126,6 +126,7 @@ GET /v1/threads/{thread_id}
   "inbox_id": "ibx_abc123",
   "subject": "Re: Pricing Question",
   "last_message_at": "2025-01-31T10:05:00Z",
+  "summary": "Customer asked about pricing. Support replied with $20/month starting price.",
   "messages": [
     {
       "id": "msg_001",
@@ -149,6 +150,7 @@ GET /v1/threads/{thread_id}
 |-------|-------------|
 | `role` | `user` for inbound messages, `assistant` for outbound |
 | `content` | Clean Markdown content (HTML converted, cruft removed) |
+| `summary` | LLM-generated thread summary (null when summarization is disabled or not yet generated) |
 
 {{< callout type="info" >}}
 The `role` field maps directly to LLM chat formats, making it easy to use thread content as conversation history.

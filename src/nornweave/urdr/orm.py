@@ -1,11 +1,12 @@
 """SQLAlchemy ORM models for Urðr storage layer."""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy import (
     JSON,
+    Date,
     DateTime,
     ForeignKey,
     Index,
@@ -171,6 +172,7 @@ class ThreadORM(Base):
         index=True,
     )
     preview: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Stats
     last_message_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
@@ -211,6 +213,7 @@ class ThreadORM(Base):
             recipients=self.recipients or [],
             subject=self.subject,
             preview=self.preview,
+            summary=self.summary,
             attachments=None,  # Load separately if needed
             last_message_id=self.last_message_id,
             message_count=self.message_count,
@@ -236,6 +239,7 @@ class ThreadORM(Base):
             subject=thread.subject,
             normalized_subject=thread.normalized_subject,
             preview=thread.preview,
+            summary=thread.summary,
             last_message_id=thread.last_message_id,
             message_count=thread.message_count,
             size=thread.size,
@@ -639,3 +643,25 @@ class EventORM(Base):
             thread_id=event.thread_id,
             message_id=event.message_id,
         )
+
+
+class LlmTokenUsageORM(Base):
+    """Daily LLM token usage tracking."""
+
+    __tablename__ = "llm_token_usage"
+
+    date: Mapped[date] = mapped_column(
+        Date,
+        primary_key=True,
+    )
+    tokens_used: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

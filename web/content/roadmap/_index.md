@@ -34,6 +34,7 @@ The intelligence layer adds LLM-friendly features:
 - **Smart Threading**: Automatic conversation grouping via email headers
 - **MCP Server**: Direct integration with Claude, Cursor, and other MCP clients
 - **Attachment Processing**: Extract text from PDFs and documents
+- **LLM Thread Summaries**: BYO API key for OpenAI, Anthropic, or Gemini to auto-summarize threads. AI agents can understand a 50-email thread from just the summary + last 2 messages. Includes daily token budgeting.
 
 ---
 

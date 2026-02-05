@@ -188,6 +188,46 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
 | `s3` | Production, scalable | `[s3]` | Presigned URLs |
 | `gcs` | Google Cloud deployments | `[gcs]` | Presigned URLs |
 
+## LLM Thread Summarization
+
+NornWeave can automatically generate thread summaries using your LLM provider. This allows AI agents to understand long threads by reading just the summary instead of every message.
+
+The feature is **disabled by default**. To enable it, set `LLM_PROVIDER` to one of the supported providers and provide the API key.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `LLM_PROVIDER` | LLM provider (`openai`, `anthropic`, or `gemini`) | (disabled) |
+| `LLM_API_KEY` | API key for the selected provider | Required when provider is set |
+| `LLM_MODEL` | Model override (auto-selected per provider if empty) | (auto) |
+| `LLM_SUMMARY_PROMPT` | Custom system prompt for summarization | Built-in default |
+| `LLM_DAILY_TOKEN_LIMIT` | Max tokens per day (0 = unlimited) | `1000000` |
+
+Requires the provider's optional dependency:
+
+```bash
+pip install nornweave[openai]    # For OpenAI (default model: gpt-4o-mini)
+pip install nornweave[anthropic]  # For Anthropic (default model: claude-haiku)
+pip install nornweave[gemini]     # For Gemini (default model: gemini-2.0-flash)
+pip install nornweave[llm]        # All providers
+```
+
+### Example
+
+```bash
+# Enable with OpenAI
+LLM_PROVIDER=openai
+LLM_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+LLM_DAILY_TOKEN_LIMIT=500000
+
+# Optional: custom model and prompt
+LLM_MODEL=gpt-4o
+LLM_SUMMARY_PROMPT="Summarize this email thread in 3 bullet points."
+```
+
+{{< callout type="info" >}}
+Summaries are generated after each new message. If the daily token limit is reached, summarization is paused until the next day (UTC). Token usage is tracked in the database and can be queried from the `llm_token_usage` table.
+{{< /callout >}}
+
 ## MCP Server Configuration
 
 The MCP server connects AI agents to NornWeave. Configure it using environment variables:
@@ -258,6 +298,11 @@ AWS_S3_REGION=us-east-1
 # MCP Server
 NORNWEAVE_API_URL=http://localhost:8000
 NORNWEAVE_API_KEY=nw-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# LLM Thread Summarization (optional)
+LLM_PROVIDER=openai
+LLM_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+LLM_DAILY_TOKEN_LIMIT=1000000
 ```
 
 ## Next Steps

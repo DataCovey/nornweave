@@ -26,6 +26,7 @@ class ThreadDetailResponse(BaseModel):
 
     id: str
     subject: str
+    summary: str | None = None
     messages: list[ThreadMessageResponse]
 
 
@@ -35,6 +36,7 @@ class ThreadSummaryResponse(BaseModel):
     id: str
     inbox_id: str
     subject: str
+    summary: str | None = None
     last_message_at: datetime | None
     participant_hash: str | None
 
@@ -74,6 +76,7 @@ async def list_threads(
                 id=t.id,
                 inbox_id=t.inbox_id,
                 subject=t.subject,
+                summary=t.summary,
                 last_message_at=t.last_message_at,
                 participant_hash=t.participant_hash,
             )
@@ -138,5 +141,6 @@ async def get_thread(
     return ThreadDetailResponse(
         id=thread.id,
         subject=thread.subject,
+        summary=thread.summary,
         messages=thread_messages,
     )

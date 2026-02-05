@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **LLM Thread Summaries** - Automatic thread summarization using your LLM provider:
+  - Support for OpenAI, Anthropic, and Google Gemini as summarization backends
+  - Opt-in via `LLM_PROVIDER` env var (disabled by default)
+  - Summaries update on each new message using Talon-cleaned text (no quoted-reply duplication)
+  - Customizable summarization prompt via `LLM_SUMMARY_PROMPT`
+  - Daily token budget with `LLM_DAILY_TOKEN_LIMIT` to control costs
+  - `summary` field on Thread and ThreadItem in REST API responses
+  - MCP resources include summaries for agent triage workflows
+  - New optional dependency extras: `pip install nornweave[openai]`, `[anthropic]`, `[gemini]`, or `[llm]` for all
 - **Expanded MessageResponse** - API message responses now include all email metadata fields:
   - `subject`, `from_address`, `to_addresses`, `cc_addresses`, `bcc_addresses`, `reply_to_addresses`
   - `text`, `html`, `content_clean`, `timestamp`, `labels`, `preview`, `size`

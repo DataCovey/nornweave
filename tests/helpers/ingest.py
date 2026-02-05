@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
 from nornweave.verdandi.content import extract_content, generate_preview
+from nornweave.verdandi.summarize import generate_thread_summary
 from nornweave.verdandi.threading import (
     compute_participant_hash,
     normalize_subject,
@@ -165,6 +166,9 @@ async def ingest_inbound_message(
 
     created_message = await storage.create_message(message)
 
+    # Fire-and-forget thread summarization (non-blocking)
+    await generate_thread_summary(storage, thread_result.thread_id)
+
     # Create attachment records if requested
     if create_attachments and inbound.attachments:
         for attachment in inbound.attachments:
@@ -267,5 +271,8 @@ async def create_outbound_message(
         thread.message_count = (thread.message_count or 0) + 1
         thread.preview = preview
         await storage.update_thread(thread)
+
+    # Fire-and-forget thread summarization (non-blocking)
+    await generate_thread_summary(storage, thread_id)
 
     return created_message

@@ -17,6 +17,7 @@ from nornweave.core.storage import AttachmentMetadata, create_attachment_storage
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
 from nornweave.verdandi.parser import html_to_markdown
+from nornweave.verdandi.summarize import generate_thread_summary
 from nornweave.yggdrasil.dependencies import get_storage
 
 router = APIRouter()
@@ -332,6 +333,10 @@ async def _handle_inbound_email(
         thread.last_message_at = created_message.created_at
         thread.received_timestamp = created_message.created_at
         await storage.update_thread(thread)
+
+    # Fire-and-forget thread summarization
+    if thread_id:
+        await generate_thread_summary(storage, thread_id)
 
     result = {
         "status": "received",

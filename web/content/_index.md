@@ -174,7 +174,7 @@ sitemap_changefreq: daily
   >}}
   {{< hextra/feature-card
     title="Phase 2: Intelligence"
-    subtitle="**The Agent Layer** — HTML to clean Markdown parsing, automatic cruft removal, smart conversation threading, MCP server for Claude/Cursor, and attachment text extraction."
+    subtitle="**The Agent Layer** — HTML to clean Markdown parsing, automatic cruft removal, smart conversation threading, MCP server for Claude/Cursor, attachment text extraction, and LLM Thread Summaries (BYO API key for OpenAI, Anthropic, or Gemini)."
     icon="check-circle"
     style="background: radial-gradient(ellipse at 50% 80%,rgba(120,119,198,0.15),hsla(0,0%,100%,0));"
   >}}

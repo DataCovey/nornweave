@@ -17,3 +17,5 @@ NornWeave integrates with popular automation platforms and tools to extend your 
 - Zapier
 - Make (Integromat)
 - Pipedream
+- MindStudio
+- Glean

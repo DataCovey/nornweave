@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -147,6 +147,44 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # LLM Thread Summarization Configuration
+    # -------------------------------------------------------------------------
+    llm_provider: Literal["openai", "anthropic", "gemini"] | None = Field(
+        default=None,
+        alias="LLM_PROVIDER",
+        description="LLM provider for thread summarization. None = feature disabled.",
+    )
+    llm_api_key: str = Field(
+        default="",
+        alias="LLM_API_KEY",
+        description="API key for the selected LLM provider",
+    )
+    llm_model: str = Field(
+        default="",
+        alias="LLM_MODEL",
+        description="Model override (auto-selected per provider if empty)",
+    )
+    llm_summary_prompt: str = Field(
+        default=(
+            "You are an email thread summarizer. Given a chronological email conversation, "
+            "produce a concise summary that captures:\n"
+            "- Key topics discussed\n"
+            "- Decisions made or actions agreed upon\n"
+            "- Open questions or pending items\n"
+            "- Current status of the conversation\n\n"
+            "Keep the summary under 300 words. Use bullet points for clarity.\n"
+            "Do not include greetings, sign-offs, or meta-commentary."
+        ),
+        alias="LLM_SUMMARY_PROMPT",
+        description="System prompt for thread summarization",
+    )
+    llm_daily_token_limit: int = Field(
+        default=1_000_000,
+        alias="LLM_DAILY_TOKEN_LIMIT",
+        description="Max tokens per day for summarization (0 = unlimited)",
+    )
+
+    # -------------------------------------------------------------------------
     # Content Extraction Configuration (Talon)
     # -------------------------------------------------------------------------
     talon_use_ml_signature: bool = Field(
@@ -164,6 +202,17 @@ class Settings(BaseSettings):
         alias="EXTRACTION_FALLBACK_TO_ORIGINAL",
         description="Return original content if extraction fails",
     )
+
+    @model_validator(mode="after")
+    def validate_llm_config(self) -> Settings:
+        """Validate LLM configuration: API key is required when provider is set."""
+        if self.llm_provider is not None and not self.llm_api_key:
+            msg = (
+                f"LLM_API_KEY is required when LLM_PROVIDER is set to '{self.llm_provider}'. "
+                "Set LLM_API_KEY in your environment or .env file."
+            )
+            raise ValueError(msg)
+        return self
 
 
 @lru_cache

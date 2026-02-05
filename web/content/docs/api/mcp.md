@@ -108,10 +108,15 @@ Returns the last 10 thread summaries for an inbox.
     "subject": "Re: Pricing Question",
     "last_message_at": "2025-01-31T10:05:00Z",
     "message_count": 2,
-    "participants": ["bob@gmail.com", "support@mail.yourdomain.com"]
+    "participants": ["bob@gmail.com", "support@mail.yourdomain.com"],
+    "summary": "Customer asked about pricing. Support replied with $20/month starting price."
   }
 ]
 ```
+
+{{< callout type="info" >}}
+The `summary` field contains an LLM-generated thread summary when [LLM summarization](/docs/getting-started/configuration/#llm-thread-summarization) is enabled. It is `null` when the feature is disabled or the summary hasn't been generated yet.
+{{< /callout >}}
 
 ### Thread Content
 
@@ -125,6 +130,10 @@ Returns the full thread content in Markdown format, optimized for LLM context.
 
 ```markdown
 ## Thread: Re: Pricing Question
+
+## Summary
+
+Customer asked about pricing. Support replied with $20/month starting price.
 
 **From:** bob@gmail.com ←
 **Date:** 2025-01-31 10:00

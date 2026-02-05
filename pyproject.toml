@@ -70,9 +70,22 @@ s3 = [
 gcs = [
     "google-cloud-storage>=2.18.0",
 ]
+# LLM providers for thread summarization
+openai = [
+    "openai>=1.57.0",
+]
+anthropic = [
+    "anthropic>=0.42.0",
+]
+gemini = [
+    "google-genai>=1.0.0",
+]
+llm = [
+    "nornweave[openai,anthropic,gemini]",
+]
 # All optional dependencies
 all = [
-    "nornweave[postgres,mcp,attachments,search,ratelimit,s3,gcs]",
+    "nornweave[postgres,mcp,attachments,search,ratelimit,s3,gcs,llm]",
 ]
 # Development dependencies
 dev = [
@@ -205,7 +218,13 @@ module = [
     "talon",
     "talon.*",
     "boto3",
+    "google",
+    "google.*",
     "google.cloud.*",
+    "google.genai",
+    "google.genai.*",
+    "anthropic",
+    "anthropic.*",
     "pdfplumber",
     "svix",
     "svix.*",
