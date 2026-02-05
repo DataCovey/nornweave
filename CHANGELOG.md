@@ -83,22 +83,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extended database schema with `attachments` table for metadata storage
 - Updated component architecture diagrams to include attachment storage
 
-### Deprecated
-
-- (None yet)
-
-### Removed
-
-- (None yet)
-
-### Fixed
-
-- (None yet)
-
-### Security
-
-- (None yet)
-
 ---
 
 ## [0.1.3] - 2026-02-05
