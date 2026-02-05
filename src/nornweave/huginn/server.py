@@ -20,7 +20,7 @@ from nornweave.muninn.tools import create_inbox, search_email, send_email, wait_
 # Create the FastMCP server
 mcp = FastMCP(
     name="nornweave",
-    version="0.1.2",
+    version="0.1.3",
     instructions="Email capabilities for AI agents - create inboxes, send emails, search messages",
 )
 

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] 0.1.3
+## [Unreleased]
 
 ### Added
 
@@ -30,6 +30,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - (None yet)
+
+---
+
+## [0.1.3] - 2026-02-05
+
+### Fixed
+
+- **Email provider dependency loading** - Lazy-import only the adapter for the configured provider in `get_email_provider`, so optional dependencies (e.g. `cryptography` for SendGrid) are not required when using other providers (Mailgun, Resend, SES). Fixes 500 when sending email with Resend when SendGrid’s dependencies were not installed.
 
 ---
 
@@ -104,5 +112,8 @@ Initial release. See [Unreleased] for current development.
 - Implemented **Urdr**, basic Storage (PSQL and SQLite)
 - E2E testing
 
-[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/DataCovey/nornweave/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/DataCovey/nornweave/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/DataCovey/nornweave/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/DataCovey/nornweave/releases/tag/v0.1.0
