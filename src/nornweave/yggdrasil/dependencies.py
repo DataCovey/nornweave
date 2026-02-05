@@ -160,28 +160,33 @@ async def get_email_provider(
     settings: Settings = Depends(get_settings),
 ) -> EmailProvider:
     """FastAPI dependency to get the configured email provider."""
-    # Import here to avoid circular imports
-    from nornweave.adapters.mailgun import MailgunAdapter
-    from nornweave.adapters.resend import ResendAdapter
-    from nornweave.adapters.sendgrid import SendGridAdapter
-    from nornweave.adapters.ses import SESAdapter
-
+    # Lazy-import only the adapter for the configured provider so optional
+    # dependencies (e.g. cryptography for SendGrid) are not required when
+    # using other providers.
     provider = settings.email_provider
 
     if provider == "mailgun":
+        from nornweave.adapters.mailgun import MailgunAdapter
+
         return MailgunAdapter(
             api_key=settings.mailgun_api_key,
             domain=settings.mailgun_domain,
         )
     elif provider == "sendgrid":
+        from nornweave.adapters.sendgrid import SendGridAdapter
+
         return SendGridAdapter(api_key=settings.sendgrid_api_key)
     elif provider == "ses":
+        from nornweave.adapters.ses import SESAdapter
+
         return SESAdapter(
             access_key_id=settings.aws_access_key_id,
             secret_access_key=settings.aws_secret_access_key,
             region=settings.aws_region,
         )
     elif provider == "resend":
+        from nornweave.adapters.resend import ResendAdapter
+
         return ResendAdapter(
             api_key=settings.resend_api_key,
             webhook_secret=settings.resend_webhook_secret,
