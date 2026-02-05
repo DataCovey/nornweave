@@ -36,6 +36,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **PyPI packaging** - NornWeave is now available on PyPI:
+  - Install with `pip install nornweave` (base package with SQLite)
+  - Install with `pip install nornweave[postgres]` for PostgreSQL support
+  - Install with `pip install nornweave[mcp]` for MCP server support
+  - Install with `pip install nornweave[all]` for all features
+- GitHub Actions workflow for PyPI publishing with trusted publishing (OIDC)
+- Installation validation script (`scripts/validate_install.py`)
+
+### Changed
+
+- **Breaking**: PostgreSQL dependencies (`asyncpg`, `psycopg2-binary`) moved from base to `[postgres]` extra
+  - Existing users running PostgreSQL should install with `pip install nornweave[postgres]`
+  - Base package now works with SQLite out of the box without PostgreSQL dependencies
+- Updated Dockerfile to explicitly install `[postgres,mcp]` extras
+- Updated Makefile with new install targets (`install-postgres`, `install-mcp`, `install-prod`)
+- Aligned MCP configuration examples across all documentation
 - **MCP Server implementation** (Huginn & Muninn) for AI agent integration:
   - FastMCP-based server with 2 resources and 4 tools
   - Resources: `email://inbox/{id}/recent`, `email://thread/{id}`

@@ -61,7 +61,24 @@ flowchart TB
 
 ---
 
-NornWeave can be installed using Docker (recommended) or directly from source using uv.
+NornWeave can be installed using Docker (recommended), from PyPI, or directly from source using uv.
+
+## Package Extras
+
+NornWeave uses optional extras to keep the base installation lightweight:
+
+| Installation | Command | Use Case |
+|--------------|---------|----------|
+| **Base** | `pip install nornweave` | SQLite database, all email providers |
+| **PostgreSQL** | `pip install nornweave[postgres]` | Production PostgreSQL support |
+| **MCP** | `pip install nornweave[mcp]` | AI agent integration (Claude, Cursor) |
+| **Full** | `pip install nornweave[all]` | All features |
+
+For development from source, use `make install-dev` which installs all extras.
+
+{{< callout type="info" >}}
+The base package includes SQLite support and all email providers (Mailgun, SES, SendGrid, Resend). PostgreSQL requires the `[postgres]` extra.
+{{< /callout >}}
 
 ## Using Docker (Recommended)
 

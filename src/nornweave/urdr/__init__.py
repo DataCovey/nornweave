@@ -8,7 +8,7 @@ __all__ = [
     "EventORM",
     "InboxORM",
     "MessageORM",
-    "PostgresAdapter",
+    "PostgresAdapter",  # May be None if asyncpg not installed
     "SQLiteAdapter",
     "ThreadORM",
 ]

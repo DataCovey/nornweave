@@ -17,8 +17,6 @@ from nornweave.core.interfaces import (  # noqa: TC001 - needed at runtime for F
     EmailProvider,
     StorageInterface,
 )
-from nornweave.urdr.adapters.postgres import PostgresAdapter
-from nornweave.urdr.adapters.sqlite import SQLiteAdapter
 
 # -----------------------------------------------------------------------------
 # Database engine management
@@ -142,8 +140,17 @@ async def get_storage(
 ) -> StorageInterface:
     """FastAPI dependency to get the configured storage adapter."""
     if settings.db_driver == "postgres":
+        try:
+            from nornweave.urdr.adapters.postgres import PostgresAdapter
+        except ImportError as e:
+            raise ImportError(
+                "PostgreSQL support requires additional dependencies. "
+                "Install with: pip install nornweave[postgres]"
+            ) from e
         return PostgresAdapter(session)
     elif settings.db_driver == "sqlite":
+        from nornweave.urdr.adapters.sqlite import SQLiteAdapter
+
         return SQLiteAdapter(session)
     else:
         raise ValueError(f"Unknown db_driver: {settings.db_driver}")

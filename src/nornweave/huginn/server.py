@@ -11,7 +11,7 @@ Supports three transports:
 
 from typing import Any, Literal
 
-from fastmcp import FastMCP  # type: ignore[import-not-found]
+from fastmcp import FastMCP
 
 from nornweave.huginn.client import NornWeaveClient
 from nornweave.huginn.resources import get_recent_threads, get_thread_content
@@ -20,8 +20,8 @@ from nornweave.muninn.tools import create_inbox, search_email, send_email, wait_
 # Create the FastMCP server
 mcp = FastMCP(
     name="nornweave",
-    version="0.1.0",
-    description="Email capabilities for AI agents - create inboxes, send emails, search messages",
+    version="0.1.1",
+    instructions="Email capabilities for AI agents - create inboxes, send emails, search messages",
 )
 
 # Global client instance (created on first use)
@@ -41,7 +41,7 @@ def _get_client() -> NornWeaveClient:
 # -----------------------------------------------------------------------------
 
 
-@mcp.resource("email://inbox/{inbox_id}/recent")  # type: ignore[untyped-decorator]
+@mcp.resource("email://inbox/{inbox_id}/recent")
 async def resource_recent_threads(inbox_id: str) -> str:
     """Get recent threads for an inbox.
 
@@ -52,7 +52,7 @@ async def resource_recent_threads(inbox_id: str) -> str:
     return await get_recent_threads(client, inbox_id)
 
 
-@mcp.resource("email://thread/{thread_id}")  # type: ignore[untyped-decorator]
+@mcp.resource("email://thread/{thread_id}")
 async def resource_thread_content(thread_id: str) -> str:
     """Get thread content in Markdown format.
 
@@ -63,7 +63,7 @@ async def resource_thread_content(thread_id: str) -> str:
     return await get_thread_content(client, thread_id)
 
 
-@mcp.tool()  # type: ignore[untyped-decorator]
+@mcp.tool()
 async def tool_create_inbox(name: str, username: str) -> dict[str, Any]:
     """Create a new inbox.
 
@@ -80,7 +80,7 @@ async def tool_create_inbox(name: str, username: str) -> dict[str, Any]:
     return await create_inbox(client, name=name, username=username)
 
 
-@mcp.tool()  # type: ignore[untyped-decorator]
+@mcp.tool()
 async def tool_send_email(
     inbox_id: str,
     recipient: str,
@@ -114,7 +114,7 @@ async def tool_send_email(
     )
 
 
-@mcp.tool()  # type: ignore[untyped-decorator]
+@mcp.tool()
 async def tool_search_email(query: str, inbox_id: str, limit: int = 10) -> dict[str, Any]:
     """Search for emails.
 
@@ -132,7 +132,7 @@ async def tool_search_email(query: str, inbox_id: str, limit: int = 10) -> dict[
     return await search_email(client, query=query, inbox_id=inbox_id, limit=min(limit, 100))
 
 
-@mcp.tool()  # type: ignore[untyped-decorator]
+@mcp.tool()
 async def tool_wait_for_reply(thread_id: str, timeout_seconds: int = 300) -> dict[str, Any]:
     """Wait for a reply in a thread (experimental).
 

@@ -12,10 +12,31 @@ RESET := \033[0m
 # =============================================================================
 # Installation & Setup
 # =============================================================================
+# Package extras:
+#   - (base): SQLite support, all email providers
+#   - postgres: PostgreSQL support (asyncpg, psycopg2)
+#   - mcp: MCP server for AI agents
+#   - attachments: PDF/attachment processing
+#   - search: Semantic search with pgvector
+#   - ratelimit: Redis-based rate limiting
+#   - all: Everything above
+#   - dev: Development tools (pytest, ruff, mypy)
 
-install: ## Install dependencies with uv
-	@echo "$(BLUE)Installing dependencies...$(RESET)"
-	uv sync
+install: ## Install base dependencies (SQLite only)
+	@echo "$(BLUE)Installing base dependencies...$(RESET)"
+	uv sync --no-dev
+
+install-postgres: ## Install with PostgreSQL support
+	@echo "$(BLUE)Installing with PostgreSQL support...$(RESET)"
+	uv sync --no-dev --extra postgres
+
+install-mcp: ## Install with MCP server support
+	@echo "$(BLUE)Installing with MCP support...$(RESET)"
+	uv sync --no-dev --extra mcp
+
+install-prod: ## Install for production (PostgreSQL + MCP)
+	@echo "$(BLUE)Installing production dependencies...$(RESET)"
+	uv sync --no-dev --extra postgres --extra mcp
 
 install-dev: ## Install with all development dependencies
 	@echo "$(BLUE)Installing development dependencies...$(RESET)"
@@ -23,7 +44,7 @@ install-dev: ## Install with all development dependencies
 
 install-all: ## Install with all optional dependencies
 	@echo "$(BLUE)Installing all dependencies...$(RESET)"
-	uv sync --extra all --extra dev --extra docs
+	uv sync --all-extras
 
 setup: install-dev ## Initial project setup
 	@echo "$(BLUE)Setting up pre-commit hooks...$(RESET)"

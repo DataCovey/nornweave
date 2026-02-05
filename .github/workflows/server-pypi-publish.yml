@@ -1,0 +1,100 @@
+# Publish NornWeave Server to PyPI
+#
+# Triggers on version tags (vX.Y.Z) and publishes to PyPI using trusted publishing (OIDC).
+# The version in pyproject.toml must match the tag (e.g., v0.1.1 requires version = "0.1.1").
+
+name: Server PyPI Publish
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Verify version matches tag
+        run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          PKG_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "Error: Tag version ($TAG_VERSION) does not match pyproject.toml version ($PKG_VERSION)"
+            exit 1
+          fi
+          echo "Version verified: $PKG_VERSION"
+
+      - name: Build package
+        run: uv build
+
+      - name: Store distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi-publish
+      url: https://pypi.org/p/nornweave
+    permissions:
+      id-token: write  # Required for OIDC trusted publishing
+      attestations: write
+      contents: write  # For creating GitHub release
+
+    steps:
+      - name: Download distribution packages
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI (with attestations)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: NornWeave v${{ steps.version.outputs.version }}
+          body: |
+            ## NornWeave v${{ steps.version.outputs.version }}
+            
+            Install from PyPI:
+            ```bash
+            # Base installation (SQLite, all email providers)
+            pip install nornweave==${{ steps.version.outputs.version }}
+            
+            # With PostgreSQL support
+            pip install nornweave[postgres]==${{ steps.version.outputs.version }}
+            
+            # With MCP server for AI agents
+            pip install nornweave[mcp]==${{ steps.version.outputs.version }}
+            
+            # Full installation
+            pip install nornweave[all]==${{ steps.version.outputs.version }}
+            ```
+            
+            See [CHANGELOG.md](https://github.com/DataCovey/nornweave/blob/main/CHANGELOG.md) for details.
+          draft: false
+          prerelease: false

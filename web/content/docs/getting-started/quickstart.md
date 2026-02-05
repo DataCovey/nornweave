@@ -265,6 +265,12 @@ NornWeave automatically converts Markdown to HTML for the email body and handles
 
 If you're using Claude, Cursor, or another MCP-compatible client, you can interact with NornWeave directly.
 
+First, install MCP support:
+
+```bash
+pip install nornweave[mcp]
+```
+
 Add to your MCP configuration:
 
 ```json
@@ -272,7 +278,10 @@ Add to your MCP configuration:
   "mcpServers": {
     "nornweave": {
       "command": "nornweave",
-      "args": ["--api-url", "http://localhost:8000"]
+      "args": ["mcp"],
+      "env": {
+        "NORNWEAVE_API_URL": "http://localhost:8000"
+      }
     }
   }
 }

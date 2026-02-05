@@ -1,6 +1,6 @@
 [project]
 name = "nornweave"
-version = "0.1.0"
+version = "0.1.1"
 description = "Open-source, self-hosted Inbox-as-a-Service API for AI Agents"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -26,8 +26,6 @@ dependencies = [
     "pydantic-settings>=2.6.0",
     "sqlalchemy[asyncio]>=2.0.36",
     "alembic>=1.14.0",
-    "asyncpg>=0.30.0",
-    "psycopg2-binary>=2.9.0",  # Required for Alembic sync migrations
     "aiosqlite>=0.20.0",  # For SQLite async support
     "httpx>=0.28.0",
     "python-multipart>=0.0.18",
@@ -40,28 +38,33 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Phase 2: MCP Server
+# PostgreSQL support (production database)
+postgres = [
+    "asyncpg>=0.30.0",
+    "psycopg2-binary>=2.9.0",  # Required for Alembic sync migrations
+]
+# MCP Server for AI agent integration
 mcp = [
     "mcp>=1.0.0",
     "fastmcp>=2.0.0",
 ]
-# Phase 2: Attachment processing
+# Attachment processing
 attachments = [
     "pypdf>=5.1.0",
     "python-magic>=0.4.27",
 ]
-# Phase 3: Semantic search
+# Semantic search
 search = [
     "pgvector>=0.3.6",
     "openai>=1.57.0",
 ]
-# Phase 3: Rate limiting
+# Rate limiting
 ratelimit = [
     "redis>=5.2.0",
 ]
 # All optional dependencies
 all = [
-    "nornweave[mcp,attachments,search,ratelimit]",
+    "nornweave[postgres,mcp,attachments,search,ratelimit]",
 ]
 # Development dependencies
 dev = [

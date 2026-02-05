@@ -319,25 +319,37 @@ Releases are managed by maintainers following [Semantic Versioning](https://semv
 
 ### Main NornWeave Release
 
-The main NornWeave server is released via GitHub releases.
+The main NornWeave server is published to both GitHub Releases and PyPI.
+
+**Prerequisites (one-time setup):**
+- PyPI project `nornweave` exists
+- Trusted publisher configured on PyPI for this repo (OIDC)
+- GitHub environment `pypi-publish` configured
 
 **Release steps:**
 
 ```bash
-# 1. Update CHANGELOG.md
+# 1. Update version in pyproject.toml
+# Edit: version = "X.Y.Z"
+
+# 2. Update CHANGELOG.md
 # - Move items from [Unreleased] to new version section
 # - Add release date: ## [X.Y.Z] - YYYY-MM-DD
 
-# 2. Commit the changelog
-git add CHANGELOG.md
+# 3. Commit the changes
+git add pyproject.toml CHANGELOG.md
 git commit -m "chore: release vX.Y.Z"
 
-# 3. Create annotated tag
+# 4. Create annotated tag (must match pyproject.toml version)
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
 
-# 4. Push commit and tag
+# 5. Push commit and tag (triggers PyPI publish)
 git push origin main --tags
 ```
+
+The GitHub Actions workflow (`.github/workflows/server-pypi-publish.yml`) will:
+- Build source distribution and wheel using `hatch build`
+- Publish to PyPI using trusted publishing (OIDC, no token needed)
 
 The GitHub release is created manually:
 1. Go to [Releases](https://github.com/DataCovey/nornweave/releases)
@@ -345,6 +357,8 @@ The GitHub release is created manually:
 3. Select the tag `vX.Y.Z`
 4. Use "Generate release notes" or copy from CHANGELOG.md
 5. Publish the release
+
+**Important:** The `vX.Y.Z` tag must match the version in `pyproject.toml`. For example, tag `v0.1.1` requires `version = "0.1.1"` in pyproject.toml.
 
 ### n8n Node Release (`@nornweave/n8n-nodes-nornweave`)
 
@@ -400,7 +414,7 @@ git tag python-vX.Y.Z
 git push origin main --tags
 ```
 
-The GitHub Actions workflow will:
+The GitHub Actions workflow (`.github/workflows/client-pypi-publish.yml`) will:
 - Run tests and linting
 - Build source distribution and wheel
 - Publish to PyPI with OIDC (no token needed)
@@ -427,13 +441,15 @@ Then configure trusted publishing on [PyPI](https://pypi.org/manage/project/norn
 
 The packages are versioned independently:
 
-| Package | Version Location | Tag Format |
-|---------|------------------|------------|
-| NornWeave Server | `pyproject.toml` | `vX.Y.Z` |
-| n8n Node | `packages/n8n-nodes-nornweave/package.json` | `n8n-vX.Y.Z` |
-| Python Client | `clients/python/pyproject.toml` | `python-vX.Y.Z` |
+| Package | Version Location | Tag Format | Registry |
+|---------|------------------|------------|----------|
+| NornWeave Server | `pyproject.toml` | `vX.Y.Z` | PyPI (`nornweave`) |
+| n8n Node | `packages/n8n-nodes-nornweave/package.json` | `n8n-vX.Y.Z` | npm |
+| Python Client | `clients/python/pyproject.toml` | `python-vX.Y.Z` | PyPI (`nornweave-client`) |
 
-**Important:** When making breaking API changes to the server, coordinate releases across all packages to ensure compatibility.
+**Important:**
+- The `vX.Y.Z` tag on the monorepo matches the main `nornweave` PyPI package version
+- When making breaking API changes to the server, coordinate releases across all packages to ensure compatibility
 
 ## MCP Registry Submission
 

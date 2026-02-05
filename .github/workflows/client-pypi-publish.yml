@@ -1,17 +1,17 @@
-name: Python Client CI/CD
+name: Client PyPI Publish
 
 on:
   push:
     branches: [main]
     paths:
       - 'clients/python/**'
-      - '.github/workflows/python-client.yml'
+      - '.github/workflows/client-pypi-publish.yml'
     tags:
       - "python-v*"
   pull_request:
     paths:
       - 'clients/python/**'
-      - '.github/workflows/python-client.yml'
+      - '.github/workflows/client-pypi-publish.yml'
 
 defaults:
   run:

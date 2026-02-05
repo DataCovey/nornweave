@@ -27,9 +27,9 @@ FROM base AS dependencies
 # Copy dependency files
 COPY pyproject.toml uv.lock* ./
 
-# Install dependencies (without dev dependencies for production)
+# Install dependencies with postgres and mcp extras (without dev dependencies for production)
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --no-dev
+    uv sync --frozen --no-install-project --no-dev --extra postgres --extra mcp
 
 # -----------------------------------------------------------------------------
 # Development stage: Full dev environment

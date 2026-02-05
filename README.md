@@ -52,7 +52,23 @@ In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Y
 
 ## Quick Start
 
-### Using Docker (Recommended)
+### Install from PyPI
+
+```bash
+# Base installation (SQLite, all email providers)
+pip install nornweave
+
+# With PostgreSQL support
+pip install nornweave[postgres]
+
+# With MCP server for AI agents
+pip install nornweave[mcp]
+
+# Full installation
+pip install nornweave[all]
+```
+
+### Using Docker (Recommended for Production)
 
 ```bash
 # Clone the repository
@@ -162,12 +178,19 @@ NornWeave exposes an MCP server for direct integration with Claude, Cursor, and 
 
 ### Configure in Cursor/Claude
 
+```bash
+pip install nornweave[mcp]
+```
+
 ```json
 {
   "mcpServers": {
     "nornweave": {
-      "command": "nornweave-mcp",
-      "args": ["--api-url", "http://localhost:8000"]
+      "command": "nornweave",
+      "args": ["mcp"],
+      "env": {
+        "NORNWEAVE_API_URL": "http://localhost:8000"
+      }
     }
   }
 }
