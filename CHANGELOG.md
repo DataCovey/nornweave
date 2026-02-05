@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Expanded MessageResponse** - API message responses now include all email metadata fields:
+  - `subject`, `from_address`, `to_addresses`, `cc_addresses`, `bcc_addresses`, `reply_to_addresses`
+  - `text`, `html`, `content_clean`, `timestamp`, `labels`, `preview`, `size`
+  - `in_reply_to`, `references`, `metadata`
+- **Flexible message search** - Enhanced `GET /v1/messages` endpoint:
+  - Make `inbox_id` optional, add `thread_id` filter
+  - Text search (`q` parameter) across subject, body, sender, and attachment filenames
+  - Pagination support with `total` count in response
+- **MCP `list_messages` tool** - New tool for listing messages with filters
+- **Enhanced `search_email` MCP tool** - Now supports `thread_id` filter and returns expanded message data
 - **Attachment storage adapters** - Pluggable storage backends for email attachments:
   - `LocalFilesystemStorage` - Store attachments on local filesystem (default)
   - `DatabaseBlobStorage` - Store as BLOBs in PostgreSQL/SQLite database

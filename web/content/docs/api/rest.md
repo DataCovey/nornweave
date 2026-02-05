@@ -208,6 +208,79 @@ When `reply_to_thread_id` is provided, NornWeave automatically:
 - Maintains conversation threading in email clients
 {{< /callout >}}
 
+### List Messages
+
+List and search messages with flexible filters.
+
+```http
+GET /v1/messages
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `inbox_id` | string | One of these | Filter by inbox |
+| `thread_id` | string | One of these | Filter by thread |
+| `q` | string | No | Text search (subject, body, sender, attachment filenames) |
+| `limit` | number | No | Max results (default: 50) |
+| `offset` | number | No | Offset for pagination |
+
+{{< callout type="warning" >}}
+At least one of `inbox_id` or `thread_id` must be provided.
+{{< /callout >}}
+
+**Response:**
+
+```json
+{
+  "items": [
+    {
+      "id": "msg_001",
+      "thread_id": "th_123",
+      "inbox_id": "ibx_abc123",
+      "direction": "inbound",
+      "provider_message_id": "<abc123@mail.gmail.com>",
+      "subject": "Pricing Question",
+      "from_address": "bob@gmail.com",
+      "to_addresses": ["support@mail.yourdomain.com"],
+      "cc_addresses": null,
+      "bcc_addresses": null,
+      "reply_to_addresses": null,
+      "text": "Hi, how much does your service cost?",
+      "html": "<p>Hi, how much does your service cost?</p>",
+      "content_clean": "Hi, how much does your service cost?",
+      "timestamp": "2025-01-31T10:00:00Z",
+      "labels": [],
+      "preview": "Hi, how much does your service cost?",
+      "size": 1234,
+      "in_reply_to": null,
+      "references": null,
+      "metadata": {},
+      "created_at": "2025-01-31T10:00:00Z"
+    }
+  ],
+  "count": 1,
+  "total": 1
+}
+```
+
+**Example:**
+
+```bash
+# List all messages in an inbox
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Search for messages containing "invoice"
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=invoice" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# List messages in a specific thread
+curl "http://localhost:8000/v1/messages?thread_id=th_123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
 ### Get a Message
 
 ```http
@@ -221,16 +294,24 @@ GET /v1/messages/{message_id}
   "id": "msg_001",
   "thread_id": "th_123",
   "inbox_id": "ibx_abc123",
-  "direction": "INBOUND",
-  "from": "bob@gmail.com",
-  "to": ["support@mail.yourdomain.com"],
+  "direction": "inbound",
+  "provider_message_id": "<abc123@mail.gmail.com>",
   "subject": "Pricing Question",
-  "content_raw": "<html>...",
+  "from_address": "bob@gmail.com",
+  "to_addresses": ["support@mail.yourdomain.com"],
+  "cc_addresses": null,
+  "bcc_addresses": null,
+  "reply_to_addresses": null,
+  "text": "Hi, how much does your service cost?",
+  "html": "<p>Hi, how much does your service cost?</p>",
   "content_clean": "Hi, how much does your service cost?",
-  "metadata": {
-    "message_id": "<abc123@mail.gmail.com>",
-    "headers": {}
-  },
+  "timestamp": "2025-01-31T10:00:00Z",
+  "labels": [],
+  "preview": "Hi, how much does your service cost?",
+  "size": 1234,
+  "in_reply_to": null,
+  "references": null,
+  "metadata": {},
   "created_at": "2025-01-31T10:00:00Z"
 }
 ```
@@ -411,48 +492,67 @@ curl "http://localhost:8000/v1/attachments/att_789/content?format=base64&token=a
 
 ## Search
 
-Search for messages across your inboxes.
+Search for messages using the flexible message list endpoint.
 
 ```http
-POST /v1/search
+GET /v1/messages?inbox_id={inbox_id}&q={query}
 ```
 
-**Request Body:**
+**Query Parameters:**
 
-```json
-{
-  "query": "pricing",
-  "inbox_id": "ibx_abc123",
-  "limit": 10
-}
-```
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `inbox_id` | string | One of these | Filter by inbox |
+| `thread_id` | string | One of these | Filter by thread |
+| `q` | string | Yes | Search query |
+| `limit` | number | No | Max results (default: 50) |
+| `offset` | number | No | Offset for pagination |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `query` | string | Yes | Search query |
-| `inbox_id` | string | No | Limit to specific inbox |
-| `limit` | number | No | Max results (default: 10) |
+The search looks across:
+- Email subject
+- Email body (text)
+- Sender address (`from_address`)
+- Attachment filenames
 
 **Response:**
 
 ```json
 {
-  "results": [
+  "items": [
     {
-      "message_id": "msg_001",
+      "id": "msg_001",
       "thread_id": "th_123",
+      "inbox_id": "ibx_abc123",
       "subject": "Pricing Question",
-      "snippet": "Hi, how much does your service cost?",
-      "score": 0.95
+      "from_address": "bob@gmail.com",
+      "text": "Hi, how much does your service cost?",
+      "content_clean": "Hi, how much does your service cost?",
+      "created_at": "2025-01-31T10:00:00Z"
     }
   ],
+  "count": 1,
   "total": 1
 }
 ```
 
+**Example:**
+
+```bash
+# Search in an inbox
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=pricing" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Search within a thread
+curl "http://localhost:8000/v1/messages?thread_id=th_123&q=contract" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Search with pagination
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=invoice&limit=10&offset=20" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
 {{< callout type="info" >}}
-**Phase 1**: Search uses SQL `ILIKE` for simple text matching.  
-**Phase 3**: Search will use vector embeddings for semantic search.
+Search uses SQL `ILIKE` for case-insensitive text matching. Results include the `total` count for pagination support.
 {{< /callout >}}
 
 ---

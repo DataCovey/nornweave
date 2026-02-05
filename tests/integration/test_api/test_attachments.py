@@ -7,14 +7,19 @@ Uses in-memory SQLite for fast testing, similar to e2e tests.
 For PostgreSQL-specific tests, see the separate postgresql test suite.
 """
 
+from __future__ import annotations
+
 import base64
 import tempfile
 import uuid
-from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
-from typing import Any
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import (
@@ -285,9 +290,7 @@ class TestFilesystemStorage:
             assert result.size_bytes == len(test_content)
 
             # Verify file exists
-            import os
-
-            assert os.path.exists(os.path.join(tmpdir, result.storage_key))
+            assert Path(tmpdir, result.storage_key).exists()
 
     @pytest.mark.asyncio
     async def test_retrieve_returns_content(self, test_content: bytes) -> None:
@@ -449,9 +452,7 @@ class TestAttachmentAPIIntegration:
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.get(
-                f"/v1/attachments?message_id={test_message['id']}"
-            )
+            response = await client.get(f"/v1/attachments?message_id={test_message['id']}")
 
         assert response.status_code == 200
         data = response.json()

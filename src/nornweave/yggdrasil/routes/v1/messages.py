@@ -25,24 +25,38 @@ router = APIRouter()
 
 
 class MessageResponse(BaseModel):
-    """Response model for a message."""
+    """Response model for a message with all email metadata fields."""
 
     id: str
     thread_id: str
     inbox_id: str
     direction: str
     provider_message_id: str | None
-    content_raw: str
-    content_clean: str
-    metadata: dict[str, Any]
-    created_at: datetime | None
+    subject: str | None = None
+    from_address: str | None = None
+    to_addresses: list[str] = Field(default_factory=list)
+    cc_addresses: list[str] | None = None
+    bcc_addresses: list[str] | None = None
+    reply_to_addresses: list[str] | None = None
+    text: str | None = None
+    html: str | None = None
+    content_clean: str = ""
+    timestamp: datetime | None = None
+    labels: list[str] = Field(default_factory=list)
+    preview: str | None = None
+    size: int = 0
+    in_reply_to: str | None = None
+    references: list[str] | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime | None = None
 
 
 class MessageListResponse(BaseModel):
-    """Response model for message list."""
+    """Response model for message list with pagination support."""
 
     items: list[MessageResponse]
     count: int
+    total: int
 
 
 class SendMessageRequest(BaseModel):
@@ -68,38 +82,78 @@ class SendMessageResponse(BaseModel):
 
 
 def _message_to_response(msg: Message) -> MessageResponse:
-    """Convert Message model to response."""
+    """Convert Message model to response with all email metadata fields."""
     return MessageResponse(
         id=msg.id,
         thread_id=msg.thread_id,
         inbox_id=msg.inbox_id,
         direction=msg.direction.value,
         provider_message_id=msg.provider_message_id,
-        content_raw=msg.content_raw,
-        content_clean=msg.content_clean,
-        metadata=msg.metadata,
+        subject=msg.subject,
+        from_address=msg.from_address,
+        to_addresses=msg.to if msg.to else [],
+        cc_addresses=msg.cc,
+        bcc_addresses=msg.bcc,
+        reply_to_addresses=msg.reply_to,
+        text=msg.text,
+        html=msg.html,
+        content_clean=msg.content_clean or "",
+        timestamp=msg.timestamp,
+        labels=msg.labels if msg.labels else [],
+        preview=msg.preview,
+        size=msg.size,
+        in_reply_to=msg.in_reply_to,
+        references=msg.references,
+        metadata=msg.metadata if msg.metadata else {},
         created_at=msg.created_at,
     )
 
 
 @router.get("/messages", response_model=MessageListResponse)
 async def list_messages(
-    inbox_id: str,
+    inbox_id: str | None = None,
+    thread_id: str | None = None,
+    q: str | None = None,
     limit: int = 50,
     offset: int = 0,
     storage: StorageInterface = Depends(get_storage),
 ) -> MessageListResponse:
-    """List messages for an inbox."""
-    # Verify inbox exists
-    inbox = await storage.get_inbox(inbox_id)
-    if inbox is None:
+    """
+    List and search messages with flexible filters.
+
+    At least one of inbox_id or thread_id must be provided.
+    Optional text search (q) searches across subject, body, sender, and attachment filenames.
+    """
+    # Validate at least one filter is provided
+    if inbox_id is None and thread_id is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Inbox {inbox_id} not found",
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="At least one filter (inbox_id or thread_id) is required",
         )
 
-    messages = await storage.list_messages_for_inbox(
-        inbox_id,
+    # Verify inbox exists if provided
+    if inbox_id:
+        inbox = await storage.get_inbox(inbox_id)
+        if inbox is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Inbox {inbox_id} not found",
+            )
+
+    # Verify thread exists if provided
+    if thread_id:
+        thread = await storage.get_thread(thread_id)
+        if thread is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Thread {thread_id} not found",
+            )
+
+    # Use advanced search method with all filters
+    messages, total = await storage.search_messages_advanced(
+        inbox_id=inbox_id,
+        thread_id=thread_id,
+        query=q,
         limit=limit,
         offset=offset,
     )
@@ -107,6 +161,7 @@ async def list_messages(
     return MessageListResponse(
         items=[_message_to_response(m) for m in messages],
         count=len(messages),
+        total=total,
     )
 
 

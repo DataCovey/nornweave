@@ -173,25 +173,36 @@ class NornWeaveClient:
 
     async def list_messages(
         self,
-        inbox_id: str,
+        inbox_id: str | None = None,
+        thread_id: str | None = None,
+        q: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> dict[str, Any]:
-        """List messages for an inbox.
+        """List and search messages with flexible filters.
+
+        At least one of inbox_id or thread_id must be provided.
 
         Args:
-            inbox_id: The inbox ID.
+            inbox_id: Filter by inbox ID (optional).
+            thread_id: Filter by thread ID (optional).
+            q: Text search query (optional).
             limit: Maximum number of messages to return.
             offset: Number of messages to skip.
 
         Returns:
-            List response with messages.
+            List response with messages, count, and total.
         """
         client = await self._get_client()
-        response = await client.get(
-            "/v1/messages",
-            params={"inbox_id": inbox_id, "limit": limit, "offset": offset},
-        )
+        params: dict[str, Any] = {"limit": limit, "offset": offset}
+        if inbox_id:
+            params["inbox_id"] = inbox_id
+        if thread_id:
+            params["thread_id"] = thread_id
+        if q:
+            params["q"] = q
+
+        response = await client.get("/v1/messages", params=params)
         response.raise_for_status()
         return cast("dict[str, Any]", response.json())
 

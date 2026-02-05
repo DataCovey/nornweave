@@ -4,7 +4,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 
 from nornweave.core.interfaces import StorageInterface
 from nornweave.urdr.orm import AttachmentORM, EventORM, InboxORM, MessageORM, ThreadORM
@@ -220,6 +220,63 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         )
         result = await self._session.execute(stmt)
         return [row.to_pydantic() for row in result.scalars().all()]
+
+    async def search_messages_advanced(
+        self,
+        *,
+        inbox_id: str | None = None,
+        thread_id: str | None = None,
+        query: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Message], int]:
+        """
+        Search messages with flexible filters.
+
+        Returns tuple of (messages, total_count).
+        Override in subclass for dialect-specific search (ILIKE for Postgres).
+        """
+        # Build base query with filters
+        base_conditions = []
+        if inbox_id:
+            base_conditions.append(MessageORM.inbox_id == inbox_id)
+        if thread_id:
+            base_conditions.append(MessageORM.thread_id == thread_id)
+
+        # Text search condition
+        if query:
+            pattern = f"%{query}%"
+            # Subquery for attachment filename search
+            attachment_subquery = (
+                select(AttachmentORM.message_id)
+                .where(AttachmentORM.filename.like(pattern))
+                .distinct()
+                .scalar_subquery()
+            )
+            text_condition = or_(
+                MessageORM.subject.like(pattern),
+                MessageORM.content_raw.like(pattern),
+                MessageORM.from_address.like(pattern),
+                MessageORM.id.in_(attachment_subquery),
+            )
+            base_conditions.append(text_condition)
+
+        # Count query
+        count_stmt = select(func.count(MessageORM.id))
+        if base_conditions:
+            count_stmt = count_stmt.where(*base_conditions)
+        count_result = await self._session.execute(count_stmt)
+        total = count_result.scalar() or 0
+
+        # Data query with pagination
+        data_stmt = select(MessageORM)
+        if base_conditions:
+            data_stmt = data_stmt.where(*base_conditions)
+        data_stmt = data_stmt.order_by(MessageORM.created_at.desc()).limit(limit).offset(offset)
+        data_result = await self._session.execute(data_stmt)
+        messages = [row.to_pydantic() for row in data_result.scalars().all()]
+
+        return messages, total
 
     # -------------------------------------------------------------------------
     # Event methods

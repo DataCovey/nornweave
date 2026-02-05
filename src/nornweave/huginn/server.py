@@ -19,6 +19,7 @@ from nornweave.muninn.tools import (
     create_inbox,
     get_attachment_content,
     list_attachments,
+    list_messages,
     search_email,
     send_email,
     send_email_with_attachments,
@@ -123,21 +124,66 @@ async def tool_send_email(
 
 
 @mcp.tool()
-async def tool_search_email(query: str, inbox_id: str, limit: int = 10) -> dict[str, Any]:
-    """Search for emails.
+async def tool_search_email(
+    query: str,
+    inbox_id: str | None = None,
+    thread_id: str | None = None,
+    limit: int = 10,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """Search for emails with flexible filters.
 
-    Find relevant messages in an inbox by query text.
+    Find relevant messages by query text. At least one of inbox_id or thread_id must be provided.
 
     Args:
-        query: Search query (e.g., "invoice", "meeting request")
-        inbox_id: Inbox to search in
+        query: Search query (searches subject, body, sender, attachment filenames)
+        inbox_id: Filter by inbox ID (optional)
+        thread_id: Filter by thread ID (optional)
         limit: Maximum number of results (default: 10, max: 100)
+        offset: Pagination offset (default: 0)
 
     Returns:
-        Search results with matching messages containing id, thread_id, content, created_at.
+        Search results with matching messages containing full email metadata.
     """
     client = _get_client()
-    return await search_email(client, query=query, inbox_id=inbox_id, limit=min(limit, 100))
+    return await search_email(
+        client,
+        query=query,
+        inbox_id=inbox_id,
+        thread_id=thread_id,
+        limit=min(limit, 100),
+        offset=offset,
+    )
+
+
+@mcp.tool()
+async def tool_list_messages(
+    inbox_id: str | None = None,
+    thread_id: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """List messages with flexible filters.
+
+    List messages from an inbox or thread. At least one of inbox_id or thread_id must be provided.
+
+    Args:
+        inbox_id: Filter by inbox ID (optional)
+        thread_id: Filter by thread ID (optional)
+        limit: Maximum number of results (default: 50, max: 100)
+        offset: Pagination offset (default: 0)
+
+    Returns:
+        List of messages with full email metadata including subject, from_address, to_addresses, text, etc.
+    """
+    client = _get_client()
+    return await list_messages(
+        client,
+        inbox_id=inbox_id,
+        thread_id=thread_id,
+        limit=min(limit, 100),
+        offset=offset,
+    )
 
 
 @mcp.tool()

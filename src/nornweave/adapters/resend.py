@@ -276,7 +276,9 @@ class ResendAdapter(EmailProvider):
         # Step 1: Get attachment metadata (contains download_url)
         # Use different endpoints for inbound vs outbound emails
         if inbound:
-            metadata_url = f"{self._api_url}/emails/receiving/{email_id}/attachments/{attachment_id}"
+            metadata_url = (
+                f"{self._api_url}/emails/receiving/{email_id}/attachments/{attachment_id}"
+            )
         else:
             metadata_url = f"{self._api_url}/emails/{email_id}/attachments/{attachment_id}"
 

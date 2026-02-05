@@ -252,6 +252,31 @@ class StorageInterface(ABC):
         """Search messages by content (ILIKE/LIKE on content_clean and content_raw)."""
         ...
 
+    @abstractmethod
+    async def search_messages_advanced(
+        self,
+        *,
+        inbox_id: str | None = None,
+        thread_id: str | None = None,
+        query: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Message], int]:
+        """
+        Search messages with flexible filters.
+
+        Args:
+            inbox_id: Filter by inbox (optional)
+            thread_id: Filter by thread (optional)
+            query: Text search across subject, text, from_address, attachment filenames
+            limit: Maximum results to return
+            offset: Pagination offset
+
+        Returns:
+            Tuple of (messages, total_count)
+        """
+        ...
+
     # -------------------------------------------------------------------------
     # Event methods (Phase 3 webhooks)
     # -------------------------------------------------------------------------

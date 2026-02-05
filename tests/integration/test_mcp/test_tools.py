@@ -11,6 +11,7 @@ from nornweave.muninn.tools import (
     create_inbox,
     get_attachment_content,
     list_attachments,
+    list_messages,
     search_email,
     send_email,
     send_email_with_attachments,
@@ -75,7 +76,7 @@ class MockClient:
         inbox_id: str,
         limit: int = 50,
     ) -> dict[str, Any]:
-        """Search messages."""
+        """Search messages (legacy endpoint)."""
         response = self._client.post(
             "/v1/search",
             json={"query": query, "inbox_id": inbox_id, "limit": limit},
@@ -85,6 +86,39 @@ class MockClient:
                 "Not found",
                 request=httpx.Request("POST", "/v1/search"),
                 response=httpx.Response(404),
+            )
+        response.raise_for_status()
+        return response.json()
+
+    async def list_messages(
+        self,
+        inbox_id: str | None = None,
+        thread_id: str | None = None,
+        q: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> dict[str, Any]:
+        """List and search messages with flexible filters."""
+        params: dict[str, Any] = {"limit": limit, "offset": offset}
+        if inbox_id:
+            params["inbox_id"] = inbox_id
+        if thread_id:
+            params["thread_id"] = thread_id
+        if q:
+            params["q"] = q
+
+        response = self._client.get("/v1/messages", params=params)
+        if response.status_code == 404:
+            raise httpx.HTTPStatusError(
+                "Not found",
+                request=httpx.Request("GET", "/v1/messages"),
+                response=httpx.Response(404),
+            )
+        if response.status_code == 422:
+            raise httpx.HTTPStatusError(
+                "At least one filter required",
+                request=httpx.Request("GET", "/v1/messages"),
+                response=httpx.Response(422),
             )
         response.raise_for_status()
         return response.json()
@@ -461,3 +495,145 @@ class TestSendEmailWithAttachmentsTool:
                     }
                 ],
             )
+
+
+class TestListMessagesTool:
+    """Tests for list_messages tool."""
+
+    async def test_list_messages_by_inbox(self, client: MockClient) -> None:
+        """Test listing messages filtered by inbox_id."""
+        result = await list_messages(client, inbox_id="ibx_test")
+
+        assert "count" in result
+        assert "total" in result
+        assert "messages" in result
+        assert isinstance(result["messages"], list)
+        # Verify messages have expanded fields
+        if result["messages"]:
+            msg = result["messages"][0]
+            assert "id" in msg
+            assert "thread_id" in msg
+            assert "inbox_id" in msg
+            assert "content_clean" in msg
+
+    async def test_list_messages_by_thread(self, client: MockClient) -> None:
+        """Test listing messages filtered by thread_id."""
+        result = await list_messages(client, thread_id="th_test")
+
+        assert "count" in result
+        assert "total" in result
+        assert "messages" in result
+        # All messages should belong to the thread
+        for msg in result["messages"]:
+            assert msg["thread_id"] == "th_test"
+
+    async def test_list_messages_combined_filters(self, client: MockClient) -> None:
+        """Test listing messages with both inbox_id and thread_id."""
+        result = await list_messages(
+            client,
+            inbox_id="ibx_test",
+            thread_id="th_test",
+        )
+
+        assert "messages" in result
+        for msg in result["messages"]:
+            assert msg["inbox_id"] == "ibx_test"
+            assert msg["thread_id"] == "th_test"
+
+    async def test_list_messages_requires_filter(self, client: MockClient) -> None:
+        """Test that list_messages requires at least one filter."""
+        with pytest.raises(Exception, match="filter"):
+            await list_messages(client)
+
+    async def test_list_messages_invalid_inbox(self, client: MockClient) -> None:
+        """Test listing messages from non-existent inbox fails."""
+        with pytest.raises(Exception, match="not found"):
+            await list_messages(client, inbox_id="ibx_nonexistent")
+
+    async def test_list_messages_pagination(self, client: MockClient) -> None:
+        """Test pagination with limit and offset."""
+        result = await list_messages(
+            client,
+            inbox_id="ibx_test",
+            limit=1,
+            offset=0,
+        )
+
+        assert len(result["messages"]) <= 1
+
+
+class TestMessageFiltersIntegration:
+    """Integration tests for message filter combinations."""
+
+    async def test_text_search_finds_matching_messages(self, client: MockClient) -> None:
+        """Test text search finds messages with matching content."""
+        result = await search_email(
+            client,
+            query="test",  # Matches test messages in mock data
+            inbox_id="ibx_test",
+        )
+
+        assert result["count"] >= 1
+        assert result["total"] >= 1
+
+    async def test_text_search_within_thread(self, client: MockClient) -> None:
+        """Test text search within a specific thread."""
+        result = await search_email(
+            client,
+            query="message",
+            thread_id="th_test",
+        )
+
+        assert "messages" in result
+        # All results should be from the specified thread
+        for msg in result["messages"]:
+            assert msg["thread_id"] == "th_test"
+
+    async def test_search_returns_total_count(self, client: MockClient) -> None:
+        """Test search results include total count for pagination."""
+        result = await search_email(
+            client,
+            query="test",
+            inbox_id="ibx_test",
+            limit=1,
+        )
+
+        assert "total" in result
+        # Total may be larger than count (items on current page)
+        assert result["total"] >= result["count"]
+
+    async def test_search_with_pagination(self, client: MockClient) -> None:
+        """Test search with pagination parameters."""
+        # Get first page
+        page1 = await search_email(
+            client,
+            query="message",
+            inbox_id="ibx_test",
+            limit=1,
+            offset=0,
+        )
+
+        # Get second page
+        page2 = await search_email(
+            client,
+            query="message",
+            inbox_id="ibx_test",
+            limit=1,
+            offset=1,
+        )
+
+        # Total should be the same across pages
+        assert page1["total"] == page2["total"]
+
+    async def test_expanded_message_fields_in_response(self, client: MockClient) -> None:
+        """Test that message responses include expanded fields."""
+        result = await list_messages(client, inbox_id="ibx_test")
+
+        if result["messages"]:
+            msg = result["messages"][0]
+            # Check for expanded fields
+            assert "subject" in msg or msg.get("subject") is None
+            assert "from_address" in msg or msg.get("from_address") is None
+            assert "to_addresses" in msg
+            assert "content_clean" in msg
+            assert "direction" in msg

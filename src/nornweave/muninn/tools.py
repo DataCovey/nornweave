@@ -95,53 +95,131 @@ async def send_email(
 async def search_email(
     client: NornWeaveClient,
     query: str,
-    inbox_id: str,
+    inbox_id: str | None = None,
+    thread_id: str | None = None,
     limit: int = 10,
+    offset: int = 0,
 ) -> dict[str, Any]:
-    """Search for emails.
+    """Search for emails with flexible filters.
 
-    Find relevant messages in an inbox by query text.
+    Find relevant messages by query text. At least one of inbox_id or thread_id must be provided.
 
     Args:
         client: NornWeave API client.
-        query: Search query.
-        inbox_id: Inbox to search in.
+        query: Search query (searches subject, body, sender, attachment filenames).
+        inbox_id: Filter by inbox ID (optional).
+        thread_id: Filter by thread ID (optional).
         limit: Maximum number of results (default: 10).
+        offset: Pagination offset (default: 0).
 
     Returns:
-        Search results with matching messages.
+        Search results with matching messages including expanded fields.
 
     Raises:
-        Exception: If search fails.
+        Exception: If search fails or no filter provided.
     """
+    if inbox_id is None and thread_id is None:
+        raise Exception("At least one filter (inbox_id or thread_id) is required")
+
     try:
-        result = await client.search_messages(
-            query=query,
+        result = await client.list_messages(
             inbox_id=inbox_id,
+            thread_id=thread_id,
+            q=query,
             limit=limit,
+            offset=offset,
         )
 
-        # Format results for MCP
+        # Format results for MCP with expanded fields
         messages = []
         for item in result.get("items", []):
-            messages.append(
-                {
-                    "id": item["id"],
-                    "thread_id": item["thread_id"],
-                    "content": item.get("content_clean", ""),
-                    "created_at": item.get("created_at"),
-                }
-            )
+            messages.append(_format_message_for_mcp(item))
 
         return {
             "query": query,
             "count": len(messages),
+            "total": result.get("total", len(messages)),
             "messages": messages,
         }
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
-            raise Exception(f"Inbox '{inbox_id}' not found") from e
+            raise Exception("Inbox or thread not found") from e
+        if e.response.status_code == 422:
+            raise Exception("At least one filter (inbox_id or thread_id) is required") from e
         raise Exception(f"Search failed: {e.response.status_code}") from e
+
+
+async def list_messages(
+    client: NornWeaveClient,
+    inbox_id: str | None = None,
+    thread_id: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """List messages with flexible filters.
+
+    List messages from an inbox or thread. At least one of inbox_id or thread_id must be provided.
+
+    Args:
+        client: NornWeave API client.
+        inbox_id: Filter by inbox ID (optional).
+        thread_id: Filter by thread ID (optional).
+        limit: Maximum number of results (default: 50).
+        offset: Pagination offset (default: 0).
+
+    Returns:
+        List of messages with expanded fields.
+
+    Raises:
+        Exception: If listing fails or no filter provided.
+    """
+    if inbox_id is None and thread_id is None:
+        raise Exception("At least one filter (inbox_id or thread_id) is required")
+
+    try:
+        result = await client.list_messages(
+            inbox_id=inbox_id,
+            thread_id=thread_id,
+            limit=limit,
+            offset=offset,
+        )
+
+        # Format results for MCP with expanded fields
+        messages = []
+        for item in result.get("items", []):
+            messages.append(_format_message_for_mcp(item))
+
+        return {
+            "count": len(messages),
+            "total": result.get("total", len(messages)),
+            "messages": messages,
+        }
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            raise Exception("Inbox or thread not found") from e
+        if e.response.status_code == 422:
+            raise Exception("At least one filter (inbox_id or thread_id) is required") from e
+        raise Exception(f"List messages failed: {e.response.status_code}") from e
+
+
+def _format_message_for_mcp(item: dict[str, Any]) -> dict[str, Any]:
+    """Format a message response for MCP tools with all expanded fields."""
+    return {
+        "id": item["id"],
+        "thread_id": item["thread_id"],
+        "inbox_id": item["inbox_id"],
+        "direction": item.get("direction"),
+        "subject": item.get("subject"),
+        "from_address": item.get("from_address"),
+        "to_addresses": item.get("to_addresses", []),
+        "cc_addresses": item.get("cc_addresses"),
+        "text": item.get("text"),
+        "content_clean": item.get("content_clean", ""),
+        "timestamp": item.get("timestamp"),
+        "preview": item.get("preview"),
+        "labels": item.get("labels", []),
+        "created_at": item.get("created_at"),
+    }
 
 
 async def wait_for_reply(

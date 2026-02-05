@@ -780,3 +780,280 @@ class TestAttachmentOperations:
         assert result is not None
         assert result["content"] == content
         assert result["storage_backend"] == "database"
+
+
+# =============================================================================
+# Advanced Search Tests
+# =============================================================================
+class TestAdvancedMessageSearch:
+    """Tests for search_messages_advanced method."""
+
+    @pytest.fixture
+    async def inbox(self, storage: SQLiteAdapter) -> Inbox:
+        """Create a test inbox."""
+        inbox = Inbox(
+            id=str(uuid.uuid4()),
+            email_address="search-test@example.com",
+            name="Search Test Inbox",
+            provider_config={},
+        )
+        return await storage.create_inbox(inbox)
+
+    @pytest.fixture
+    async def thread(self, storage: SQLiteAdapter, inbox: Inbox) -> Thread:
+        """Create a test thread."""
+        thread = Thread(
+            id=str(uuid.uuid4()),
+            inbox_id=inbox.id,
+            subject="Search Test Thread",
+            last_message_at=None,
+            participant_hash=None,
+        )
+        return await storage.create_thread(thread)
+
+    @pytest.mark.asyncio
+    async def test_search_by_inbox_id_only(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test searching messages by inbox_id only."""
+        # Create messages
+        for i in range(3):
+            msg = Message(
+                id=str(uuid.uuid4()),
+                thread_id=thread.id,
+                inbox_id=inbox.id,
+                direction=MessageDirection.INBOUND,
+                subject=f"Message {i}",
+                text=f"Body content {i}",
+                from_address="sender@example.com",
+                created_at=datetime.now(UTC),
+            )
+            await storage.create_message(msg)
+
+        messages, total = await storage.search_messages_advanced(inbox_id=inbox.id)
+
+        assert len(messages) == 3
+        assert total == 3
+
+    @pytest.mark.asyncio
+    async def test_search_by_thread_id_only(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test searching messages by thread_id only."""
+        # Create messages in the thread
+        for i in range(2):
+            msg = Message(
+                id=str(uuid.uuid4()),
+                thread_id=thread.id,
+                inbox_id=inbox.id,
+                direction=MessageDirection.INBOUND,
+                subject=f"Thread message {i}",
+                created_at=datetime.now(UTC),
+            )
+            await storage.create_message(msg)
+
+        messages, total = await storage.search_messages_advanced(thread_id=thread.id)
+
+        assert len(messages) == 2
+        assert total == 2
+
+    @pytest.mark.asyncio
+    async def test_search_combined_inbox_and_thread(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test searching with both inbox_id and thread_id."""
+        msg = Message(
+            id=str(uuid.uuid4()),
+            thread_id=thread.id,
+            inbox_id=inbox.id,
+            direction=MessageDirection.INBOUND,
+            subject="Combined filter test",
+            created_at=datetime.now(UTC),
+        )
+        await storage.create_message(msg)
+
+        messages, total = await storage.search_messages_advanced(
+            inbox_id=inbox.id,
+            thread_id=thread.id,
+        )
+
+        assert len(messages) == 1
+        assert total == 1
+        assert messages[0].subject == "Combined filter test"
+
+    @pytest.mark.asyncio
+    async def test_text_search_in_subject(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test text search matches subject."""
+        msg = Message(
+            id=str(uuid.uuid4()),
+            thread_id=thread.id,
+            inbox_id=inbox.id,
+            direction=MessageDirection.INBOUND,
+            subject="Important invoice document",
+            text="Generic body",
+            created_at=datetime.now(UTC),
+        )
+        await storage.create_message(msg)
+
+        messages, total = await storage.search_messages_advanced(
+            inbox_id=inbox.id,
+            query="invoice",
+        )
+
+        assert total >= 1
+        assert any("invoice" in (m.subject or "").lower() for m in messages)
+
+    @pytest.mark.asyncio
+    async def test_text_search_in_body(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test text search matches body text."""
+        msg = Message(
+            id=str(uuid.uuid4()),
+            thread_id=thread.id,
+            inbox_id=inbox.id,
+            direction=MessageDirection.INBOUND,
+            subject="Generic subject",
+            text="This contains the special keyword contract",
+            created_at=datetime.now(UTC),
+        )
+        await storage.create_message(msg)
+
+        _messages, total = await storage.search_messages_advanced(
+            inbox_id=inbox.id,
+            query="contract",
+        )
+
+        assert total >= 1
+
+    @pytest.mark.asyncio
+    async def test_text_search_in_from_address(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test text search matches from_address."""
+        msg = Message(
+            id=str(uuid.uuid4()),
+            thread_id=thread.id,
+            inbox_id=inbox.id,
+            direction=MessageDirection.INBOUND,
+            subject="Email from special sender",
+            from_address="vip-client@bigcorp.com",
+            created_at=datetime.now(UTC),
+        )
+        await storage.create_message(msg)
+
+        _messages, total = await storage.search_messages_advanced(
+            inbox_id=inbox.id,
+            query="bigcorp",
+        )
+
+        assert total >= 1
+
+    @pytest.mark.asyncio
+    async def test_text_search_no_matches(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test text search with no matches returns empty."""
+        msg = Message(
+            id=str(uuid.uuid4()),
+            thread_id=thread.id,
+            inbox_id=inbox.id,
+            direction=MessageDirection.INBOUND,
+            subject="Normal message",
+            text="Normal content",
+            created_at=datetime.now(UTC),
+        )
+        await storage.create_message(msg)
+
+        messages, total = await storage.search_messages_advanced(
+            inbox_id=inbox.id,
+            query="nonexistent12345xyz",
+        )
+
+        assert total == 0
+        assert len(messages) == 0
+
+    @pytest.mark.asyncio
+    async def test_pagination_limit(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test pagination with limit."""
+        # Create 5 messages
+        for i in range(5):
+            msg = Message(
+                id=str(uuid.uuid4()),
+                thread_id=thread.id,
+                inbox_id=inbox.id,
+                direction=MessageDirection.INBOUND,
+                subject=f"Pagination test {i}",
+                created_at=datetime.now(UTC),
+            )
+            await storage.create_message(msg)
+
+        messages, total = await storage.search_messages_advanced(
+            inbox_id=inbox.id,
+            limit=2,
+        )
+
+        assert len(messages) == 2
+        assert total == 5  # Total count reflects all matches
+
+    @pytest.mark.asyncio
+    async def test_pagination_offset(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test pagination with offset."""
+        # Create 3 messages
+        for i in range(3):
+            msg = Message(
+                id=str(uuid.uuid4()),
+                thread_id=thread.id,
+                inbox_id=inbox.id,
+                direction=MessageDirection.INBOUND,
+                subject=f"Offset test {i}",
+                created_at=datetime.now(UTC),
+            )
+            await storage.create_message(msg)
+
+        messages, total = await storage.search_messages_advanced(
+            inbox_id=inbox.id,
+            limit=10,
+            offset=2,
+        )
+
+        assert len(messages) == 1  # 3 total, offset 2 = 1 remaining
+        assert total == 3
+
+    @pytest.mark.asyncio
+    async def test_text_search_in_attachment_filename(
+        self, storage: SQLiteAdapter, inbox: Inbox, thread: Thread
+    ) -> None:
+        """Test text search matches attachment filenames."""
+        msg = Message(
+            id=str(uuid.uuid4()),
+            thread_id=thread.id,
+            inbox_id=inbox.id,
+            direction=MessageDirection.INBOUND,
+            subject="Email with attachment",
+            text="See attached file",
+            created_at=datetime.now(UTC),
+        )
+        created_msg = await storage.create_message(msg)
+
+        # Add attachment with searchable filename
+        await storage.create_attachment(
+            message_id=created_msg.id,
+            filename="quarterly-report-2024.pdf",
+            content_type="application/pdf",
+            size_bytes=1000,
+        )
+
+        messages, total = await storage.search_messages_advanced(
+            inbox_id=inbox.id,
+            query="quarterly-report",
+        )
+
+        assert total >= 1
+        assert any(m.id == created_msg.id for m in messages)

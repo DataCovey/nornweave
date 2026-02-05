@@ -240,13 +240,55 @@ def get_thread(thread_id: str) -> dict[str, Any]:
 
 # Message endpoints
 @mock_app.get("/v1/messages")
-def list_messages(inbox_id: str, limit: int = 50, offset: int = 0) -> dict[str, Any]:
-    """List messages for an inbox."""
-    if inbox_id not in _inboxes:
+def list_messages(
+    inbox_id: str | None = None,
+    thread_id: str | None = None,
+    q: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """List and search messages with flexible filters."""
+    # Require at least one filter
+    if inbox_id is None and thread_id is None:
+        raise HTTPException(
+            status_code=422, detail="At least one filter (inbox_id or thread_id) is required"
+        )
+
+    # Validate inbox exists if provided
+    if inbox_id and inbox_id not in _inboxes:
         raise HTTPException(status_code=404, detail="Inbox not found")
 
-    items = [m for m in _messages.values() if m["inbox_id"] == inbox_id][offset : offset + limit]
-    return {"items": items, "count": len(items)}
+    # Validate thread exists if provided
+    if thread_id and thread_id not in _threads:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    # Filter messages
+    items = list(_messages.values())
+    if inbox_id:
+        items = [m for m in items if m["inbox_id"] == inbox_id]
+    if thread_id:
+        items = [m for m in items if m["thread_id"] == thread_id]
+
+    # Apply text search if provided
+    if q:
+        q_lower = q.lower()
+        filtered = []
+        for m in items:
+            # Search in subject, content_raw, from_address
+            subject = m.get("subject", "") or ""
+            content = m.get("content_raw", "") or ""
+            from_addr = m.get("from_address", "") or m.get("metadata", {}).get("from", "") or ""
+            if (
+                q_lower in subject.lower()
+                or q_lower in content.lower()
+                or q_lower in from_addr.lower()
+            ):
+                filtered.append(m)
+        items = filtered
+
+    total = len(items)
+    items = items[offset : offset + limit]
+    return {"items": items, "count": len(items), "total": total}
 
 
 @mock_app.post("/v1/messages")
@@ -380,7 +422,8 @@ def list_attachments(
 
     # Remove internal _content field from response
     result_items = [
-        {k: v for k, v in a.items() if not k.startswith("_")} for a in items[offset : offset + limit]
+        {k: v for k, v in a.items() if not k.startswith("_")}
+        for a in items[offset : offset + limit]
     ]
     return {"items": result_items, "count": len(result_items)}
 
@@ -394,7 +437,9 @@ def get_attachment(attachment_id: str) -> dict[str, Any]:
     attachment = _attachments[attachment_id]
     # Generate a mock download URL
     result = {k: v for k, v in attachment.items() if not k.startswith("_")}
-    result["download_url"] = f"/v1/attachments/{attachment_id}/content?token=mock&expires=9999999999"
+    result["download_url"] = (
+        f"/v1/attachments/{attachment_id}/content?token=mock&expires=9999999999"
+    )
     return result
 
 

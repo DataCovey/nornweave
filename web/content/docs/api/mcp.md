@@ -185,22 +185,59 @@ saying "We'd love to schedule a demo. Are you available next week?"
 When `thread_id` is provided, NornWeave handles all threading headers automatically.
 {{< /callout >}}
 
-### search_email
+### list_messages
 
-Find relevant messages in your inboxes.
+List messages with flexible filters.
 
 **Arguments:**
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `query` | string | Yes | Search query |
-| `inbox_id` | string | Yes | Inbox to search in |
+| `inbox_id` | string | One of these | Filter by inbox |
+| `thread_id` | string | One of these | Filter by thread |
+| `limit` | number | No | Max results (default: 50) |
+| `offset` | number | No | Pagination offset (default: 0) |
+
+{{< callout type="info" >}}
+At least one of `inbox_id` or `thread_id` must be provided.
+{{< /callout >}}
+
+**Example:**
+
+```
+List all messages in the support inbox
+```
+
+**Returns:**
+
+Messages with full email metadata including subject, from_address, to_addresses, text, html, timestamp, labels, and more.
+
+### search_email
+
+Search for messages with flexible filters.
+
+**Arguments:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `query` | string | Yes | Search query (subject, body, sender, attachment filenames) |
+| `inbox_id` | string | One of these | Filter by inbox |
+| `thread_id` | string | One of these | Filter by thread |
 | `limit` | number | No | Max results (default: 10) |
+| `offset` | number | No | Pagination offset (default: 0) |
+
+{{< callout type="info" >}}
+At least one of `inbox_id` or `thread_id` must be provided. Search looks across subject, body, sender address, and attachment filenames.
+{{< /callout >}}
 
 **Example:**
 
 ```
 Search for emails about "invoice" in the support inbox
+```
+
+```
+Search for messages with attachments named "contract" in thread th_123
 ```
 
 ### send_email_with_attachments
