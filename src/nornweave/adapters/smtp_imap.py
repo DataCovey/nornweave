@@ -375,9 +375,9 @@ class ImapReceiver:
                     if raw_bytes is None:
                         # Fallback: look for the largest bytes line (skip envelope)
                         candidates = [
-                            bytes(l) if isinstance(l, bytearray) else l
-                            for l in response.lines
-                            if isinstance(l, (bytes, bytearray)) and len(l) > 50
+                            bytes(line) if isinstance(line, bytearray) else line
+                            for line in response.lines
+                            if isinstance(line, (bytes, bytearray)) and len(line) > 50
                         ]
                         if candidates:
                             raw_bytes = max(candidates, key=len)
@@ -387,7 +387,7 @@ class ImapReceiver:
                         logger.warning(
                             "No RFC822 body in fetch response for UID %d: %r",
                             uid,
-                            [(type(l).__name__, len(l)) for l in response.lines],
+                            [(type(line).__name__, len(line)) for line in response.lines],
                         )
             except Exception:
                 logger.warning("Failed to fetch UID %d", uid, exc_info=True)
