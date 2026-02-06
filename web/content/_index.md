@@ -126,19 +126,19 @@ sitemap_changefreq: daily
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
     title="Virtual Inboxes"
-    subtitle="Create dedicated email addresses for your AI agents. Each inbox can receive and send emails independently."
+    subtitle="Dedicated addresses for AI agents; receive and send via your provider. PostgreSQL-backed storage and API key authentication."
     link="docs/getting-started"
     icon="inbox"
   >}}
   {{< hextra/feature-card
     title="Webhook Ingestion"
-    subtitle="Receive emails from Mailgun, AWS SES, SendGrid, and Resend through webhook endpoints."
+    subtitle="Ingest from Mailgun, AWS SES, SendGrid, and Resend; send via your configured provider."
     link="docs/guides"
     icon="cloud-download"
   >}}
   {{< hextra/feature-card
     title="Smart Threading"
-    subtitle="Automatic conversation grouping using email headers. Messages are organized into threads and summarized by LLMs."
+    subtitle="Thread by headers, HTML→Markdown parsing, and cruft removal. LLM thread summaries with your own OpenAI, Anthropic, or Gemini key."
     link="docs/concepts"
     icon="collection"
   >}}
@@ -150,36 +150,15 @@ sitemap_changefreq: daily
   >}}
   {{< hextra/feature-card
     title="MCP Integration"
-    subtitle="Connect directly to Claude, Cursor, and other MCP clients. Read and send email with natural language."
+    subtitle="Claude, Cursor, and other MCP clients. Read and send email; attachment text extraction included."
     link="docs/api/mcp"
     icon="chip"
   >}}
   {{< hextra/feature-card
     title="Clean Architecture"
-    subtitle="Modular design with storage and provider adapters. Change email providers with ease."
+    subtitle="Modular design with storage and provider adapters. Swap email providers with ease."
     link="docs/concepts/architecture"
     icon="template"
-  >}}
-{{< /hextra/feature-grid >}}
-
-<div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
-{{< hextra/hero-headline >}}
-  Current Capabilities
-{{< /hextra/hero-headline >}}
-</div>
-
-{{< hextra/feature-grid >}}
-  {{< hextra/feature-card
-    title="Phase 1: Foundation"
-    subtitle="**The Mail Proxy** — Virtual Inboxes for AI agents, webhook ingestion from providers, PostgreSQL persistent storage, email sending via configured provider, and API key authentication."
-    icon="check-circle"
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(45,212,191,0.15),hsla(0,0%,100%,0));"
-  >}}
-  {{< hextra/feature-card
-    title="Phase 2: Intelligence"
-    subtitle="**The Agent Layer** — HTML to clean Markdown parsing, automatic cruft removal, smart conversation threading, MCP server for Claude/Cursor, attachment text extraction, and LLM Thread Summaries (BYO API key for OpenAI, Anthropic, or Gemini)."
-    icon="check-circle"
-    style="background: radial-gradient(ellipse at 50% 80%,rgba(120,119,198,0.15),hsla(0,0%,100%,0));"
   >}}
 {{< /hextra/feature-grid >}}
 
