@@ -83,9 +83,14 @@ gemini = [
 llm = [
     "nornweave[openai,anthropic,gemini]",
 ]
+# IMAP/SMTP email provider
+smtpimap = [
+    "aiosmtplib>=5.0.0",
+    "aioimaplib>=2.0.0",
+]
 # All optional dependencies
 all = [
-    "nornweave[postgres,mcp,attachments,search,ratelimit,s3,gcs,llm]",
+    "nornweave[postgres,mcp,attachments,search,ratelimit,s3,gcs,llm,smtpimap]",
 ]
 # Development dependencies
 dev = [
@@ -228,5 +233,9 @@ module = [
     "pdfplumber",
     "svix",
     "svix.*",
+    "aiosmtplib",
+    "aiosmtplib.*",
+    "aioimaplib",
+    "aioimaplib.*",
 ]
 ignore_missing_imports = true

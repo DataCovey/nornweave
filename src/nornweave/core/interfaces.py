@@ -15,6 +15,17 @@ if TYPE_CHECKING:
 
 
 @dataclass
+class ImapPollState:
+    """IMAP polling state for an inbox."""
+
+    inbox_id: str
+    last_uid: int
+    uid_validity: int
+    mailbox: str = "INBOX"
+    updated_at: datetime | None = None
+
+
+@dataclass
 class InboundAttachment:
     """
     Attachment parsed from inbound email webhook.
@@ -378,6 +389,25 @@ class StorageInterface(ABC):
         since: datetime | None = None,
     ) -> Thread | None:
         """Get thread by normalized subject within time window (for subject-based threading)."""
+        ...
+
+    # -------------------------------------------------------------------------
+    # IMAP Poll State methods
+    # -------------------------------------------------------------------------
+    @abstractmethod
+    async def get_imap_poll_state(self, inbox_id: str) -> ImapPollState | None:
+        """Get IMAP polling state for an inbox. Returns None if no state exists."""
+        ...
+
+    @abstractmethod
+    async def upsert_imap_poll_state(
+        self,
+        inbox_id: str,
+        last_uid: int,
+        uid_validity: int,
+        mailbox: str = "INBOX",
+    ) -> None:
+        """Create or update IMAP polling state for an inbox."""
         ...
 
     # -------------------------------------------------------------------------

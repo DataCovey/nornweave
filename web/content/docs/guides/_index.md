@@ -20,17 +20,18 @@ Detailed setup guides for each supported email provider.
   {{< card link="sendgrid" title="SendGrid" icon="mail" subtitle="Setup guide for SendGrid integration" >}}
   {{< card link="ses" title="AWS SES" icon="cloud" subtitle="Setup guide for Amazon SES integration" >}}
   {{< card link="resend" title="Resend" icon="mail" subtitle="Setup guide for Resend integration" >}}
+  {{< card link="imap-smtp" title="IMAP/SMTP" icon="server" subtitle="Connect to any mail server via IMAP and SMTP" >}}
 {{< /cards >}}
 
 ## Provider Comparison
 
-| Feature | Mailgun | SendGrid | AWS SES | Resend |
-|---------|---------|----------|---------|--------|
-| Sending | Yes | Yes | Yes | Yes |
-| Receiving | Yes | Yes | Yes | Yes |
-| Auto-Route Setup | Yes | Yes | Manual | Yes |
-| Free Tier | 5k/month | 100/day | 62k/month | 3k/month |
-| Webhook Parsing | JSON | JSON | SNS/JSON | JSON |
+| Feature | Mailgun | SendGrid | AWS SES | Resend | IMAP/SMTP |
+|---------|---------|----------|---------|--------|-----------|
+| Sending | Yes | Yes | Yes | Yes | Yes |
+| Receiving | Yes | Yes | Yes | Yes | Yes (polling) |
+| Auto-Route Setup | Yes | Yes | Manual | Yes | N/A |
+| Free Tier | 5k/month | 100/day | 62k/month | 3k/month | Any server |
+| Ingestion | Webhooks | Webhooks | SNS/Webhooks | Webhooks | IMAP polling |
 
 ## General Setup Steps
 

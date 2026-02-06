@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy dependency files and README (required by pyproject.toml)
 COPY pyproject.toml uv.lock* README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --extra postgres --extra mcp --extra gemini
+    uv sync --frozen --no-install-project --extra postgres --extra mcp --extra gemini --extra smtpimap
 
 # Copy source code
 COPY src/ ./src/
@@ -54,7 +54,7 @@ COPY alembic.ini ./
 
 # Install the project
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --extra postgres --extra mcp --extra gemini
+    uv sync --frozen --extra postgres --extra mcp --extra gemini --extra smtpimap
 
 # Expose port
 EXPOSE 8000

@@ -41,6 +41,21 @@ services:
       - ENVIRONMENT=development
       - LOG_LEVEL=DEBUG
       - EMAIL_PROVIDER=${EMAIL_PROVIDER:-mailgun}
+      # IMAP/SMTP configuration (for imap-smtp provider with smtp4dev or real servers)
+      - SMTP_HOST=${SMTP_HOST:-host.docker.internal}
+      - SMTP_PORT=${SMTP_PORT:-25}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_USE_TLS=${SMTP_USE_TLS:-false}
+      - IMAP_HOST=${IMAP_HOST:-host.docker.internal}
+      - IMAP_PORT=${IMAP_PORT:-143}
+      - IMAP_USERNAME=${IMAP_USERNAME:-}
+      - IMAP_PASSWORD=${IMAP_PASSWORD:-}
+      - IMAP_USE_SSL=${IMAP_USE_SSL:-false}
+      - IMAP_POLL_INTERVAL=${IMAP_POLL_INTERVAL:-15}
+      - IMAP_MAILBOX=${IMAP_MAILBOX:-INBOX}
+      - IMAP_MARK_AS_READ=${IMAP_MARK_AS_READ:-true}
+      - IMAP_DELETE_AFTER_FETCH=${IMAP_DELETE_AFTER_FETCH:-false}
       # Attachment storage configuration
       - ATTACHMENT_STORAGE_BACKEND=${ATTACHMENT_STORAGE_BACKEND:-local}
       - ATTACHMENT_LOCAL_PATH=/app/data/attachments
@@ -52,6 +67,8 @@ services:
       - AWS_S3_REGION=${AWS_S3_REGION:-us-east-1}
     env_file:
       - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./src:/app/src:ro
       - ./tests:/app/tests:ro

@@ -122,3 +122,56 @@ async def delete_inbox(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Inbox {inbox_id} not found",
         )
+
+
+class SyncResponse(BaseModel):
+    """Response model for IMAP sync."""
+
+    status: str
+    new_messages: int
+
+
+@router.post("/inboxes/{inbox_id}/sync", response_model=SyncResponse)
+async def sync_inbox(
+    inbox_id: str,
+    storage: StorageInterface = Depends(get_storage),
+    settings: Settings = Depends(get_settings),
+) -> SyncResponse:
+    """Trigger an immediate IMAP sync for a specific inbox.
+
+    Only available when EMAIL_PROVIDER is imap-smtp.
+    """
+    # Check provider
+    if settings.email_provider != "imap-smtp":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="IMAP sync is only available with the imap-smtp provider",
+        )
+
+    # Verify inbox exists
+    inbox = await storage.get_inbox(inbox_id)
+    if inbox is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Inbox {inbox_id} not found",
+        )
+
+    # Trigger sync
+    from nornweave.yggdrasil.app import get_imap_poller
+
+    poller = get_imap_poller()
+    if poller is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="IMAP poller is not running",
+        )
+
+    try:
+        new_messages = await poller.sync_inbox(inbox_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"IMAP connection failure: {e}",
+        ) from e
+
+    return SyncResponse(status="synced", new_messages=new_messages)

@@ -22,21 +22,25 @@ NornWeave is an **open-source, self-hosted** Inbox-as-a-Service API built for AI
 {{% /details %}}
 
 {{% details title="How is NornWeave different from services like AWS SES or Mailgun?" closed="true" %}}
-SendGrid, Mailgun, Resend, and AWS SES are excellent for **transactional email** (receipts, password resets, marketing). NornWeave does **not** replace them—it sits **on top** of them. You bring your own provider (Mailgun, SendGrid, SES, or Resend); NornWeave adds a **conversational layer**: stateful **threads**, **inboxes** as first-class entities, HTML→Markdown parsing, semantic search, and MCP tools so agents can have two-way email conversations. Think of NornWeave as the brain that turns your existing provider into an agent-ready email backend.
+SendGrid, Mailgun, Resend, and AWS SES are excellent for **transactional email** (receipts, password resets, marketing). NornWeave does **not** replace them---it sits **on top** of them. You bring your own provider (Mailgun, SendGrid, SES, Resend, or **IMAP/SMTP**); NornWeave adds a **conversational layer**: stateful **threads**, **inboxes** as first-class entities, HTML-to-Markdown parsing, semantic search, and MCP tools so agents can have two-way email conversations. Think of NornWeave as the brain that turns your existing provider into an agent-ready email backend.
+{{% /details %}}
+
+{{% details title="Can I use NornWeave without a transactional email provider?" closed="true" %}}
+Yes! NornWeave supports a built-in **IMAP/SMTP** provider (`EMAIL_PROVIDER=imap-smtp`) that connects directly to any standard mail server---Gmail, Office 365, Fastmail, or self-hosted Postfix/Dovecot. Instead of webhooks, NornWeave polls the IMAP mailbox for new messages and sends outbound via SMTP. This is ideal when you don't want a dedicated transactional email account. See the [IMAP/SMTP Setup Guide]({{< relref "guides/imap-smtp" >}}) for details.
 {{% /details %}}
 
 {{% details title="Can I use my own custom domain to send and receive email?" closed="true" %}}
-Yes. NornWeave is self-hosted and **provider-agnostic**. You configure your **own domain** with whichever provider you use (Mailgun, SendGrid, AWS SES, or Resend). Domain verification, DNS records, and sending/receiving are all set up in that provider’s dashboard; NornWeave receives inbound mail via webhooks and sends outbound mail via the provider’s API. See the [Provider Guides]({{< relref "guides" >}}) for step-by-step setup per provider.
+Yes. NornWeave is self-hosted and **provider-agnostic**. You configure your **own domain** with whichever provider you use (Mailgun, SendGrid, AWS SES, Resend, or IMAP/SMTP). For webhook-based providers, domain verification, DNS records, and sending/receiving are set up in that provider's dashboard. For IMAP/SMTP, you simply point NornWeave at your mail server. See the [Provider Guides]({{< relref "guides" >}}) for step-by-step setup per provider.
 {{% /details %}}
 
 {{% details title="How do I avoid ending up in spam?" closed="true" %}}
-Deliverability is determined by your **email provider** and your **domain/DNS** setup (SPF, DKIM, DMARC). Because NornWeave uses your chosen provider (Mailgun, SendGrid, SES, Resend), follow that provider’s deliverability and domain authentication guides. Use a verified domain, avoid spammy content and high complaint rates, and adhere to your provider’s sending best practices.
+Deliverability is determined by your **email provider** and your **domain/DNS** setup (SPF, DKIM, DMARC). Because NornWeave uses your chosen provider (Mailgun, SendGrid, SES, Resend), follow that provider's deliverability and domain authentication guides. Use a verified domain, avoid spammy content and high complaint rates, and adhere to your provider's sending best practices.
 {{% /details %}}
 
 {{% details title="Do you have SDKs or clients available?" closed="true" %}}
-Yes. We provide an official **Python client** (`nornweave-client`) in the [clients/python](https://github.com/DataCovey/nornweave/tree/main/clients/python) directory, with sync and async support, pagination, and full API coverage. For **AI agents**, the **MCP server** is the primary interface: Claude, Cursor, and other MCP clients can use NornWeave’s tools and resources without writing REST calls. See the [API Reference]({{< relref "api" >}}) for REST and [MCP Integration]({{< relref "api/mcp" >}}) for MCP setup.
+Yes. We provide an official **Python client** (`nornweave-client`) in the [clients/python](https://github.com/DataCovey/nornweave/tree/main/clients/python) directory, with sync and async support, pagination, and full API coverage. For **AI agents**, the **MCP server** is the primary interface: Claude, Cursor, and other MCP clients can use NornWeave's tools and resources without writing REST calls. See the [API Reference]({{< relref "api" >}}) for REST and [MCP Integration]({{< relref "api/mcp" >}}) for MCP setup.
 {{% /details %}}
 
 {{% details title="Is NornWeave self-hosted? Where is my data stored?" closed="true" %}}
-Yes. NornWeave is **self-hosted** and **open-source**. You run the server and the database (PostgreSQL or SQLite) on your own infrastructure. All inbox, thread, and message data stays in **your** storage; no email content is sent to third parties except through the provider you configure (e.g. Mailgun or SendGrid) for sending and receiving.
+Yes. NornWeave is **self-hosted** and **open-source**. You run the server and the database (PostgreSQL or SQLite) on your own infrastructure. All inbox, thread, and message data stays in **your** storage; no email content is sent to third parties except through the provider you configure (e.g. Mailgun, SendGrid, or IMAP/SMTP) for sending and receiving.
 {{% /details %}}

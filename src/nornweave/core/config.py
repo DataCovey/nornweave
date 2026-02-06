@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     database_url: str = Field(default="", alias="DATABASE_URL")
 
     # Email provider
-    email_provider: Literal["mailgun", "ses", "sendgrid", "resend"] = Field(
+    email_provider: Literal["mailgun", "ses", "sendgrid", "resend", "imap-smtp"] = Field(
         default="mailgun", alias="EMAIL_PROVIDER"
     )
     email_domain: str = Field(default="", alias="EMAIL_DOMAIN")
@@ -36,6 +36,22 @@ class Settings(BaseSettings):
     aws_access_key_id: str = Field(default="", alias="AWS_ACCESS_KEY_ID")
     aws_secret_access_key: str = Field(default="", alias="AWS_SECRET_ACCESS_KEY")
     aws_region: str = Field(default="us-east-1", alias="AWS_REGION")
+
+    # SMTP/IMAP provider settings
+    smtp_host: str = Field(default="", alias="SMTP_HOST")
+    smtp_port: int = Field(default=587, alias="SMTP_PORT")
+    smtp_username: str = Field(default="", alias="SMTP_USERNAME")
+    smtp_password: str = Field(default="", alias="SMTP_PASSWORD")
+    smtp_use_tls: bool = Field(default=True, alias="SMTP_USE_TLS")
+    imap_host: str = Field(default="", alias="IMAP_HOST")
+    imap_port: int = Field(default=993, alias="IMAP_PORT")
+    imap_username: str = Field(default="", alias="IMAP_USERNAME")
+    imap_password: str = Field(default="", alias="IMAP_PASSWORD")
+    imap_use_ssl: bool = Field(default=True, alias="IMAP_USE_SSL")
+    imap_poll_interval: int = Field(default=60, alias="IMAP_POLL_INTERVAL")
+    imap_mailbox: str = Field(default="INBOX", alias="IMAP_MAILBOX")
+    imap_mark_as_read: bool = Field(default=True, alias="IMAP_MARK_AS_READ")
+    imap_delete_after_fetch: bool = Field(default=False, alias="IMAP_DELETE_AFTER_FETCH")
 
     # API security
     api_key: str = Field(default="", alias="API_KEY")
@@ -202,6 +218,17 @@ class Settings(BaseSettings):
         alias="EXTRACTION_FALLBACK_TO_ORIGINAL",
         description="Return original content if extraction fails",
     )
+
+    @model_validator(mode="after")
+    def validate_imap_config(self) -> Settings:
+        """Validate IMAP configuration: delete requires mark-as-read for safety."""
+        if self.imap_delete_after_fetch and not self.imap_mark_as_read:
+            msg = (
+                "IMAP_DELETE_AFTER_FETCH=true requires IMAP_MARK_AS_READ=true. "
+                "Deleting emails without marking them as read first is not safe."
+            )
+            raise ValueError(msg)
+        return self
 
     @model_validator(mode="after")
     def validate_llm_config(self) -> Settings:

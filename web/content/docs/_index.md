@@ -45,7 +45,8 @@ For detailed data flows and sequence diagrams, see [Concepts → Architecture]({
 
 | Provider | Sending | Receiving | Auto-Route Setup |
 |----------|---------|-----------|------------------|
-| Mailgun | Yes | Yes | Yes |
-| AWS SES | Yes | Yes | Manual |
-| SendGrid | Yes | Yes | Yes |
-| Resend | Yes | Yes | Yes |
+| Mailgun | Yes | Yes (webhooks) | Yes |
+| AWS SES | Yes | Yes (webhooks) | Manual |
+| SendGrid | Yes | Yes (webhooks) | Yes |
+| Resend | Yes | Yes (webhooks) | Yes |
+| IMAP/SMTP | Yes (SMTP) | Yes (IMAP polling) | N/A |

@@ -1,0 +1,25 @@
+From: Eve Martinez <eve@example.com>
+To: alice@nornweave.dev
+Subject: Re: Project Yggdrasil - Design Review
+Date: Thu, 06 Feb 2026 11:45:00 +0000
+Message-ID: <msg-004@mail.example.com>
+In-Reply-To: <msg-original-001@mail.example.com>
+References: <msg-original-001@mail.example.com> <msg-reply-001@mail.example.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hi Alice,
+
+Thanks for the design doc. I have a few comments:
+
+1. The threading algorithm looks solid. I agree with the In-Reply-To
+   fallback to References approach.
+2. For the IMAP polling, consider adding exponential backoff on
+   connection failures.
+3. The attachment storage abstraction is clean - easy to swap backends.
+
+I'll approve once items 1-2 are addressed in the next revision.
+
+Cheers,
+Eve

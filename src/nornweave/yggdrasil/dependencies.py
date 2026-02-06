@@ -191,5 +191,9 @@ async def get_email_provider(
             api_key=settings.resend_api_key,
             webhook_secret=settings.resend_webhook_secret,
         )
+    elif provider == "imap-smtp":
+        from nornweave.adapters.smtp_imap import SmtpImapAdapter
+
+        return SmtpImapAdapter(settings=settings)
     else:
         raise ValueError(f"Unknown email_provider: {provider}")

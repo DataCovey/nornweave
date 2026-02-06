@@ -1,0 +1,19 @@
+From: Alice Johnson <alice@example.com>
+To: Bob Smith <bob@nornweave.dev>
+Subject: Weekly status update
+Date: Mon, 03 Feb 2026 10:30:00 +0000
+Message-ID: <msg-001@mail.example.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hi Bob,
+
+Here is the weekly status update for Project Yggdrasil:
+
+- Completed the new inbox routing logic.
+- Started work on the IMAP polling module.
+- Next week: integration tests and documentation.
+
+Best regards,
+Alice

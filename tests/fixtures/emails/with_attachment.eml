@@ -1,0 +1,39 @@
+From: Dave Wilson <dave@example.com>
+To: inbox@nornweave.dev
+Subject: Q4 Report
+Date: Wed, 05 Feb 2026 09:00:00 +0000
+Message-ID: <msg-003@mail.example.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="----=_Part_MIX_001"
+
+------=_Part_MIX_001
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hi team,
+
+Attached is the Q4 report for your review. Please take a look
+and share feedback by end of week.
+
+Thanks,
+Dave
+
+------=_Part_MIX_001
+Content-Type: text/plain; charset="utf-8"; name="q4-report.txt"
+Content-Disposition: attachment; filename="q4-report.txt"
+Content-Transfer-Encoding: 7bit
+
+Q4 2025 Performance Report
+==========================
+
+Revenue: $2.4M (+12% YoY)
+Active Users: 48,000 (+18% YoY)
+Churn Rate: 2.1% (-0.3pp)
+NPS Score: 72 (+5)
+
+Key Highlights:
+- Launched self-hosted deployment option
+- Expanded to 3 new regions
+- Reduced p99 latency by 40%
+
+------=_Part_MIX_001--

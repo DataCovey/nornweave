@@ -3,6 +3,24 @@ revision = 3
 requires-python = ">=3.14"
 
 [[package]]
+name = "aioimaplib"
+version = "2.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ee/da/a454c47fb8522e607425e15bf1f49ccfdb3d75f4071f40b63ebd49573495/aioimaplib-2.0.1.tar.gz", hash = "sha256:5a494c3b75f220977048f5eb2c7ba9c0570a3148aaf38bee844e37e4d7af8648", size = 35555, upload-time = "2025-01-16T10:38:23.14Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/52/48aaa287fb3c4c995edcb602370b10d182dc5c48371df7cb3a404356733f/aioimaplib-2.0.1-py3-none-any.whl", hash = "sha256:727e00c35cf25106bd34611dddd6e2ddf91a5f1a7e72d9269f3ce62486b31e14", size = 34729, upload-time = "2025-01-16T10:38:20.427Z" },
+]
+
+[[package]]
+name = "aiosmtplib"
+version = "5.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/ad/240a7ce4e50713b111dff8b781a898d8d4770e5d6ad4899103f84c86005c/aiosmtplib-5.1.0.tar.gz", hash = "sha256:2504a23b2b63c9de6bc4ea719559a38996dba68f73f6af4eb97be20ee4c5e6c4", size = 66176, upload-time = "2026-01-25T01:51:11.408Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/37/82/70f2c452acd7ed18c558c8ace9a8cf4fdcc70eae9a41749b5bdc53eb6f45/aiosmtplib-5.1.0-py3-none-any.whl", hash = "sha256:368029440645b486b69db7029208a7a78c6691b90d24a5332ddba35d9109d55b", size = 27778, upload-time = "2026-01-25T01:51:10.026Z" },
+]
+
+[[package]]
 name = "aiosqlite"
 version = "0.22.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1184,6 +1202,8 @@ dependencies = [
 
 [package.optional-dependencies]
 all = [
+    { name = "aioimaplib" },
+    { name = "aiosmtplib" },
     { name = "anthropic" },
     { name = "asyncpg" },
     { name = "boto3" },
@@ -1247,9 +1267,15 @@ search = [
     { name = "openai" },
     { name = "pgvector" },
 ]
+smtpimap = [
+    { name = "aioimaplib" },
+    { name = "aiosmtplib" },
+]
 
 [package.metadata]
 requires-dist = [
+    { name = "aioimaplib", marker = "extra == 'smtpimap'", specifier = ">=2.0.0" },
+    { name = "aiosmtplib", marker = "extra == 'smtpimap'", specifier = ">=5.0.0" },
     { name = "aiosqlite", specifier = ">=0.20.0" },
     { name = "aiosqlite", marker = "extra == 'dev'", specifier = ">=0.20.0" },
     { name = "alembic", specifier = ">=1.14.0" },
@@ -1270,7 +1296,7 @@ requires-dist = [
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.0.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13.0" },
     { name = "nornweave", extras = ["openai", "anthropic", "gemini"], marker = "extra == 'llm'" },
-    { name = "nornweave", extras = ["postgres", "mcp", "attachments", "search", "ratelimit", "s3", "gcs", "llm"], marker = "extra == 'all'" },
+    { name = "nornweave", extras = ["postgres", "mcp", "attachments", "search", "ratelimit", "s3", "gcs", "llm", "smtpimap"], marker = "extra == 'all'" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=1.57.0" },
     { name = "openai", marker = "extra == 'search'", specifier = ">=1.57.0" },
     { name = "pgvector", marker = "extra == 'search'", specifier = ">=0.3.6" },
@@ -1290,7 +1316,7 @@ requires-dist = [
     { name = "svix", specifier = ">=1.24.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
 ]
-provides-extras = ["postgres", "mcp", "attachments", "search", "ratelimit", "s3", "gcs", "openai", "anthropic", "gemini", "llm", "all", "dev"]
+provides-extras = ["postgres", "mcp", "attachments", "search", "ratelimit", "s3", "gcs", "openai", "anthropic", "gemini", "llm", "smtpimap", "all", "dev"]
 
 [[package]]
 name = "numpy"

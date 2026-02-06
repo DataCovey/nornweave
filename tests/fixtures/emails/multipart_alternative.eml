@@ -1,0 +1,43 @@
+From: Carol Davis <carol@example.com>
+To: support@nornweave.dev
+Subject: Invoice #2026-0142 attached
+Date: Tue, 04 Feb 2026 14:15:00 +0000
+Message-ID: <msg-002@mail.example.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="----=_Part_ALT_001"
+
+------=_Part_ALT_001
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hi Support,
+
+Please find invoice #2026-0142 for the January billing cycle.
+
+Amount due: $1,250.00
+Due date: February 28, 2026
+
+Let me know if you have any questions.
+
+Thanks,
+Carol
+
+------=_Part_ALT_001
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+<!DOCTYPE html>
+<html>
+<body>
+<p>Hi Support,</p>
+<p>Please find invoice <strong>#2026-0142</strong> for the January billing cycle.</p>
+<table>
+<tr><td>Amount due:</td><td><strong>$1,250.00</strong></td></tr>
+<tr><td>Due date:</td><td>February 28, 2026</td></tr>
+</table>
+<p>Let me know if you have any questions.</p>
+<p>Thanks,<br>Carol</p>
+</body>
+</html>
+
+------=_Part_ALT_001--

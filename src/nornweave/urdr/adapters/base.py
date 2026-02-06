@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import func, or_, select
 
-from nornweave.core.interfaces import StorageInterface
+from nornweave.core.interfaces import ImapPollState, StorageInterface
 from nornweave.urdr.orm import (
     AttachmentORM,
     EventORM,
+    ImapPollStateORM,
     InboxORM,
     LlmTokenUsageORM,
     MessageORM,
@@ -524,6 +525,47 @@ class BaseSQLAlchemyAdapter(StorageInterface):
         result = await self._session.execute(stmt)
         orm_thread = result.scalar_one_or_none()
         return orm_thread.to_pydantic() if orm_thread else None
+
+    # -------------------------------------------------------------------------
+    # IMAP Poll State methods
+    # -------------------------------------------------------------------------
+    async def get_imap_poll_state(self, inbox_id: str) -> ImapPollState | None:
+        """Get IMAP polling state for an inbox."""
+        result = await self._session.get(ImapPollStateORM, inbox_id)
+        if result is None:
+            return None
+        return ImapPollState(
+            inbox_id=result.inbox_id,
+            last_uid=result.last_uid,
+            uid_validity=result.uid_validity,
+            mailbox=result.mailbox,
+            updated_at=result.updated_at,
+        )
+
+    async def upsert_imap_poll_state(
+        self,
+        inbox_id: str,
+        last_uid: int,
+        uid_validity: int,
+        mailbox: str = "INBOX",
+    ) -> None:
+        """Create or update IMAP polling state for an inbox."""
+        result = await self._session.get(ImapPollStateORM, inbox_id)
+
+        if result is None:
+            state = ImapPollStateORM(
+                inbox_id=inbox_id,
+                last_uid=last_uid,
+                uid_validity=uid_validity,
+                mailbox=mailbox,
+            )
+            self._session.add(state)
+        else:
+            result.last_uid = last_uid
+            result.uid_validity = uid_validity
+            result.mailbox = mailbox
+
+        await self._session.flush()
 
     # -------------------------------------------------------------------------
     # LLM Token Usage methods

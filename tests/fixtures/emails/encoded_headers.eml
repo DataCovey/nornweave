@@ -1,0 +1,21 @@
+From: =?UTF-8?B?SsO8cmdlbiBNw7xsbGVy?= <juergen@example.de>
+To: inbox@nornweave.dev
+Cc: =?UTF-8?B?TMOpYSBEdXBvbnQ=?= <lea@example.fr>, frank@example.com
+Subject: =?UTF-8?B?w5xiZXJwcsO8ZnVuZyBkZXIgRG9rdW1lbnRhdGlvbiDwn5OE?=
+Date: Fri, 06 Feb 2026 16:30:00 +0100
+Message-ID: <msg-005@mail.example.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Authentication-Results: mx.nornweave.dev;
+ spf=pass smtp.mailfrom=example.de;
+ dkim=pass header.d=example.de;
+ dmarc=pass header.from=example.de
+
+Hallo,
+
+Dies ist eine Testnachricht mit kodierten Kopfzeilen.
+Die Überprüfung der Dokumentation ist abgeschlossen.
+
+Mit freundlichen Grüßen,
+Jürgen Müller

@@ -645,6 +645,39 @@ class EventORM(Base):
         )
 
 
+class ImapPollStateORM(Base):
+    """IMAP polling state per inbox for UID-based tracking."""
+
+    __tablename__ = "imap_poll_state"
+
+    inbox_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("inboxes.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    last_uid: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+    uid_validity: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+    mailbox: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        default="INBOX",
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
 class LlmTokenUsageORM(Base):
     """Daily LLM token usage tracking."""
 

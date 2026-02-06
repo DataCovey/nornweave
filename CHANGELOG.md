@@ -9,7 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- (None yet)
+- IMAP/SMTP email provider (`EMAIL_PROVIDER=imap-smtp`): send via SMTP and receive via IMAP polling, connecting to any standard mail server (Gmail, Office 365, Fastmail, self-hosted, etc.) without a transactional email account
+- Shared `ingest_message()` function in `verdandi/ingest.py` unifying inbound email processing across all providers
+- RFC 822 email parser (`verdandi/email_parser.py`) for parsing raw IMAP messages into `InboundMessage` objects
+- `imap_poll_state` database table for persistent IMAP UID tracking across restarts
+- `POST /v1/inboxes/{inbox_id}/sync` endpoint for on-demand IMAP sync
+- Configurable IMAP post-fetch behavior: `IMAP_MARK_AS_READ` and `IMAP_DELETE_AFTER_FETCH` settings
+- Background IMAP poller with exponential backoff reconnect, managed by FastAPI lifespan
 
 ### Changed
 

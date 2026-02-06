@@ -1,6 +1,8 @@
 """FastAPI application factory (Yggdrasil)."""
 
-from contextlib import asynccontextmanager
+import asyncio
+import logging
+from contextlib import asynccontextmanager, suppress
 from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
@@ -10,16 +12,52 @@ from nornweave import __version__
 from nornweave.core.config import get_settings
 from nornweave.yggdrasil.dependencies import close_database, init_database
 
+# Configure nornweave loggers to output to stdout
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+# Ensure nornweave namespace logs at DEBUG in development
+logging.getLogger("nornweave").setLevel(logging.DEBUG)
+
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+
+    from nornweave.verdandi.imap_poller import ImapPoller
+
+# Module-level reference to the IMAP poller for use by the sync endpoint
+_imap_poller: ImapPoller | None = None
+
+
+def get_imap_poller() -> ImapPoller | None:
+    """Get the running IMAP poller instance (or None if not using imap-smtp)."""
+    return _imap_poller
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
-    """Application lifespan: initialize and close database connections."""
+    """Application lifespan: initialize DB and optionally start IMAP poller."""
+    global _imap_poller
+
     settings = get_settings()
     await init_database(settings)
+
+    poller_task: asyncio.Task[None] | None = None
+
+    if settings.email_provider == "imap-smtp":
+        from nornweave.verdandi.imap_poller import ImapPoller
+
+        _imap_poller = ImapPoller(settings)
+        poller_task = asyncio.create_task(_imap_poller.run())
+
     yield
+
+    if poller_task:
+        poller_task.cancel()
+        with suppress(asyncio.CancelledError):
+            await poller_task
+        _imap_poller = None
+
     await close_database()
 
 
