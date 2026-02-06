@@ -26,6 +26,7 @@ Welcome to the NornWeave documentation. Learn how to set up and use the Inbox-as
   {{< card link="concepts" title="Concepts" icon="academic-cap" subtitle="Understand NornWeave's architecture and design" >}}
   {{< card link="api" title="API Reference" icon="code" subtitle="REST API and MCP integration documentation" >}}
   {{< card link="guides" title="Provider Guides" icon="book-open" subtitle="Setup guides for Mailgun, SendGrid, SES, and more" >}}
+  {{< card link="faq" title="FAQ" icon="question-mark-circle" subtitle="Frequently asked questions about NornWeave" >}}
 {{< /cards >}}
 
 ## Architecture Overview

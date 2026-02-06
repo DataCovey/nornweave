@@ -22,11 +22,11 @@ sitemap_changefreq: daily
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 2rem;
-  margin-top: 2rem;
-  margin-bottom: 4rem;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 .nw-hero-row .nw-hero-image {
-  flex: 0 0 min(45%, 420px);
+  flex: 0 0 min(34%, 315px);
   min-width: 0;
 }
 .nw-hero-row .nw-hero-image img {
@@ -35,8 +35,11 @@ sitemap_changefreq: daily
   display: block;
 }
 .nw-hero-row .nw-hero-right {
-  flex: 1 1 45%;
+  flex: 1 1 50%;
   min-width: 0;
+}
+.nw-hero-row .nw-hero-right .hextra-feature-grid {
+  grid-template-columns: 1fr !important;
 }
 .nw-hero-row .nw-hero-quote,
 .nw-hero-row .nw-hero-credits {
@@ -51,7 +54,7 @@ sitemap_changefreq: daily
   .nw-hero-row .nw-hero-image {
     flex: 0 0 auto;
     width: 100%;
-    max-width: 320px;
+    max-width: 240px;
   }
   .nw-hero-row .nw-hero-right {
     width: 100%;
@@ -66,19 +69,19 @@ sitemap_changefreq: daily
 }
 </style>
 
-<div style="margin-top: 2rem; margin-bottom: 2rem;">
+<div style="margin-bottom: 0.75rem;">
 {{< hextra/hero-headline >}}
   Inbox-as-a-Service for AI Agents
 {{< /hextra/hero-headline >}}
 </div>
 
-<div style="margin-bottom: 3rem;">
+<div style="margin-bottom: 1.25rem;">
 {{< hextra/hero-subtitle >}}
   Open-source, self-hosted API that turns standard email providers into intelligent, stateful email for LLMs via REST or MCP.
 {{< /hextra/hero-subtitle >}}
 </div>
 
-<div style="margin-bottom: 4rem;">
+<div style="margin-bottom: 1.5rem;">
 {{< hextra/hero-button text="Get Started" link="docs/getting-started" >}}
 {{< hextra/hero-button text="GitHub" link="https://github.com/DataCovey/nornweave" style="outline" >}}
 </div>
@@ -114,7 +117,7 @@ sitemap_changefreq: daily
   </div>
 </div>
 
-<div style="margin-top: 5rem; margin-bottom: 2.5rem;">
+<div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
 {{< hextra/hero-headline >}}
   Features
 {{< /hextra/hero-headline >}}
@@ -135,7 +138,7 @@ sitemap_changefreq: daily
   >}}
   {{< hextra/feature-card
     title="Smart Threading"
-    subtitle="Automatic conversation grouping using email headers. Messages are organized into threads."
+    subtitle="Automatic conversation grouping using email headers. Messages are organized into threads and summarized by LLMs."
     link="docs/concepts"
     icon="collection"
   >}}
@@ -159,7 +162,7 @@ sitemap_changefreq: daily
   >}}
 {{< /hextra/feature-grid >}}
 
-<div style="margin-top: 5rem; margin-bottom: 2.5rem;">
+<div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
 {{< hextra/hero-headline >}}
   Current Capabilities
 {{< /hextra/hero-headline >}}
@@ -180,7 +183,7 @@ sitemap_changefreq: daily
   >}}
 {{< /hextra/feature-grid >}}
 
-<div style="margin-top: 5rem; margin-bottom: 2.5rem;">
+<div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
 {{< hextra/hero-headline >}}
   Quick Start
 {{< /hextra/hero-headline >}}
