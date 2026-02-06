@@ -9,13 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- IMAP/SMTP email provider (`EMAIL_PROVIDER=imap-smtp`): send via SMTP and receive via IMAP polling, connecting to any standard mail server (Gmail, Office 365, Fastmail, self-hosted, etc.) without a transactional email account
-- Shared `ingest_message()` function in `verdandi/ingest.py` unifying inbound email processing across all providers
-- RFC 822 email parser (`verdandi/email_parser.py`) for parsing raw IMAP messages into `InboundMessage` objects
-- `imap_poll_state` database table for persistent IMAP UID tracking across restarts
-- `POST /v1/inboxes/{inbox_id}/sync` endpoint for on-demand IMAP sync
-- Configurable IMAP post-fetch behavior: `IMAP_MARK_AS_READ` and `IMAP_DELETE_AFTER_FETCH` settings
-- Background IMAP poller with exponential backoff reconnect, managed by FastAPI lifespan
+- (None yet)
 
 ### Changed
 
@@ -36,6 +30,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - (None yet)
+
+---
+
+## [0.1.5] - 2026-02-06
+
+### Added
+
+- IMAP/SMTP email provider (`EMAIL_PROVIDER=imap-smtp`): send via SMTP and receive via IMAP polling, connecting to any standard mail server (Gmail, Office 365, Fastmail, self-hosted, etc.) without a transactional email account
+- Shared `ingest_message()` function in `verdandi/ingest.py` unifying inbound email processing across all providers
+- RFC 822 email parser (`verdandi/email_parser.py`) for parsing raw IMAP messages into `InboundMessage` objects
+- `imap_poll_state` database table for persistent IMAP UID tracking across restarts
+- `POST /v1/inboxes/{inbox_id}/sync` endpoint for on-demand IMAP sync
+- Configurable IMAP post-fetch behavior: `IMAP_MARK_AS_READ` and `IMAP_DELETE_AFTER_FETCH` settings
+- Background IMAP poller with exponential backoff reconnect, managed by FastAPI lifespan
 
 ---
 
@@ -170,7 +178,8 @@ Initial release. See [Unreleased] for current development.
 - Implemented **Urdr**, basic Storage (PSQL and SQLite)
 - E2E testing
 
-[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/DataCovey/nornweave/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/DataCovey/nornweave/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/DataCovey/nornweave/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/DataCovey/nornweave/compare/v0.1.1...v0.1.2
