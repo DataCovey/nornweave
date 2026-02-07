@@ -11,7 +11,7 @@ NornWeave is an open-source, self-hosted Inbox-as-a-Service API for AI Agents. I
 ```
 nornweave/
 ├── src/nornweave/              # Main Python package
-│   ├── adapters/               # Email provider adapters (Mailgun, SES, SendGrid, Resend)
+│   ├── adapters/               # Email provider adapters (Mailgun, SES, SendGrid, Resend, SMTP/IMAP)
 │   ├── core/                   # Core utilities (config, exceptions, interfaces)
 │   ├── models/                 # Pydantic/SQLAlchemy models (Event, Inbox, Message, Thread)
 │   ├── huginn/                 # MCP Resources (read operations for AI agents)
@@ -20,7 +20,7 @@ nornweave/
 │   ├── urdr/                   # Storage layer (database adapters, migrations)
 │   │   ├── adapters/           # PostgreSQL and SQLite adapters
 │   │   └── migrations/         # Alembic migration scripts
-│   ├── verdandi/               # Ingestion engine (parsing, sanitizing, threading, attachments)
+│   ├── verdandi/               # Ingestion (webhook + IMAP, parsing, threading, attachments, LLM summarization)
 │   └── yggdrasil/              # FastAPI gateway
 │       ├── middleware/         # Auth and logging middleware
 │       └── routes/             # API routes (v1/, webhooks/)
@@ -28,17 +28,14 @@ nornweave/
 │   └── python/                 # Python client library (nornweave-client)
 ├── packages/                   # External platform integrations
 │   └── n8n-nodes-nornweave/    # n8n community node for NornWeave
-├── tests/                      # Test suite
-│   ├── fixtures/               # Test data (emails, etc.)
-│   ├── integration/            # Integration tests
-│   └── unit/                   # Unit tests
+├── tests/                      # Test suite (fixtures/, integration/, unit/, e2e/)
 ├── web/                        # Hugo documentation website
 │   └── content/docs/           # Documentation content
 ├── scripts/                    # Utility scripts (DB init, migrations, dev setup)
 ├── skills/                     # Distributable AI assistant skills for NornWeave
 ├── openspec/                   # OpenSpec artifacts (specs, changes, context for implementations)
 │   ├── specs/                  # Feature specifications and design documents
-│   └── archive/                # Completed and archived changes
+│   └── changes/archive/        # Completed and archived changes
 └── .github/                    # CI/CD workflows
 ```
 
@@ -49,7 +46,7 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 | Module | Name | Purpose |
 |--------|------|---------|
 | `urdr` | The Well | Storage layer - PostgreSQL/SQLite adapters, Alembic migrations |
-| `verdandi` | The Loom | Ingestion - webhook processing, HTML→Markdown, email threading |
+| `verdandi` | The Loom | Ingestion - webhook + IMAP, HTML→Markdown, threading, LLM thread summarization |
 | `skuld` | The Prophecy | Outbound - rate limiting, scheduling, email sending |
 | `yggdrasil` | World Tree | FastAPI gateway - routes, middleware, API endpoints |
 | `huginn` | Thought Raven | MCP Resources - read operations for AI agents |
@@ -120,6 +117,13 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 - Hosted on GitHub Pages
 - Keep API documentation in sync with code changes
 
+### Keeping documentation in sync
+When adding, changing, or removing **features** (e.g. providers, capabilities, architecture), update these so they stay accurate:
+- **README.md**: Sections "Features", "Architecture", "Supported Providers", "Repository Structure", and "MCP Integration" (tools table) as relevant.
+- **web/content/docs/**: Guides, API docs, and concept pages that describe the feature.
+- **.cursor/rules/main.mdc**: "Repository Structure" and "Architecture Overview" (and this list if doc locations change).
+Prefer a single commit that includes both the code change and the doc/rule updates.
+
 ## File Organization
 
 - Module names: snake_case
@@ -141,7 +145,7 @@ This repository uses **OpenSpec** for structured feature development and change 
 
 ### Directory Structure
 - `openspec/specs/` - Active feature specifications and design documents
-- `openspec/archive/` - Completed changes for historical reference
+- `openspec/changes/archive/` - Completed changes for historical reference
 
 ### When to Use OpenSpec
 - **Before implementing**: Check `openspec/specs/` for existing specifications related to your task
@@ -177,3 +181,4 @@ When working in this codebase:
 4. **Provider abstraction**: Email providers are abstracted in `adapters/` - maintain this pattern
 5. **MCP compatibility**: When adding features, consider MCP tool/resource exposure for AI agents
 6. **OpenSpec context**: Check `openspec/specs/` for detailed specifications before implementing features - specs contain design decisions, API contracts, and implementation guidance
+7. **Doc sync**: When implementing or changing user-facing features, update README.md, relevant `web/content/docs/` pages, and `.cursor/rules/main.mdc` (Repository Structure / Architecture) so they stay accurate

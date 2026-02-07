@@ -35,12 +35,14 @@ In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Y
 ### Foundation (The Mail Proxy)
 - **Virtual Inboxes**: Create email addresses for your AI agents
 - **Webhook Ingestion**: Receive emails from Mailgun, SES, SendGrid, Resend
+- **IMAP/SMTP**: Poll existing mailboxes (IMAP) and send via SMTP for any provider or self-hosted server
 - **Persistent Storage**: PostgreSQL with abstracted storage adapters
 - **Email Sending**: Send replies through your configured provider
 
 ### Intelligence (The Agent Layer)
 - **Content Parsing**: HTML to clean Markdown, cruft removal
 - **Threading**: Automatic conversation grouping via email headers
+- **Thread Summarization**: LLM-generated thread summaries (OpenAI, Anthropic, Gemini) for list views and token savings
 - **MCP Server**: Connect directly to Claude, Cursor, and other MCP clients
 - **Attachment Processing**: Extract text from PDFs and documents
 
@@ -202,11 +204,11 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 
 | Component | Name | Purpose |
 |-----------|------|---------|
-| Storage Layer | **Urdr** (The Well) | Database adapters (PostgreSQL, SQLite) |
-| Ingestion Engine | **Verdandi** (The Loom) | Webhook processing, HTML to Markdown |
-| API & Outbound | **Skuld** (The Prophecy) | REST API, email sending, rate limiting |
-| Gateway | **Yggdrasil** | API router connecting all providers |
-| MCP Tools | **Huginn & Muninn** | Read/write tools for AI agents |
+| Storage Layer | **Urdr** (The Well) | Database adapters (PostgreSQL, SQLite), migrations |
+| Ingestion Engine | **Verdandi** (The Loom) | Webhook + IMAP ingestion, HTML→Markdown, threading, LLM thread summarization |
+| Outbound | **Skuld** (The Prophecy) | Email sending, rate limiting, webhooks |
+| Gateway | **Yggdrasil** | FastAPI routes, middleware, API endpoints |
+| MCP | **Huginn & Muninn** | Read resources and write tools for AI agents |
 
 ## Supported Providers
 
@@ -216,6 +218,7 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 | AWS SES | yes | yes | manual |
 | SendGrid | yes | yes | yes |
 | Resend | yes | yes | yes |
+| IMAP/SMTP | yes (SMTP) | yes (IMAP polling) | config |
 
 ## Documentation
 
@@ -228,11 +231,16 @@ NornWeave uses a thematic architecture inspired by Norse mythology:
 
 This is a monorepo:
 
-- **`src/nornweave/`** – Main NornWeave server components
-- **`clients/python/`** – Python client SDK (`nornweave-client`)
-- **`packages/n8n-nodes-nornweave/`** – n8n community node (`@nornweave/n8n-nodes-nornweave`)
-
-The root **`credentials`** symlink points to `packages/n8n-nodes-nornweave/credentials` so n8n’s package verification can find the credential file when checking the repo.
+| Directory | Purpose |
+|-----------|---------|
+| **`src/nornweave/`** | Main Python package: adapters (Mailgun, SES, SendGrid, Resend, SMTP/IMAP), core config, models, **huginn** (MCP resources), **muninn** (MCP tools), **skuld** (outbound/sending), **urdr** (storage, migrations), **verdandi** (ingestion, parsing, threading), **yggdrasil** (FastAPI gateway), search, storage backends |
+| **`clients/python/`** | Python client SDK (`nornweave-client`) |
+| **`packages/n8n-nodes-nornweave/`** | n8n community node for NornWeave |
+| **`tests/`** | Test suite: `fixtures/`, `integration/`, `unit/`, `e2e/` |
+| **`web/`** | Hugo documentation site (`content/docs/`) |
+| **`scripts/`** | DB init, migrations, dev setup |
+| **`skills/`** | Distributable AI assistant skills (e.g. `nornweave-api`) |
+| **`openspec/`** | Specs (`specs/`) and change artifacts (`changes/`, `changes/archive/`) |
 
 ## Contributing
 
