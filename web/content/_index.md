@@ -161,6 +161,12 @@ sitemap_changefreq: daily
     icon="shield-check"
   >}}
   {{< hextra/feature-card
+    title="Send Rate Limiting"
+    subtitle="Global per-minute and per-hour caps on outbound email. Protect against runaway agents with HTTP 429 and Retry-After."
+    link="docs/getting-started/configuration#rate-limiting"
+    icon="clock"
+  >}}
+  {{< hextra/feature-card
     title="Clean Architecture"
     subtitle="Modular design with storage and provider adapters. Swap email providers with ease."
     link="docs/concepts/architecture"

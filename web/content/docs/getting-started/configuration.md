@@ -228,6 +228,33 @@ LLM_SUMMARY_PROMPT="Summarize this email thread in 3 bullet points."
 Summaries are generated after each new message. If the daily token limit is reached, summarization is paused until the next day (UTC). Token usage is tracked in the database and can be queried from the `llm_token_usage` table.
 {{< /callout >}}
 
+## Rate Limiting
+
+NornWeave supports global send rate limiting to protect against runaway agents or integrations exhausting provider quotas. Limits are enforced in-memory with a sliding-window counter — no Redis or external dependencies needed.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GLOBAL_SEND_RATE_LIMIT_PER_MINUTE` | Max outbound emails per rolling minute | `0` (unlimited) |
+| `GLOBAL_SEND_RATE_LIMIT_PER_HOUR` | Max outbound emails per rolling hour | `0` (unlimited) |
+
+Both windows are enforced independently. When either limit is exceeded, the API returns **HTTP 429 Too Many Requests** with a `Retry-After` header (in seconds) so callers know when to retry.
+
+### Examples
+
+```bash
+# Cap at 10 emails per minute, 200 per hour
+GLOBAL_SEND_RATE_LIMIT_PER_MINUTE=10
+GLOBAL_SEND_RATE_LIMIT_PER_HOUR=200
+
+# Only cap per hour (no per-minute limit)
+GLOBAL_SEND_RATE_LIMIT_PER_MINUTE=0
+GLOBAL_SEND_RATE_LIMIT_PER_HOUR=500
+```
+
+{{< callout type="info" >}}
+Rate-limit counters are in-memory and reset on process restart. Only successfully sent emails count against the limit — domain-filtered or failed sends do not. Rejected requests are logged at WARNING level for observability.
+{{< /callout >}}
+
 ## Domain Filtering (Allow/Blocklists)
 
 NornWeave supports domain-level allow/blocklists for both inbound (receiving) and outbound (sending) email. Use these to restrict which external domains your instance interacts with.

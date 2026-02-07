@@ -121,24 +121,13 @@ POST /v1/domains
 - Status monitoring
 - Multiple domains per project
 
-### Rate Limiting and Credits
+### Advanced Rate Limiting and Credits
 
-Protect against runaway agents and manage API usage.
+Granular rate limiting and usage management beyond the global send limits already available.
 
-```yaml
-# Rate limit configuration
-rate_limits:
-  messages_per_minute: 60
-  messages_per_day: 1000
-  
-credits:
-  enabled: true
-  monthly_limit: 10000
-```
-
-- Per-inbox rate limits
-- Organization-wide quotas
-- Usage alerts
+- Per-inbox and per-recipient-domain rate limits
+- Organization-wide quotas (requires multi-tenancy)
+- Usage alerts and notifications
 - Credit-based billing support
 
 ### Analytics Dashboard

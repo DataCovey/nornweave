@@ -226,6 +226,20 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # Global Send Rate Limiting
+    # -------------------------------------------------------------------------
+    global_send_rate_limit_per_minute: int = Field(
+        default=0,
+        alias="GLOBAL_SEND_RATE_LIMIT_PER_MINUTE",
+        description="Max outbound emails per rolling minute (0 = unlimited)",
+    )
+    global_send_rate_limit_per_hour: int = Field(
+        default=0,
+        alias="GLOBAL_SEND_RATE_LIMIT_PER_HOUR",
+        description="Max outbound emails per rolling hour (0 = unlimited)",
+    )
+
+    # -------------------------------------------------------------------------
     # Content Extraction Configuration (Talon)
     # -------------------------------------------------------------------------
     talon_use_ml_signature: bool = Field(
@@ -243,6 +257,19 @@ class Settings(BaseSettings):
         alias="EXTRACTION_FALLBACK_TO_ORIGINAL",
         description="Return original content if extraction fails",
     )
+
+    @model_validator(mode="after")
+    def validate_rate_limit_settings(self) -> Settings:
+        """Validate that rate limit settings are non-negative."""
+        fields = {
+            "GLOBAL_SEND_RATE_LIMIT_PER_MINUTE": self.global_send_rate_limit_per_minute,
+            "GLOBAL_SEND_RATE_LIMIT_PER_HOUR": self.global_send_rate_limit_per_hour,
+        }
+        for env_var, value in fields.items():
+            if value < 0:
+                msg = f"{env_var} must be a non-negative integer (0 = unlimited), got {value}."
+                raise ValueError(msg)
+        return self
 
     @model_validator(mode="after")
     def validate_domain_filter_patterns(self) -> Settings:

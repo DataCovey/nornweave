@@ -1,8 +1,13 @@
 """Dependency injection (storage, provider)."""
 
+from __future__ import annotations
+
 from collections.abc import AsyncGenerator  # noqa: TC003 - needed at runtime
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from nornweave.skuld.rate_limiter import GlobalRateLimiter
 
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import (
@@ -154,6 +159,25 @@ async def get_storage(
         return SQLiteAdapter(session)
     else:
         raise ValueError(f"Unknown db_driver: {settings.db_driver}")
+
+
+_rate_limiter: GlobalRateLimiter | None = None
+
+
+def get_rate_limiter(
+    settings: Settings = Depends(get_settings),
+) -> GlobalRateLimiter:
+    """FastAPI dependency returning a singleton GlobalRateLimiter."""
+    global _rate_limiter
+
+    if _rate_limiter is None:
+        from nornweave.skuld.rate_limiter import GlobalRateLimiter
+
+        _rate_limiter = GlobalRateLimiter(
+            per_minute_limit=settings.global_send_rate_limit_per_minute,
+            per_hour_limit=settings.global_send_rate_limit_per_hour,
+        )
+    return _rate_limiter
 
 
 async def get_email_provider(

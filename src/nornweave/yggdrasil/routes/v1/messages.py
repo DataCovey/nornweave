@@ -20,8 +20,9 @@ from nornweave.core.storage import AttachmentMetadata, create_attachment_storage
 from nornweave.models.attachment import AttachmentUpload, SendAttachment
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
+from nornweave.skuld.rate_limiter import GlobalRateLimiter  # noqa: TC001 - needed at runtime
 from nornweave.verdandi.summarize import generate_thread_summary
-from nornweave.yggdrasil.dependencies import get_email_provider, get_storage
+from nornweave.yggdrasil.dependencies import get_email_provider, get_rate_limiter, get_storage
 
 router = APIRouter()
 
@@ -188,6 +189,7 @@ async def send_message(
     storage: StorageInterface = Depends(get_storage),
     email_provider: EmailProvider = Depends(get_email_provider),
     settings: Settings = Depends(get_settings),
+    rate_limiter: GlobalRateLimiter = Depends(get_rate_limiter),
 ) -> SendMessageResponse:
     """Send an outbound message.
 
@@ -223,6 +225,15 @@ async def send_message(
                 f"Recipient domain(s) blocked by outbound policy: "
                 f"{', '.join(sorted(set(blocked_domains)))}"
             ),
+        )
+
+    # Global send rate limiting (check before provider call)
+    rl_result = rate_limiter.check()
+    if not rl_result.allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=rl_result.detail,
+            headers={"Retry-After": str(rate_limiter.retry_after_header(rl_result))},
         )
 
     # Get or create thread
@@ -332,6 +343,10 @@ async def send_message(
             from_address=inbox.email_address,
             attachments=provider_attachments if provider_attachments else None,
         )
+
+    # Record successful send in rate limiter (only when provider returned an id)
+    if provider_message_id is not None:
+        rate_limiter.record()
 
     # Create message record
     message = Message(
