@@ -66,6 +66,37 @@ INBOUND_DOMAIN_BLOCKLIST=spam\.com,junk\.org
 Blocklist always takes precedence: a domain on the blocklist is rejected even if it also matches the allowlist. Empty lists mean "no restriction." See the [Configuration Guide]({{< relref "getting-started/configuration#domain-filtering-allowblocklists" >}}) for full details.
 {{% /details %}}
 
+{{% details title="Can I rate-limit how many emails NornWeave sends?" closed="true" %}}
+Yes. NornWeave supports **global send rate limiting** via two environment variables:
+
+| Variable | Effect |
+|---|---|
+| `GLOBAL_SEND_RATE_LIMIT_PER_MINUTE` | Max outbound emails per rolling minute (`0` = unlimited) |
+| `GLOBAL_SEND_RATE_LIMIT_PER_HOUR` | Max outbound emails per rolling hour (`0` = unlimited) |
+
+Both windows are enforced independently. When a limit is exceeded, the API returns **HTTP 429 Too Many Requests** with a `Retry-After` header so callers know when to retry.
+
+**Example — cap at 10 per minute and 200 per hour:**
+```bash
+GLOBAL_SEND_RATE_LIMIT_PER_MINUTE=10
+GLOBAL_SEND_RATE_LIMIT_PER_HOUR=200
+```
+
+Rate-limit state is in-memory (no Redis required) and resets on process restart. See the [Configuration Guide]({{< relref "getting-started/configuration#rate-limiting" >}}) for details.
+{{% /details %}}
+
+{{% details title="What do I need to get NornWeave running?" closed="true" %}}
+**Docker** (recommended) or **Python 3.14+**, a database (**PostgreSQL** for production or **SQLite** for local dev), and an account with a supported email provider (Mailgun, SendGrid, AWS SES, Resend) or any IMAP/SMTP server. With Docker Compose you can be up and running in minutes. See the [Installation guide]({{< relref "getting-started/installation" >}}) and [Quickstart]({{< relref "getting-started/quickstart" >}}).
+{{% /details %}}
+
+{{% details title="How does NornWeave format emails for my LLM?" closed="true" %}}
+Inbound HTML is converted to **clean Markdown** with reply cruft (quoted blocks, signatures) stripped out. When you fetch a thread, messages are returned with `user` (inbound) and `assistant` (outbound) roles so you can feed them straight into an LLM conversation. All of this happens automatically in the **Verdandi** ingestion engine.
+{{% /details %}}
+
+{{% details title="Does NornWeave handle attachments?" closed="true" %}}
+Yes. Inbound attachments are stored alongside their message and exposed via the API. When sending, you can include attachments in the `POST /v1/messages` request. Supported storage backends include local disk and cloud storage (S3, GCS) with presigned download URLs.
+{{% /details %}}
+
 {{% details title="Is NornWeave self-hosted? Where is my data stored?" closed="true" %}}
 Yes. NornWeave is **self-hosted** and **open-source**. You run the server and the database (PostgreSQL or SQLite) on your own infrastructure. All inbox, thread, and message data stays in **your** storage; no email content is sent to third parties except through the provider you configure (e.g. Mailgun, SendGrid, or IMAP/SMTP) for sending and receiving.
 {{% /details %}}
