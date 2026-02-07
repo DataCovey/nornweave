@@ -3,7 +3,7 @@
 import hashlib
 import hmac
 import time
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 
@@ -47,7 +47,7 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
     ) -> StorageResult:
         """Store attachment on local filesystem."""
         # Create date-based path
-        date_path = datetime.utcnow().strftime("%Y/%m/%d")
+        date_path = datetime.now(UTC).strftime("%Y/%m/%d")
         storage_key = f"{date_path}/{attachment_id}/{metadata.filename}"
 
         full_path = self.base_path / storage_key

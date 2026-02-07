@@ -12,7 +12,7 @@ Reference: https://www.jwz.org/doc/threading.html
 import hashlib
 import re
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -215,7 +215,7 @@ async def resolve_thread(
     """
     import uuid
 
-    timestamp = timestamp or datetime.utcnow()
+    timestamp = timestamp or datetime.now(UTC)
 
     # Priority 1: Check References header (most reliable)
     if references:

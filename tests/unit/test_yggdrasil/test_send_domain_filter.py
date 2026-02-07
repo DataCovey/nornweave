@@ -9,6 +9,7 @@ import pytest
 
 from nornweave.core.interfaces import StorageInterface
 from nornweave.models.inbox import Inbox
+from nornweave.skuld.rate_limiter import RateLimitResult
 from nornweave.yggdrasil.routes.v1.messages import SendMessageRequest, send_message
 
 if TYPE_CHECKING:
@@ -27,6 +28,14 @@ def _make_settings(
     settings.attachment_storage_backend = "local"
     settings.attachment_local_path = "/tmp/test-attachments"
     return settings
+
+
+def _make_rate_limiter() -> MagicMock:
+    """Build a mock GlobalRateLimiter that always allows."""
+    rl = MagicMock()
+    rl.check.return_value = RateLimitResult(allowed=True, retry_after_seconds=0.0, detail="")
+    rl.record.return_value = None
+    return rl
 
 
 def _make_storage(*, inbox: Inbox | None = None) -> AsyncMock:
@@ -73,6 +82,7 @@ async def test_send_blocked_recipient_returns_403() -> None:
     storage = _make_storage(inbox=inbox)
     settings = _make_settings(outbound_domain_blocklist=r"blocked\.org")
     provider = _make_email_provider()
+    rate_limiter = _make_rate_limiter()
     payload = SendMessageRequest(
         inbox_id="inbox-001",
         to=["user@blocked.org"],
@@ -83,7 +93,7 @@ async def test_send_blocked_recipient_returns_403() -> None:
     from fastapi import HTTPException
 
     with pytest.raises(HTTPException) as exc_info:
-        await send_message(payload, storage, provider, settings)
+        await send_message(payload, storage, provider, settings, rate_limiter)
 
     assert exc_info.value.status_code == 403
     assert "blocked.org" in str(exc_info.value.detail)
@@ -98,6 +108,7 @@ async def test_send_mixed_recipients_blocked_returns_403() -> None:
     storage = _make_storage(inbox=inbox)
     settings = _make_settings(outbound_domain_blocklist=r"blocked\.org")
     provider = _make_email_provider()
+    rate_limiter = _make_rate_limiter()
     payload = SendMessageRequest(
         inbox_id="inbox-001",
         to=["user@ok.com", "user@blocked.org"],
@@ -108,7 +119,7 @@ async def test_send_mixed_recipients_blocked_returns_403() -> None:
     from fastapi import HTTPException
 
     with pytest.raises(HTTPException) as exc_info:
-        await send_message(payload, storage, provider, settings)
+        await send_message(payload, storage, provider, settings, rate_limiter)
 
     assert exc_info.value.status_code == 403
     assert "blocked.org" in str(exc_info.value.detail)
@@ -128,6 +139,7 @@ async def test_send_allowed_recipient_proceeds() -> None:
     storage = _make_storage(inbox=inbox)
     settings = _make_settings(outbound_domain_allowlist=r"partner\.com")
     provider = _make_email_provider()
+    rate_limiter = _make_rate_limiter()
     payload = SendMessageRequest(
         inbox_id="inbox-001",
         to=["user@partner.com"],
@@ -139,7 +151,7 @@ async def test_send_allowed_recipient_proceeds() -> None:
         "nornweave.yggdrasil.routes.v1.messages.generate_thread_summary",
         new_callable=AsyncMock,
     ):
-        result = await send_message(payload, storage, provider, settings)
+        result = await send_message(payload, storage, provider, settings, rate_limiter)
 
     assert result.status == "sent"
     provider.send_email.assert_awaited_once()
@@ -153,6 +165,7 @@ async def test_send_no_filter_configured_proceeds() -> None:
     storage = _make_storage(inbox=inbox)
     settings = _make_settings()  # empty lists
     provider = _make_email_provider()
+    rate_limiter = _make_rate_limiter()
     payload = SendMessageRequest(
         inbox_id="inbox-001",
         to=["anyone@anywhere.com"],
@@ -164,7 +177,7 @@ async def test_send_no_filter_configured_proceeds() -> None:
         "nornweave.yggdrasil.routes.v1.messages.generate_thread_summary",
         new_callable=AsyncMock,
     ):
-        result = await send_message(payload, storage, provider, settings)
+        result = await send_message(payload, storage, provider, settings, rate_limiter)
 
     assert result.status == "sent"
     provider.send_email.assert_awaited_once()

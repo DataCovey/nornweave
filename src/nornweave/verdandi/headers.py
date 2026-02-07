@@ -10,7 +10,7 @@ Provides RFC 5322 compliant header handling for:
 import re
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from email.utils import formataddr, formatdate, parseaddr
 from typing import Any
 
@@ -48,7 +48,7 @@ def generate_message_id(domain: str, *, timestamp: datetime | None = None) -> st
         >>> generate_message_id("example.com")
         '<20260131153045.a1b2c3d4e5f6@example.com>'
     """
-    timestamp = timestamp or datetime.utcnow()
+    timestamp = timestamp or datetime.now(UTC)
     ts_str = timestamp.strftime("%Y%m%d%H%M%S")
     unique_id = uuid.uuid4().hex[:12]
     return f"<{ts_str}.{unique_id}@{domain}>"
@@ -322,7 +322,7 @@ def format_rfc2822_date(dt: datetime | None = None) -> str:
     Returns:
         RFC 2822 formatted date string
     """
-    dt = dt or datetime.utcnow()
+    dt = dt or datetime.now(UTC)
     return formatdate(dt.timestamp(), localtime=False, usegmt=True)
 
 
@@ -388,7 +388,7 @@ def build_reply_headers(
     Returns:
         OutboundHeaders with all necessary fields
     """
-    timestamp = timestamp or datetime.utcnow()
+    timestamp = timestamp or datetime.now(UTC)
 
     message_id = generate_message_id(domain, timestamp=timestamp)
     date_header = format_rfc2822_date(timestamp)
