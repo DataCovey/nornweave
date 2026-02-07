@@ -236,7 +236,7 @@ def parse_header_list(header_value: str | None) -> list[dict[str, str]]:
     if isinstance(header_value, str):
         try:
             parsed = json.loads(header_value)
-        except (json.JSONDecodeError, ValueError):
+        except json.JSONDecodeError, ValueError:
             return []
     else:
         parsed = header_value

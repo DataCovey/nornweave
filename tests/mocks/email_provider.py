@@ -246,7 +246,7 @@ class MockEmailProvider(EmailProvider):
 
                 try:
                     content = base64.b64decode(content)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     content = content.encode("utf-8")
 
             disposition_str = att.get("disposition", "attachment")

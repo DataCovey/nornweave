@@ -394,7 +394,7 @@ class ResendAdapter(EmailProvider):
                 # Handle ISO 8601 format
                 timestamp_str = webhook_timestamp.replace("Z", "+00:00")
                 timestamp = datetime.fromisoformat(timestamp_str)
-            except (ValueError, AttributeError):
+            except ValueError, AttributeError:
                 pass
 
         # Parse attachments metadata (content must be fetched separately)

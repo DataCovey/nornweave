@@ -166,7 +166,7 @@ class MailgunAdapter(EmailProvider):
 
                 headers_list = json.loads(headers_raw)
                 headers = {h[0]: h[1] for h in headers_list if len(h) >= 2}
-            except (json.JSONDecodeError, TypeError):
+            except json.JSONDecodeError, TypeError:
                 pass
 
         # Parse references into list

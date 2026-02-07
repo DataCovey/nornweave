@@ -20,73 +20,73 @@ classifiers = [
 ]
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.32.0",
-    "pydantic>=2.10.0",
-    "pydantic-settings>=2.6.0",
-    "sqlalchemy[asyncio]>=2.0.36",
-    "alembic>=1.14.0",
-    "aiosqlite>=0.20.0",  # For SQLite async support
-    "httpx>=0.28.0",
-    "python-multipart>=0.0.18",
-    "html2text>=2024.2.26",
-    "email-validator>=2.2.0",
-    "markdown>=3.7",
-    "svix>=1.24.0",  # For Resend webhook signature verification
-    "cryptography>=44.0.0",  # For SES/SendGrid webhook signature verification
-    "click>=8.1.0",  # CLI framework
+    "fastapi>=0.128.4",
+    "uvicorn[standard]>=0.40.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "sqlalchemy[asyncio]>=2.0.46",
+    "alembic>=1.18.3",
+    "aiosqlite>=0.22.1",  # For SQLite async support
+    "httpx>=0.28.1",
+    "python-multipart>=0.0.22",
+    "html2text>=2025.4.15",
+    "email-validator>=2.3.0",
+    "markdown>=3.10.1",
+    "svix>=1.84.1",  # For Resend webhook signature verification
+    "cryptography>=46.0.4",  # For SES/SendGrid webhook signature verification
+    "click>=8.3.1",  # CLI framework
 ]
 
 [project.optional-dependencies]
 # PostgreSQL support (production database)
 postgres = [
-    "asyncpg>=0.30.0",
-    "psycopg2-binary>=2.9.0",  # Required for Alembic sync migrations
+    "asyncpg>=0.31.0",
+    "psycopg2-binary>=2.9.11",  # Required for Alembic sync migrations
 ]
 # MCP Server for AI agent integration
 mcp = [
-    "mcp>=1.0.0",
-    "fastmcp>=2.0.0",
+    "mcp>=1.26.0",
+    "fastmcp>=2.14.5",
 ]
 # Attachment processing
 attachments = [
-    "pypdf>=5.1.0",
+    "pypdf>=6.6.2",
     "python-magic>=0.4.27",
 ]
 # Semantic search
 search = [
-    "pgvector>=0.3.6",
-    "openai>=1.57.0",
+    "pgvector>=0.4.2",
+    "openai>=2.17.0",
 ]
 # Rate limiting
 ratelimit = [
-    "redis>=5.2.0",
+    "redis>=7.1.0",
 ]
 # AWS S3 attachment storage
 s3 = [
-    "boto3>=1.35.0",
+    "boto3>=1.42.44",
 ]
 # Google Cloud Storage attachment storage
 gcs = [
-    "google-cloud-storage>=2.18.0",
+    "google-cloud-storage>=3.9.0",
 ]
 # LLM providers for thread summarization
 openai = [
-    "openai>=1.57.0",
+    "openai>=2.17.0",
 ]
 anthropic = [
-    "anthropic>=0.42.0",
+    "anthropic>=0.78.0",
 ]
 gemini = [
-    "google-genai>=1.0.0",
+    "google-genai>=1.62.0",
 ]
 llm = [
     "nornweave[openai,anthropic,gemini]",
 ]
 # IMAP/SMTP email provider
 smtpimap = [
-    "aiosmtplib>=5.0.0",
-    "aioimaplib>=2.0.0",
+    "aiosmtplib>=5.1.0",
+    "aioimaplib>=2.0.1",
 ]
 # All optional dependencies
 all = [
@@ -94,14 +94,14 @@ all = [
 ]
 # Development dependencies
 dev = [
-    "pytest>=8.3.0",
-    "pytest-asyncio>=0.24.0",
-    "pytest-cov>=6.0.0",
-    "ruff>=0.8.0",
-    "mypy>=1.13.0",
-    "pre-commit>=4.0.0",
-    "httpx>=0.28.0",
-    "aiosqlite>=0.20.0",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.15.0",
+    "mypy>=1.19.1",
+    "pre-commit>=4.5.1",
+    "httpx>=0.28.1",
+    "aiosqlite>=0.22.1",
 ]
 # Documentation (Hugo-based, no Python deps needed)
 

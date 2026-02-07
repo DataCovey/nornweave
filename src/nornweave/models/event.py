@@ -4,7 +4,7 @@ Event models for webhook notifications and internal event tracking.
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, Field
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from nornweave.models.thread import ThreadItem
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     """
     Event types for webhooks.
 

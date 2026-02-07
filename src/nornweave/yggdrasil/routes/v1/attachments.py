@@ -5,7 +5,7 @@ import hashlib
 import hmac
 import time
 from datetime import datetime  # noqa: TC003 - needed at runtime for Pydantic
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -64,7 +64,7 @@ class AttachmentBase64Response(BaseModel):
     filename: str
 
 
-class ContentFormat(str, Enum):
+class ContentFormat(StrEnum):
     """Content format options."""
 
     BINARY = "binary"

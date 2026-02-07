@@ -4,7 +4,7 @@ Message models for email content and metadata.
 """
 
 from datetime import datetime  # noqa: TC003 - needed at runtime for Pydantic
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, Field
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from nornweave.models.attachment import Attachment, AttachmentMeta, SendAttachment
 
 
-class MessageDirection(str, Enum):
+class MessageDirection(StrEnum):
     """Message direction."""
 
     INBOUND = "inbound"

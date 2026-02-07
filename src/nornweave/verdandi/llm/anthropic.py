@@ -28,10 +28,7 @@ class AnthropicSummaryProvider:
 
     async def summarize(self, text: str) -> SummaryResult:
         """Generate a summary using Anthropic Messages API."""
-        try:
-            from anthropic import APIError
-        except ImportError:
-            APIError = Exception
+        from anthropic import APIStatusError
 
         try:
             response = await self.client.messages.create(
@@ -42,7 +39,7 @@ class AnthropicSummaryProvider:
                     {"role": "user", "content": text},
                 ],
             )
-        except APIError as e:
+        except APIStatusError as e:
             logger.error("Anthropic API error: %s %s", e.status_code, e.message)
             raise
 
