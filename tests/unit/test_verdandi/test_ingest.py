@@ -46,11 +46,17 @@ def _make_inbox(
     return Inbox(id=inbox_id, email_address=email_address, name="Test Inbox")
 
 
-def _make_settings() -> MagicMock:
+def _make_settings(
+    *,
+    inbound_domain_allowlist: str = "",
+    inbound_domain_blocklist: str = "",
+) -> MagicMock:
     """Build a mock Settings object with sensible defaults."""
     settings = MagicMock()
     settings.attachment_storage_backend = "local"
     settings.attachment_local_path = "/tmp/test-attachments"
+    settings.inbound_domain_allowlist = inbound_domain_allowlist
+    settings.inbound_domain_blocklist = inbound_domain_blocklist
     return settings
 
 
@@ -230,5 +236,73 @@ async def test_ingest_no_inbox_does_not_create_anything() -> None:
 
     await ingest_message(inbound, storage, settings)
 
+    storage.create_message.assert_not_awaited()
+    storage.create_thread.assert_not_awaited()
+
+
+# ---------------------------------------------------------------------------
+# Inbound domain filtering
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_ingest_blocked_sender_domain_returns_domain_blocked() -> None:
+    """Inbound email from a blocklisted sender domain returns 'domain_blocked'."""
+    inbox = _make_inbox()
+    storage = _make_storage(inbox=inbox)
+    settings = _make_settings(inbound_domain_blocklist=r"blocked\.org")
+    inbound = _make_inbound(from_address="spammer@blocked.org")
+
+    result = await ingest_message(inbound, storage, settings)
+
+    assert result.status == "domain_blocked"
+    assert result.message_id == ""
+    assert result.thread_id == ""
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_ingest_blocked_sender_does_not_create_anything() -> None:
+    """Blocked sender should not trigger any create operations."""
+    inbox = _make_inbox()
+    storage = _make_storage(inbox=inbox)
+    settings = _make_settings(inbound_domain_blocklist=r"blocked\.org")
+    inbound = _make_inbound(from_address="spammer@blocked.org")
+
+    await ingest_message(inbound, storage, settings)
+
+    storage.create_message.assert_not_awaited()
+    storage.create_thread.assert_not_awaited()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_ingest_allowed_sender_domain_proceeds() -> None:
+    """Inbound email from an allowlisted sender domain is processed normally."""
+    inbox = _make_inbox()
+    storage = _make_storage(inbox=inbox)
+    settings = _make_settings(inbound_domain_allowlist=r"allowed\.com")
+    inbound = _make_inbound(from_address="partner@allowed.com")
+
+    with patch("nornweave.verdandi.ingest.generate_thread_summary", new_callable=AsyncMock):
+        result = await ingest_message(inbound, storage, settings)
+
+    assert result.status == "received"
+    assert result.message_id != ""
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_ingest_unlisted_domain_rejected_when_allowlist_active() -> None:
+    """Sender domain not on the allowlist is rejected when allowlist is set."""
+    inbox = _make_inbox()
+    storage = _make_storage(inbox=inbox)
+    settings = _make_settings(inbound_domain_allowlist=r"allowed\.com")
+    inbound = _make_inbound(from_address="stranger@unknown.com")
+
+    result = await ingest_message(inbound, storage, settings)
+
+    assert result.status == "domain_blocked"
     storage.create_message.assert_not_awaited()
     storage.create_thread.assert_not_awaited()

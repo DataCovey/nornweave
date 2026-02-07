@@ -228,6 +228,42 @@ LLM_SUMMARY_PROMPT="Summarize this email thread in 3 bullet points."
 Summaries are generated after each new message. If the daily token limit is reached, summarization is paused until the next day (UTC). Token usage is tracked in the database and can be queried from the `llm_token_usage` table.
 {{< /callout >}}
 
+## Domain Filtering (Allow/Blocklists)
+
+NornWeave supports domain-level allow/blocklists for both inbound (receiving) and outbound (sending) email. Use these to restrict which external domains your instance interacts with.
+
+Each variable accepts a **comma-separated list of regex patterns** (Python `re` syntax). Patterns are matched against the full domain using `re.fullmatch` (no partial matches).
+
+| Variable | Direction | Semantics | Default |
+|----------|-----------|-----------|---------|
+| `INBOUND_DOMAIN_ALLOWLIST` | Inbound | Sender domain must match at least one pattern | (empty — allow all) |
+| `INBOUND_DOMAIN_BLOCKLIST` | Inbound | Sender domain rejected if it matches any pattern | (empty — block none) |
+| `OUTBOUND_DOMAIN_ALLOWLIST` | Outbound | Recipient domain must match at least one pattern | (empty — allow all) |
+| `OUTBOUND_DOMAIN_BLOCKLIST` | Outbound | Recipient domain rejected if it matches any pattern | (empty — block none) |
+
+**Evaluation order:** Blocklist is checked first. If a domain matches the blocklist it is rejected, regardless of the allowlist. If the allowlist is non-empty, only matching domains pass.
+
+### Examples
+
+```bash
+# Only accept inbound email from your own domain
+INBOUND_DOMAIN_ALLOWLIST=(.*\.)?yourcompany\.com
+
+# Block known spam domains from inbound
+INBOUND_DOMAIN_BLOCKLIST=spam\.com,junk\.org
+
+# Allow sending only to specific partners
+OUTBOUND_DOMAIN_ALLOWLIST=partner\.com,client\.org
+
+# Block a subdomain while allowing the parent
+INBOUND_DOMAIN_ALLOWLIST=(.*\.)?example\.com
+INBOUND_DOMAIN_BLOCKLIST=noreply\.example\.com
+```
+
+{{< callout type="info" >}}
+Patterns use Python regex syntax. Escape dots with `\.` for literal matching. Use `(.*\.)?example\.com` to match a domain and all its subdomains. Invalid patterns cause a startup error.
+{{< /callout >}}
+
 ## MCP Server Configuration
 
 The MCP server connects AI agents to NornWeave. Configure it using environment variables:

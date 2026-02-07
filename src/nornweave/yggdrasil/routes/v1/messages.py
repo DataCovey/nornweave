@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from nornweave.core.config import Settings, get_settings
+from nornweave.core.domain_filter import DomainFilter
 from nornweave.core.interfaces import (  # noqa: TC001 - needed at runtime for FastAPI
     EmailProvider,
     StorageInterface,
@@ -201,6 +202,27 @@ async def send_message(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Inbox {payload.inbox_id} not found",
+        )
+
+    # Outbound domain filtering (allow/blocklist)
+    # NOTE: When cc/bcc fields are added to SendMessageRequest, include them here.
+    outbound_filter = DomainFilter(
+        allowlist=settings.outbound_domain_allowlist,
+        blocklist=settings.outbound_domain_blocklist,
+        direction="outbound",
+    )
+    blocked_domains: list[str] = []
+    for recipient in payload.to:
+        if not outbound_filter.check(recipient):
+            _, _, domain = recipient.rpartition("@")
+            blocked_domains.append(domain or recipient)
+    if blocked_domains:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                f"Recipient domain(s) blocked by outbound policy: "
+                f"{', '.join(sorted(set(blocked_domains)))}"
+            ),
         )
 
     # Get or create thread

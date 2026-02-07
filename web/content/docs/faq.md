@@ -41,6 +41,31 @@ Deliverability is determined by your **email provider** and your **domain/DNS** 
 Yes. We provide an official **Python client** (`nornweave-client`) in the [clients/python](https://github.com/DataCovey/nornweave/tree/main/clients/python) directory, with sync and async support, pagination, and full API coverage. For **AI agents**, the **MCP server** is the primary interface: Claude, Cursor, and other MCP clients can use NornWeave's tools and resources without writing REST calls. See the [API Reference]({{< relref "api" >}}) for REST and [MCP Integration]({{< relref "api/mcp" >}}) for MCP setup.
 {{% /details %}}
 
+{{% details title="Can I allow or block specific email domains?" closed="true" %}}
+Yes! NornWeave supports **domain-level allow/blocklists** for both inbound and outbound email via environment variables. Each list accepts comma-separated **regex patterns** matched against the domain portion of email addresses.
+
+**Environment variables:**
+
+| Variable | Direction | Effect |
+|---|---|---|
+| `INBOUND_DOMAIN_ALLOWLIST` | Receiving | Only accept mail from matching sender domains |
+| `INBOUND_DOMAIN_BLOCKLIST` | Receiving | Reject mail from matching sender domains |
+| `OUTBOUND_DOMAIN_ALLOWLIST` | Sending | Only send to matching recipient domains |
+| `OUTBOUND_DOMAIN_BLOCKLIST` | Sending | Reject sends to matching recipient domains |
+
+**Example — only accept email from your company:**
+```bash
+INBOUND_DOMAIN_ALLOWLIST=(.*\.)?yourcompany\.com
+```
+
+**Example — block spam domains:**
+```bash
+INBOUND_DOMAIN_BLOCKLIST=spam\.com,junk\.org
+```
+
+Blocklist always takes precedence: a domain on the blocklist is rejected even if it also matches the allowlist. Empty lists mean "no restriction." See the [Configuration Guide]({{< relref "getting-started/configuration#domain-filtering-allowblocklists" >}}) for full details.
+{{% /details %}}
+
 {{% details title="Is NornWeave self-hosted? Where is my data stored?" closed="true" %}}
 Yes. NornWeave is **self-hosted** and **open-source**. You run the server and the database (PostgreSQL or SQLite) on your own infrastructure. All inbox, thread, and message data stays in **your** storage; no email content is sent to third parties except through the provider you configure (e.g. Mailgun, SendGrid, or IMAP/SMTP) for sending and receiving.
 {{% /details %}}

@@ -1,5 +1,6 @@
 """Application configuration (Pydantic settings)."""
 
+import re
 from functools import lru_cache
 from typing import Literal
 
@@ -201,6 +202,30 @@ class Settings(BaseSettings):
     )
 
     # -------------------------------------------------------------------------
+    # Domain Filtering (Allow/Blocklists)
+    # -------------------------------------------------------------------------
+    inbound_domain_allowlist: str = Field(
+        default="",
+        alias="INBOUND_DOMAIN_ALLOWLIST",
+        description="Comma-separated regex patterns. Inbound sender domain must match >= 1.",
+    )
+    inbound_domain_blocklist: str = Field(
+        default="",
+        alias="INBOUND_DOMAIN_BLOCKLIST",
+        description="Comma-separated regex patterns. Inbound sender domain rejected if matches any.",
+    )
+    outbound_domain_allowlist: str = Field(
+        default="",
+        alias="OUTBOUND_DOMAIN_ALLOWLIST",
+        description="Comma-separated regex patterns. Outbound recipient domain must match >= 1.",
+    )
+    outbound_domain_blocklist: str = Field(
+        default="",
+        alias="OUTBOUND_DOMAIN_BLOCKLIST",
+        description="Comma-separated regex patterns. Outbound recipient domain rejected if matches any.",
+    )
+
+    # -------------------------------------------------------------------------
     # Content Extraction Configuration (Talon)
     # -------------------------------------------------------------------------
     talon_use_ml_signature: bool = Field(
@@ -218,6 +243,32 @@ class Settings(BaseSettings):
         alias="EXTRACTION_FALLBACK_TO_ORIGINAL",
         description="Return original content if extraction fails",
     )
+
+    @model_validator(mode="after")
+    def validate_domain_filter_patterns(self) -> Settings:
+        """Validate that all domain filter patterns are valid regexes."""
+        fields = {
+            "INBOUND_DOMAIN_ALLOWLIST": self.inbound_domain_allowlist,
+            "INBOUND_DOMAIN_BLOCKLIST": self.inbound_domain_blocklist,
+            "OUTBOUND_DOMAIN_ALLOWLIST": self.outbound_domain_allowlist,
+            "OUTBOUND_DOMAIN_BLOCKLIST": self.outbound_domain_blocklist,
+        }
+        for env_var, raw in fields.items():
+            if not raw.strip():
+                continue
+            for pattern in raw.split(","):
+                pattern = pattern.strip()
+                if not pattern:
+                    continue
+                try:
+                    re.compile(pattern)
+                except re.error as exc:
+                    msg = (
+                        f"Invalid regex pattern '{pattern}' in {env_var}: {exc}. "
+                        "Each entry must be a valid Python regular expression."
+                    )
+                    raise ValueError(msg) from exc
+        return self
 
     @model_validator(mode="after")
     def validate_imap_config(self) -> Settings:

@@ -155,6 +155,12 @@ sitemap_changefreq: daily
     icon="chip"
   >}}
   {{< hextra/feature-card
+    title="Domain Filtering"
+    subtitle="Allow/blocklist email domains with regex patterns. Separate controls for inbound and outbound traffic."
+    link="docs/getting-started/configuration#domain-filtering-allowblocklists"
+    icon="shield-check"
+  >}}
+  {{< hextra/feature-card
     title="Clean Architecture"
     subtitle="Modular design with storage and provider adapters. Swap email providers with ease."
     link="docs/concepts/architecture"

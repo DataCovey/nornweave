@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- (None yet)
+- Domain-level allow/blocklist filtering for inbound and outbound email. Four new env vars (`INBOUND_DOMAIN_ALLOWLIST`, `INBOUND_DOMAIN_BLOCKLIST`, `OUTBOUND_DOMAIN_ALLOWLIST`, `OUTBOUND_DOMAIN_BLOCKLIST`) accept comma-separated regex patterns. Blocklist takes precedence. Inbound rejections return `domain_blocked`; outbound rejections return HTTP 403.
 
 ### Changed
 

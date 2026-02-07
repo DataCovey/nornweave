@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from nornweave.core.domain_filter import DomainFilter
 from nornweave.core.storage import AttachmentMetadata, create_attachment_storage
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
@@ -28,7 +29,7 @@ logger = logging.getLogger(__name__)
 class IngestResult:
     """Result of the ingestion pipeline."""
 
-    status: Literal["received", "duplicate", "no_inbox"]
+    status: Literal["received", "duplicate", "no_inbox", "domain_blocked"]
     message_id: str = ""
     thread_id: str = ""
     warning: str | None = None
@@ -63,6 +64,17 @@ async def ingest_message(
         return IngestResult(status="no_inbox")
 
     logger.info("Found inbox %s for recipient %s", inbox.id, inbound.to_address)
+
+    # -------------------------------------------------------------------------
+    # 1b. Inbound domain filtering (allow/blocklist)
+    # -------------------------------------------------------------------------
+    inbound_filter = DomainFilter(
+        allowlist=settings.inbound_domain_allowlist,
+        blocklist=settings.inbound_domain_blocklist,
+        direction="inbound",
+    )
+    if not inbound_filter.check(inbound.from_address):
+        return IngestResult(status="domain_blocked")
 
     # -------------------------------------------------------------------------
     # 2. Duplicate detection (idempotency)
