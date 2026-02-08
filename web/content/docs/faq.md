@@ -25,6 +25,10 @@ NornWeave is an **open-source, self-hosted** Inbox-as-a-Service API built for AI
 SendGrid, Mailgun, Resend, and AWS SES are excellent for **transactional email** (receipts, password resets, marketing). NornWeave does **not** replace them---it sits **on top** of them. You bring your own provider (Mailgun, SendGrid, SES, Resend, or **IMAP/SMTP**); NornWeave adds a **conversational layer**: stateful **threads**, **inboxes** as first-class entities, HTML-to-Markdown parsing, semantic search, and MCP tools so agents can have two-way email conversations. Think of NornWeave as the brain that turns your existing provider into an agent-ready email backend.
 {{% /details %}}
 
+{{% details title="How is NornWeave different from AgentMail and other email-for-agents tools?" closed="true" %}}
+NornWeave is **open-source** and **Apache 2.0 licensed**, giving you more control and extensibility than hosted, closed, or expensive alternatives. It is largely **feature-complete** compared to AgentMail and similar tools, while offering capabilities **not found elsewhere**, such as **auto-summarization of threads** so agents get more compact context when interacting with a mail thread. NornWeave supports **bring-your-own (BYO) storage and mail provider**, so mail-heavy users can reuse their existing cloud or mail provider and avoid adding another vendor—and another single point of failure—to their architecture.
+{{% /details %}}
+
 {{% details title="Can I use NornWeave without a transactional email provider?" closed="true" %}}
 Yes! NornWeave supports a built-in **IMAP/SMTP** provider (`EMAIL_PROVIDER=imap-smtp`) that connects directly to any standard mail server---Gmail, Office 365, Fastmail, or self-hosted Postfix/Dovecot. Instead of webhooks, NornWeave polls the IMAP mailbox for new messages and sends outbound via SMTP. This is ideal when you don't want a dedicated transactional email account. See the [IMAP/SMTP Setup Guide]({{< relref "guides/imap-smtp" >}}) for details.
 {{% /details %}}
