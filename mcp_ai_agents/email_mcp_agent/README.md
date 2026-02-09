@@ -32,6 +32,19 @@ NornWeave is the email backend: it gives the agent stateful inboxes, threading, 
 
 ```bash
 pip install nornweave[mcp]
+```
+
+Before starting the server, create a `.env` file with your email domain — this is how NornWeave constructs inbox addresses (e.g. `support@mail.yourdomain.com`):
+
+```bash
+echo 'EMAIL_DOMAIN=mail.yourdomain.com' > .env
+```
+
+> Replace `mail.yourdomain.com` with the domain your email provider uses (e.g. `yourdomain.resend.app` for Resend). Without `EMAIL_DOMAIN`, inbox creation will fail with a 422 error.
+
+Now start the server:
+
+```bash
 nornweave api
 ```
 
@@ -55,7 +68,7 @@ In the main text area, ask the agent to provision an inbox:
 Create an inbox named "Support Bot" with username "support". Tell me the inbox id and email address.
 ```
 
-The agent uses the NornWeave MCP tool `create_inbox` and returns the new address (e.g. `support@your-nornweave-domain`). **Note the inbox id** (e.g. `ibx_...`) — you'll use it in every step below.
+The agent uses the NornWeave MCP tool `create_inbox` and returns the new address (e.g. `support@mail.yourdomain.com` — the domain comes from `EMAIL_DOMAIN` in your `.env`). **Note the inbox id** (e.g. `ibx_...`) — you'll use it in every step below.
 
 ### Step 4: Seed the inbox with test tickets
 
