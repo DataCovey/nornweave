@@ -122,17 +122,22 @@ def test_settings() -> Settings:
 def e2e_app(
     e2e_session_factory: async_sessionmaker[AsyncSession],
     mock_provider: MockEmailProvider,
-    test_settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
 ) -> FastAPI:
     """Create a FastAPI app with test dependencies injected."""
-    # Set environment variable for test domain before clearing cache
+    # Set EMAIL_DOMAIN before any Settings() call so env and cache see it
+    # (pydantic-settings gives env precedence over kwargs in CI)
     monkeypatch.setenv("EMAIL_DOMAIN", TEST_EMAIL_DOMAIN)
-
-    # Clear the LRU cache so it picks up the new env var
     get_settings.cache_clear()
 
-    # Import here to avoid circular imports
+    # Build test settings after env is set so they have email_domain
+    settings_for_app = Settings(
+        environment="test",
+        db_driver="sqlite",
+        email_provider="mailgun",
+        email_domain=TEST_EMAIL_DOMAIN,
+    )
+
     from nornweave.yggdrasil.app import create_app
 
     app = create_app()
@@ -147,9 +152,9 @@ def e2e_app(
     def override_get_email_provider() -> MockEmailProvider:
         return mock_provider
 
-    # Override settings to use test domain
+    # Override settings so routes get test domain (avoids env/kwarg precedence)
     def override_get_settings() -> Settings:
-        return test_settings
+        return settings_for_app
 
     app.dependency_overrides[get_storage] = override_get_storage
     app.dependency_overrides[get_email_provider] = override_get_email_provider
