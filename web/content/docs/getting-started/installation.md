@@ -93,6 +93,10 @@ nornweave api
 
 The API will be available at `http://localhost:8000`. Data is stored in `./nornweave.db`.
 
+{{< callout type="tip" >}}
+Run `nornweave api` from the directory that contains your `.env` file so the app finds your config and creates the SQLite database in that directory.
+{{< /callout >}}
+
 For AI agent integration via MCP:
 
 ```bash

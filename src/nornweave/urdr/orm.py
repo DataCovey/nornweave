@@ -364,7 +364,8 @@ class MessageORM(Base):
         cascade="all, delete-orphan",
     )
 
-    # Indexes for performance
+    # Indexes for performance.
+    # Unique on (inbox_id, provider_message_id): both SQLite and PostgreSQL allow multiple NULLs.
     __table_args__ = (
         Index("ix_messages_thread_created", "thread_id", "created_at"),
         Index("ix_messages_inbox_created", "inbox_id", "created_at"),
@@ -374,7 +375,6 @@ class MessageORM(Base):
             "inbox_id",
             "provider_message_id",
             unique=True,
-            postgresql_where=("provider_message_id IS NOT NULL"),
         ),
         Index("ix_messages_timestamp", "timestamp"),
     )
