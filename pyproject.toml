@@ -239,3 +239,10 @@ module = [
     "aioimaplib.*",
 ]
 ignore_missing_imports = true
+
+[dependency-groups]
+dev = [
+    "fastmcp>=2.14.5",
+    "openai>=2.17.0",
+    "pypdf>=6.6.2",
+]
