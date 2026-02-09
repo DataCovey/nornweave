@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload build artifacts
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/n8n-v')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: dist
           path: packages/n8n-nodes-nornweave/dist
