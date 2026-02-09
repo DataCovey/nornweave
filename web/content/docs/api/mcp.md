@@ -55,7 +55,7 @@ Make sure the NornWeave API server is running before using MCP. Start it with `n
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NORNWEAVE_API_URL` | NornWeave REST API URL | `http://localhost:8000` |
-| `NORNWEAVE_API_KEY` | API key for authentication | (none) |
+| `NORNWEAVE_API_KEY` | API key for authentication (not yet enforced) | (none) |
 
 ## Transports
 
@@ -438,12 +438,12 @@ nornweave api
 curl http://localhost:8000/health
 ```
 
-### Authentication Errors
+### Connection Errors
 
-Verify your API key is set correctly:
+If the MCP server can't reach the API, verify the URL and that the API is running:
 
 ```bash
-export NORNWEAVE_API_KEY=your-api-key
+export NORNWEAVE_API_URL=http://localhost:8000
 nornweave mcp
 ```
 
@@ -456,8 +456,7 @@ Or in your MCP client configuration:
       "command": "nornweave",
       "args": ["mcp"],
       "env": {
-        "NORNWEAVE_API_URL": "http://localhost:8000",
-        "NORNWEAVE_API_KEY": "your-api-key"
+        "NORNWEAVE_API_URL": "http://localhost:8000"
       }
     }
   }

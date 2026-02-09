@@ -90,7 +90,7 @@ Rate-limit state is in-memory (no Redis required) and resets on process restart.
 {{% /details %}}
 
 {{% details title="What do I need to get NornWeave running?" closed="true" %}}
-**Docker** (recommended) or **Python 3.14+**, a database (**PostgreSQL** for production or **SQLite** for local dev), and an account with a supported email provider (Mailgun, SendGrid, AWS SES, Resend) or any IMAP/SMTP server. With Docker Compose you can be up and running in minutes. See the [Installation guide]({{< relref "getting-started/installation" >}}) and [Quickstart]({{< relref "getting-started/quickstart" >}}).
+Just **Python 3.14+** and an email provider account (Mailgun, SendGrid, AWS SES, Resend, or any IMAP/SMTP server). NornWeave defaults to **SQLite**, so no separate database setup is needed to get started — just `pip install nornweave && nornweave api`. For production, we recommend **PostgreSQL** and **Docker Compose**. See the [Installation guide]({{< relref "getting-started/installation" >}}) and [Quickstart]({{< relref "getting-started/quickstart" >}}).
 {{% /details %}}
 
 {{% details title="How does NornWeave format emails for my LLM?" closed="true" %}}

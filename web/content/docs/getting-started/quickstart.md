@@ -42,11 +42,14 @@ Keep ngrok running in a separate terminal while you work through this guide.
 
 ## Create an Inbox
 
+{{< callout type="warning" >}}
+Before creating an inbox, make sure `EMAIL_DOMAIN` is set in your `.env` file. This is the domain your email provider uses for sending and receiving (e.g., `mail.yourdomain.com` for Mailgun, or `yourdomain.resend.app` for Resend). Without it, inbox creation will return a **422 error**. See [Configuration](../configuration) for details.
+{{< /callout >}}
+
 Create a virtual inbox for your AI agent:
 
 ```bash
 curl -X POST http://localhost:8000/v1/inboxes \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Support Agent",
@@ -66,7 +69,7 @@ Response:
 ```
 
 {{< callout type="info" >}}
-The email address format depends on your provider configuration. The `email_username` becomes the local part before the `@`.
+The email address is constructed as `{email_username}@{EMAIL_DOMAIN}`. The `email_username` becomes the local part before the `@`, and `EMAIL_DOMAIN` from your `.env` provides the domain.
 {{< /callout >}}
 
 ## Configure Webhook
@@ -99,8 +102,7 @@ When someone sends an email to your inbox address, NornWeave:
 View all messages in your inbox:
 
 ```bash
-curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123"
 ```
 
 Response:
@@ -135,7 +137,6 @@ Search for messages containing specific text:
 
 ```bash
 curl -X POST "http://localhost:8000/v1/search" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "inbox_id": "ibx_abc123",
@@ -172,7 +173,6 @@ Send a new email (creates a new thread):
 
 ```bash
 curl -X POST http://localhost:8000/v1/messages \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "inbox_id": "ibx_abc123",
@@ -198,8 +198,7 @@ Response:
 Retrieve a conversation thread (optimized for LLM context):
 
 ```bash
-curl http://localhost:8000/v1/threads/th_123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl http://localhost:8000/v1/threads/th_123
 ```
 
 Response:
@@ -235,7 +234,6 @@ To reply to an existing conversation, include the `reply_to_thread_id`:
 
 ```bash
 curl -X POST http://localhost:8000/v1/messages \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "inbox_id": "ibx_abc123",

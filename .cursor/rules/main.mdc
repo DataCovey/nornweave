@@ -182,3 +182,4 @@ When working in this codebase:
 5. **MCP compatibility**: When adding features, consider MCP tool/resource exposure for AI agents
 6. **OpenSpec context**: Check `openspec/specs/` for detailed specifications before implementing features - specs contain design decisions, API contracts, and implementation guidance
 7. **Doc sync**: When implementing or changing user-facing features, update README.md, relevant `web/content/docs/` pages, and `.cursor/rules/main.mdc` (Repository Structure / Architecture) so they stay accurate
+8. **.env file**: Use `.env.example` as a template for `.env` file and keep it up to date with the latest environment variables.

@@ -126,7 +126,7 @@ sitemap_changefreq: daily
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
     title="Virtual Inboxes"
-    subtitle="Dedicated addresses for AI agents; receive and send via your provider. PostgreSQL-backed storage and API key authentication."
+    subtitle="Dedicated addresses for AI agents; receive and send via your provider. SQLite (default) or PostgreSQL storage with API key authentication."
     link="docs/getting-started"
     icon="inbox"
   >}}
@@ -181,24 +181,19 @@ sitemap_changefreq: daily
 </div>
 
 ```bash
-# Clone the repository
+# Install and run — SQLite tables are created automatically
+pip install nornweave
+nornweave api
+```
+
+Or use Docker for production (with PostgreSQL):
+
+```bash
 git clone https://github.com/DataCovey/nornweave.git
 cd nornweave
-
-# Copy environment configuration
 cp .env.example .env
-# Edit .env with your API keys
-
-# Start the stack
 docker compose --profile storage_psql --profile mail_mailgun up -d
-
-# Run migrations
 docker compose --profile storage_psql exec api-psql uv run alembic upgrade head
-
-# (Optional) Validate with Python SDK
-cd clients/python
-pip install -e .
-python scripts/validate_local.py
 ```
 
 <div style="margin-top: 2rem;">

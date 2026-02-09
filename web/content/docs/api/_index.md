@@ -20,11 +20,9 @@ NornWeave provides two ways to interact with your email data:
 
 ## Authentication
 
-All API requests require authentication using an API key in the `Authorization` header:
-
-```bash
-Authorization: Bearer YOUR_API_KEY
-```
+{{< callout type="info" >}}
+API key authentication is **not yet enforced**. All endpoints are currently accessible without credentials. The `API_KEY` environment variable is reserved for a future release.
+{{< /callout >}}
 
 ## Base URL
 

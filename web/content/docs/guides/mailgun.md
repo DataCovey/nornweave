@@ -132,7 +132,6 @@ docker compose restart api
 
 ```bash
 curl -X POST http://localhost:8000/v1/inboxes \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "Test", "email_username": "test"}'
 ```

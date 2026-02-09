@@ -9,6 +9,22 @@ NornWeave uses adapter patterns for both storage and email providers, allowing y
 
 The storage layer uses a `StorageInterface` that can be implemented by different database backends.
 
+### SQLiteAdapter (Default)
+
+The default adapter — zero configuration required. Great for getting started, development, and single-server deployments.
+
+```bash
+DB_DRIVER=sqlite
+# DATABASE_URL defaults to sqlite+aiosqlite:///./nornweave.db
+```
+
+Features:
+- Single file database, no server required
+- Tables auto-created on first startup (no migrations needed)
+- Async support via aiosqlite
+- Zero-config quickstart
+- Great for development, testing, and small deployments
+
 ### PostgresAdapter
 
 The production-ready adapter using PostgreSQL with asyncpg.
@@ -23,21 +39,6 @@ Features:
 - Alembic migrations for schema management
 - Production-ready with connection pooling
 - Supports pgvector for semantic search (Phase 3)
-
-### SQLiteAdapter
-
-A lightweight adapter for local development and testing.
-
-```bash
-DB_DRIVER=sqlite
-DATABASE_URL=sqlite+aiosqlite:///./nornweave.db
-```
-
-Features:
-- Single file database, no server required
-- Async support via aiosqlite
-- Great for development and testing
-- Not recommended for production
 
 ## Email Provider Adapters (BYOP)
 

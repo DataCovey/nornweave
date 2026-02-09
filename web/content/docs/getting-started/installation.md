@@ -1,10 +1,11 @@
 ---
 title: NornWeave Installation Guide
-description: "Install NornWeave using Docker or from source with uv. Complete setup instructions including PostgreSQL database configuration."
+description: "Install NornWeave using Docker, from PyPI, or from source with uv. Complete setup instructions with SQLite (default) and PostgreSQL options."
 weight: 1
 keywords:
   - NornWeave installation
   - Docker setup
+  - SQLite setup
   - PostgreSQL setup
   - Python installation
   - uv package manager
@@ -38,7 +39,7 @@ flowchart TB
         end
 
         subgraph storage [Storage]
-            DB[(PostgreSQL)]
+            DB[(SQLite / PostgreSQL)]
         end
 
         subgraph agents [AI Agents]
@@ -57,11 +58,11 @@ flowchart TB
 
 - **External access**: Only `/webhooks/*` and `/health` are exposed through the external listener
 - **Internal access**: AI agents connect through the internal listener, which has full API access
-- **Storage**: PostgreSQL runs inside your network, accessible only by the NornWeave API
+- **Storage**: The database (SQLite or PostgreSQL) runs inside your network, accessible only by the NornWeave API
 
 ---
 
-NornWeave can be installed using Docker (recommended), from PyPI, or directly from source using uv.
+NornWeave can be installed from PyPI (quickest), using Docker (recommended for production), or from source using uv.
 
 ## Package Extras
 
@@ -69,7 +70,8 @@ NornWeave uses optional extras to keep the base installation lightweight:
 
 | Installation | Command | Use Case |
 |--------------|---------|----------|
-| **Base** | `pip install nornweave` | SQLite database, all email providers |
+| **Base** | `pip install nornweave` | SQLite, Mailgun/SES/SendGrid/Resend |
+| **IMAP/SMTP** | `pip install nornweave[smtpimap]` | Poll any IMAP mailbox, send via SMTP |
 | **PostgreSQL** | `pip install nornweave[postgres]` | Production PostgreSQL support |
 | **MCP** | `pip install nornweave[mcp]` | AI agent integration (Claude, Cursor) |
 | **Full** | `pip install nornweave[all]` | All features |
@@ -77,10 +79,33 @@ NornWeave uses optional extras to keep the base installation lightweight:
 For development from source, use `make install-dev` which installs all extras.
 
 {{< callout type="info" >}}
-The base package includes SQLite support and all email providers (Mailgun, SES, SendGrid, Resend). PostgreSQL requires the `[postgres]` extra.
+The base package includes SQLite support and four HTTP-based email providers (Mailgun, SES, SendGrid, Resend). IMAP/SMTP requires `[smtpimap]`, PostgreSQL requires `[postgres]`.
 {{< /callout >}}
 
-## Using Docker (Recommended)
+## From PyPI (Quickstart)
+
+The fastest way to get NornWeave running. Uses SQLite by default — no database setup or migrations required. Tables are created automatically on first startup.
+
+```bash
+pip install nornweave
+nornweave api
+```
+
+The API will be available at `http://localhost:8000`. Data is stored in `./nornweave.db`.
+
+For AI agent integration via MCP:
+
+```bash
+pip install nornweave[mcp]
+nornweave api    # start the API server (in one terminal)
+nornweave mcp    # start the MCP server (in another terminal)
+```
+
+{{< callout type="info" >}}
+The base package uses SQLite and includes Mailgun, SES, SendGrid, and Resend. For IMAP/SMTP, add `[smtpimap]`. For PostgreSQL, add `[postgres]` and set `DB_DRIVER=postgres`.
+{{< /callout >}}
+
+## Using Docker (Recommended for Production)
 
 Docker is the easiest way to get started with NornWeave.
 
@@ -109,20 +134,25 @@ cp .env.example .env
 Edit `.env` with your settings:
 
 ```bash
-# Database
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
-POSTGRES_DB=nornweave
-POSTGRES_USER=nornweave
-POSTGRES_PASSWORD=your-secure-password
+# Database (SQLite is the default — no database config needed for quickstart)
+# For production with PostgreSQL, uncomment and configure:
+# DB_DRIVER=postgres
+# POSTGRES_HOST=postgres
+# POSTGRES_PORT=5432
+# POSTGRES_DB=nornweave
+# POSTGRES_USER=nornweave
+# POSTGRES_PASSWORD=your-secure-password
+
+# Email Domain (used for inbox addresses: username@EMAIL_DOMAIN)
+EMAIL_DOMAIN=mail.yourdomain.com
 
 # Email Provider
 EMAIL_PROVIDER=mailgun  # or: sendgrid, ses, resend
 MAILGUN_API_KEY=your-api-key
 MAILGUN_DOMAIN=mail.yourdomain.com
 
-# API Security
-API_KEY=your-api-key
+# API Security (not yet enforced — reserved for future use)
+# API_KEY=your-api-key
 ```
 
 ### Start the Stack
@@ -131,7 +161,9 @@ API_KEY=your-api-key
 docker compose up -d
 ```
 
-### Run Database Migrations
+### Run Database Migrations (PostgreSQL only)
+
+SQLite tables are created automatically. If you're using PostgreSQL, run Alembic migrations:
 
 ```bash
 docker compose exec api alembic upgrade head
@@ -219,8 +251,8 @@ For development or when you need more control over the installation.
 ### Prerequisites
 
 - Python 3.14+
-- PostgreSQL 15+
 - [uv](https://github.com/astral-sh/uv) package manager
+- PostgreSQL 15+ (optional — SQLite is used by default)
 
 ### Steps
 
@@ -240,12 +272,14 @@ make install-dev
 
 ```bash
 cp .env.example .env
-# Edit .env with your database and provider settings
+# Edit .env with your provider settings
 ```
 
-### Start PostgreSQL
+The default configuration uses SQLite, which requires no database setup.
 
-You can use Docker for just the database:
+### (Optional) Start PostgreSQL
+
+If you prefer PostgreSQL, set `DB_DRIVER=postgres` in your `.env` and start a PostgreSQL instance:
 
 ```bash
 docker compose up -d postgres
@@ -253,7 +287,9 @@ docker compose up -d postgres
 
 Or use your own PostgreSQL instance.
 
-### Run Migrations
+### Run Migrations (PostgreSQL only)
+
+SQLite tables are created automatically on startup. If you're using PostgreSQL, run:
 
 ```bash
 make migrate
@@ -314,7 +350,7 @@ Add to your MCP client configuration (`~/.config/claude/config.json` or Cursor s
 ```
 
 {{< callout type="info" >}}
-The API server must be running for the MCP server to work. Start it with `nornweave api` or `docker compose up`.
+The API server must be running for the MCP server to work. Start it with `nornweave api` (uses SQLite by default) or `docker compose up`.
 {{< /callout >}}
 
 See the [MCP Integration Guide](/docs/api/mcp/) for detailed usage.

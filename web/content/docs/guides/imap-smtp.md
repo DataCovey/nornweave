@@ -162,7 +162,6 @@ IMAP poller starting: imap.example.com:993/INBOX (interval=60s)
 
 ```bash
 curl -X POST http://localhost:8000/v1/inboxes \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "Test", "email_username": "test"}'
 ```
@@ -176,8 +175,7 @@ Send an email to your configured address and wait up to `IMAP_POLL_INTERVAL` sec
 Trigger an immediate sync instead of waiting:
 
 ```bash
-curl -X POST http://localhost:8000/v1/inboxes/{inbox_id}/sync \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl -X POST http://localhost:8000/v1/inboxes/{inbox_id}/sync
 ```
 
 {{% /steps %}}

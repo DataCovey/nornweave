@@ -21,14 +21,25 @@ NornWeave is configured through environment variables. This page documents all a
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DB_DRIVER` | Database driver (`postgres` or `sqlite`) | `postgres` |
+| `DB_DRIVER` | Database driver (`sqlite` or `postgres`) | `sqlite` |
 | `POSTGRES_HOST` | PostgreSQL host | `localhost` |
 | `POSTGRES_PORT` | PostgreSQL port | `5432` |
 | `POSTGRES_DB` | Database name | `nornweave` |
 | `POSTGRES_USER` | Database user | `nornweave` |
 | `POSTGRES_PASSWORD` | Database password | Required |
 
-### Example
+### SQLite (Default)
+
+SQLite is the default and requires no additional setup — perfect for getting started:
+
+```bash
+DB_DRIVER=sqlite
+# Leave DATABASE_URL empty to use the default: ./nornweave.db
+```
+
+### PostgreSQL
+
+For production deployments, switch to PostgreSQL:
 
 ```bash
 DB_DRIVER=postgres
@@ -43,11 +54,13 @@ POSTGRES_PASSWORD=your-secure-password
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `EMAIL_PROVIDER` | Provider to use (`mailgun`, `sendgrid`, `ses`, `resend`) | Required |
+| `EMAIL_DOMAIN` | Domain for inbox email addresses (e.g. `mail.yourdomain.com`) | Required |
+| `EMAIL_PROVIDER` | Provider to use (`mailgun`, `sendgrid`, `ses`, `resend`, `imap-smtp`) | `mailgun` |
 
 ### Mailgun
 
 ```bash
+EMAIL_DOMAIN=mail.yourdomain.com
 EMAIL_PROVIDER=mailgun
 MAILGUN_API_KEY=your-api-key
 MAILGUN_DOMAIN=mail.yourdomain.com
@@ -57,6 +70,7 @@ MAILGUN_REGION=us  # or: eu
 ### SendGrid
 
 ```bash
+EMAIL_DOMAIN=yourdomain.com
 EMAIL_PROVIDER=sendgrid
 SENDGRID_API_KEY=your-api-key
 ```
@@ -64,6 +78,7 @@ SENDGRID_API_KEY=your-api-key
 ### AWS SES
 
 ```bash
+EMAIL_DOMAIN=yourdomain.com
 EMAIL_PROVIDER=ses
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
@@ -78,6 +93,7 @@ AWS_REGION=us-east-1
 | `RESEND_WEBHOOK_SECRET` | Svix signing secret for webhook verification | Optional |
 
 ```bash
+EMAIL_DOMAIN=yourdomain.resend.app
 EMAIL_PROVIDER=resend
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxx  # Optional: for webhook signature verification
@@ -85,11 +101,47 @@ RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxx  # Optional: for webhook signat
 
 The `RESEND_WEBHOOK_SECRET` is the Svix signing secret from your Resend webhook configuration. When set, NornWeave verifies the signature on incoming webhooks to ensure they originated from Resend.
 
+### IMAP/SMTP
+
+Use any existing mailbox. SMTP sends outbound email; IMAP polls for inbound.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SMTP_HOST` | SMTP server hostname | Required |
+| `SMTP_PORT` | SMTP server port | `587` |
+| `SMTP_USERNAME` | SMTP auth username | Required |
+| `SMTP_PASSWORD` | SMTP auth password | Required |
+| `SMTP_USE_TLS` | Use STARTTLS | `true` |
+| `IMAP_HOST` | IMAP server hostname | Required |
+| `IMAP_PORT` | IMAP server port | `993` |
+| `IMAP_USERNAME` | IMAP auth username | Required |
+| `IMAP_PASSWORD` | IMAP auth password | Required |
+| `IMAP_USE_SSL` | Use SSL for IMAP | `true` |
+| `IMAP_POLL_INTERVAL` | Seconds between polls | `60` |
+| `IMAP_MAILBOX` | Mailbox folder to poll | `INBOX` |
+| `IMAP_MARK_AS_READ` | Mark fetched emails as read | `true` |
+| `IMAP_DELETE_AFTER_FETCH` | Delete after fetching (requires mark-as-read) | `false` |
+
+```bash
+EMAIL_DOMAIN=yourdomain.com
+EMAIL_PROVIDER=imap-smtp
+SMTP_HOST=smtp.yourdomain.com
+SMTP_PORT=587
+SMTP_USERNAME=agent@yourdomain.com
+SMTP_PASSWORD=your-app-password
+IMAP_HOST=imap.yourdomain.com
+IMAP_PORT=993
+IMAP_USERNAME=agent@yourdomain.com
+IMAP_PASSWORD=your-app-password
+```
+
+See the [IMAP/SMTP Guide](../../guides/imap-smtp) for detailed setup instructions.
+
 ## API Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `API_KEY` | API key for authentication | Required |
+| `API_KEY` | API key for authentication (not yet enforced) | Optional |
 | `API_HOST` | Host to bind to | `0.0.0.0` |
 | `API_PORT` | Port to listen on | `8000` |
 | `LOG_LEVEL` | Logging level | `INFO` |
@@ -97,7 +149,7 @@ The `RESEND_WEBHOOK_SECRET` is the Svix signing secret from your Resend webhook 
 ### Example
 
 ```bash
-API_KEY=your-secure-api-key
+# API_KEY=your-secure-api-key  # Reserved for future use; not yet enforced
 API_HOST=0.0.0.0
 API_PORT=8000
 LOG_LEVEL=INFO
@@ -331,13 +383,17 @@ Options:
 Here's a complete `.env` file:
 
 ```bash
-# Database
-DB_DRIVER=postgres
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
-POSTGRES_DB=nornweave
-POSTGRES_USER=nornweave
-POSTGRES_PASSWORD=super-secret-password
+# Database (SQLite is the default — no config needed for quickstart)
+# For production, switch to PostgreSQL:
+# DB_DRIVER=postgres
+# POSTGRES_HOST=postgres
+# POSTGRES_PORT=5432
+# POSTGRES_DB=nornweave
+# POSTGRES_USER=nornweave
+# POSTGRES_PASSWORD=super-secret-password
+
+# Email Domain (used to construct inbox addresses: username@EMAIL_DOMAIN)
+EMAIL_DOMAIN=mail.example.com
 
 # Email Provider (Mailgun)
 EMAIL_PROVIDER=mailgun
@@ -346,7 +402,7 @@ MAILGUN_DOMAIN=mail.example.com
 MAILGUN_REGION=us
 
 # API
-API_KEY=nw-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# API_KEY=nw-xxxxxxxxxxxxxxxxxxxxxxxxxxxx  # Not yet enforced
 API_HOST=0.0.0.0
 API_PORT=8000
 LOG_LEVEL=INFO

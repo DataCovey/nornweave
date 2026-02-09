@@ -202,10 +202,10 @@ Add error handling nodes to manage cases where:
 - Verify the event type is selected in the trigger node
 - Test with the "Listen for Test Event" feature
 
-### Authentication Errors
+### Connection Errors
 
-- Double-check your API key if authentication is enabled
-- Ensure the key hasn't expired or been revoked
+- Verify the Base URL in your credential settings points to the running NornWeave instance
+- API key authentication is not yet enforced; leave the API Key field empty or set any value
 
 ## Resources
 

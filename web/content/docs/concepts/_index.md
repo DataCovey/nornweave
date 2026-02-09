@@ -73,8 +73,8 @@ The system uses a `StorageInterface` to persist data, not hardcoded to any speci
 
 | Implementation | Description | Use Case |
 |----------------|-------------|----------|
+| `SQLiteAdapter` | SQLite — zero-config default | Development, small deployments |
 | `PostgresAdapter` | PostgreSQL with full features | Production |
-| `SQLiteAdapter` | SQLite for simplicity | Local development |
 
 ### Provider Adapter Layer (BYOP Model)
 

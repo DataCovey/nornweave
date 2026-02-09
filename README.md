@@ -36,7 +36,7 @@ In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Y
 - **Virtual Inboxes**: Create email addresses for your AI agents
 - **Webhook Ingestion**: Receive emails from Mailgun, SES, SendGrid, Resend
 - **IMAP/SMTP**: Poll existing mailboxes (IMAP) and send via SMTP for any provider or self-hosted server
-- **Persistent Storage**: PostgreSQL with abstracted storage adapters
+- **Persistent Storage**: SQLite (default) or PostgreSQL with abstracted storage adapters
 - **Email Sending**: Send replies through your configured provider
 
 ### Intelligence (The Agent Layer)
@@ -57,8 +57,11 @@ In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Y
 ### Install from PyPI
 
 ```bash
-# Base installation (SQLite, all email providers)
+# Base installation (SQLite, Mailgun/SES/SendGrid/Resend)
 pip install nornweave
+
+# With IMAP/SMTP support (any mailbox)
+pip install nornweave[smtpimap]
 
 # With PostgreSQL support
 pip install nornweave[postgres]
@@ -70,6 +73,29 @@ pip install nornweave[mcp]
 pip install nornweave[all]
 ```
 
+### Configure Your Email Domain
+
+Create a `.env` file in the directory where you'll run the server:
+
+```bash
+# .env — minimum configuration for inbox creation
+EMAIL_DOMAIN=mail.yourdomain.com   # your email provider's domain
+```
+
+> **Tip:** The domain depends on your provider (e.g. `mail.yourdomain.com` for Mailgun,
+> `yourdomain.resend.app` for Resend). Without `EMAIL_DOMAIN`, inbox creation will fail.
+
+See [Configuration](https://nornweave.datacovey.com/docs/getting-started/configuration/) for all available settings.
+
+### Start the API Server
+
+```bash
+# SQLite is the default — no database setup required
+nornweave api
+```
+
+The API will be available at `http://localhost:8000`. Data is stored in `./nornweave.db`.
+
 ### Using Docker (Recommended for Production)
 
 ```bash
@@ -77,14 +103,13 @@ pip install nornweave[all]
 git clone https://github.com/DataCovey/nornweave.git
 cd nornweave
 
-# Copy environment configuration
+# Copy environment configuration and set EMAIL_DOMAIN + provider keys (see above)
 cp .env.example .env
-# Edit .env with your API keys
 
 # Start the stack
 docker compose up -d
 
-# Run migrations
+# Run migrations (PostgreSQL only — SQLite tables are created automatically)
 docker compose exec api alembic upgrade head
 ```
 
@@ -98,27 +123,15 @@ cd nornweave
 # Install dependencies
 make install-dev
 
-# Copy environment configuration
+# Copy environment configuration and set EMAIL_DOMAIN + provider keys (see above)
 cp .env.example .env
 
-# Start PostgreSQL (or use your own)
-docker compose up -d postgres
-
-# Run migrations
-make migrate
+# Run migrations (PostgreSQL only — SQLite tables are created automatically)
+# make migrate
 
 # Start the development server
 make dev
 ```
-
-### Configure Your Email Provider
-
-1. Set `EMAIL_PROVIDER` in `.env` (e.g., `mailgun`)
-2. Add your provider's API key
-3. Configure the webhook URL in your provider's dashboard:
-   ```
-   https://your-server.com/webhooks/mailgun
-   ```
 
 ## API Overview
 
@@ -126,7 +139,6 @@ make dev
 
 ```bash
 curl -X POST http://localhost:8000/v1/inboxes \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "Support Agent", "email_username": "support"}'
 ```
@@ -134,8 +146,7 @@ curl -X POST http://localhost:8000/v1/inboxes \
 ### Read a Thread
 
 ```bash
-curl http://localhost:8000/v1/threads/th_123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl http://localhost:8000/v1/threads/th_123
 ```
 
 Response (LLM-optimized):
@@ -154,7 +165,6 @@ Response (LLM-optimized):
 
 ```bash
 curl -X POST http://localhost:8000/v1/messages \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "inbox_id": "ibx_555",

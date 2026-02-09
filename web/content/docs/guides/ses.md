@@ -217,7 +217,6 @@ You should see: "SNS subscription confirmed successfully"
 
 ```bash
 curl -X POST http://localhost:8000/v1/inboxes \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "Test", "email_username": "test"}'
 ```
@@ -230,7 +229,6 @@ Send an email to `test@mail.yourdomain.com` from your personal email.
 
 ```bash
 curl -X POST http://localhost:8000/v1/messages \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "inbox_id": "ibx_test",

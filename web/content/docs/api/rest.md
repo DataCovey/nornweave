@@ -1,6 +1,6 @@
 ---
 title: REST API Reference
-description: "Complete REST API documentation for NornWeave. Endpoints for inboxes, threads, messages, and search with authentication, request/response examples."
+description: "Complete REST API documentation for NornWeave. Endpoints for inboxes, threads, messages, and search with request/response examples."
 weight: 1
 keywords:
   - NornWeave REST API
@@ -19,11 +19,9 @@ The NornWeave REST API provides full control over inboxes, threads, and messages
 
 ## Authentication
 
-All requests require an API key in the `Authorization` header:
-
-```bash
-Authorization: Bearer YOUR_API_KEY
-```
+{{< callout type="info" >}}
+API key authentication is **not yet enforced**. All endpoints are currently accessible without credentials. The `API_KEY` environment variable is reserved for a future release. You can omit the `Authorization` header for now.
+{{< /callout >}}
 
 ## Base URL
 
@@ -72,7 +70,6 @@ POST /v1/inboxes
 
 ```bash
 curl -X POST http://localhost:8000/v1/inboxes \
-  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "Support Agent", "email_username": "support"}'
 ```
@@ -271,16 +268,13 @@ At least one of `inbox_id` or `thread_id` must be provided.
 
 ```bash
 # List all messages in an inbox
-curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123"
 
 # Search for messages containing "invoice"
-curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=invoice" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=invoice"
 
 # List messages in a specific thread
-curl "http://localhost:8000/v1/messages?thread_id=th_123" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl "http://localhost:8000/v1/messages?thread_id=th_123"
 ```
 
 ### Get a Message
@@ -482,12 +476,10 @@ Returns raw binary content with appropriate `Content-Type` and `Content-Disposit
 ```bash
 # Download as binary
 curl -o document.pdf \
-  "http://localhost:8000/v1/attachments/att_789/content?token=abc&expires=1234567890" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+  "http://localhost:8000/v1/attachments/att_789/content?token=abc&expires=1234567890"
 
 # Download as base64 JSON
-curl "http://localhost:8000/v1/attachments/att_789/content?format=base64&token=abc&expires=1234567890" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl "http://localhost:8000/v1/attachments/att_789/content?format=base64&token=abc&expires=1234567890"
 ```
 
 ---
@@ -541,16 +533,13 @@ The search looks across:
 
 ```bash
 # Search in an inbox
-curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=pricing" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=pricing"
 
 # Search within a thread
-curl "http://localhost:8000/v1/messages?thread_id=th_123&q=contract" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl "http://localhost:8000/v1/messages?thread_id=th_123&q=contract"
 
 # Search with pagination
-curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=invoice&limit=10&offset=20" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl "http://localhost:8000/v1/messages?inbox_id=ibx_abc123&q=invoice&limit=10&offset=20"
 ```
 
 {{< callout type="info" >}}
@@ -602,7 +591,6 @@ All errors follow a consistent format:
 | Status Code | Description |
 |-------------|-------------|
 | `400` | Bad request (invalid parameters) |
-| `401` | Unauthorized (missing/invalid API key) |
 | `404` | Resource not found |
 | `429` | Rate limited |
 | `500` | Internal server error |

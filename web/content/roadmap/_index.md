@@ -22,7 +22,7 @@ The foundation layer is complete and provides core email functionality:
 
 - **Virtual Inboxes**: Create email addresses for your AI agents
 - **Webhook Ingestion**: Receive emails from Mailgun, SES, SendGrid, Resend
-- **Persistent Storage**: PostgreSQL with abstracted storage adapters
+- **Persistent Storage**: SQLite (default) or PostgreSQL with abstracted storage adapters
 - **Email Sending**: Send replies through your configured provider
 
 ## Phase 2: Intelligence (The Agent Layer) - Available
