@@ -40,6 +40,18 @@ async def create_inbox(
 
     The email address is constructed from the username and configured domain.
     """
+    # Validate that email domain is configured
+    if not settings.email_domain:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "EMAIL_DOMAIN is not configured. "
+                "Set EMAIL_DOMAIN in your .env file to the domain used by your email provider "
+                "(e.g. EMAIL_DOMAIN=mail.yourdomain.com). "
+                "See the Configuration docs for details."
+            ),
+        )
+
     # Construct full email address
     email_address = f"{payload.email_username}@{settings.email_domain}"
 

@@ -1,11 +1,14 @@
 """Application configuration (Pydantic settings)."""
 
+import logging
 import re
 from functools import lru_cache
 from typing import Literal
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -19,7 +22,7 @@ class Settings(BaseSettings):
     )
 
     # Storage (Urdr)  # noqa: ERA001
-    db_driver: Literal["postgres", "sqlite"] = Field(default="postgres", alias="DB_DRIVER")
+    db_driver: Literal["postgres", "sqlite"] = Field(default="sqlite", alias="DB_DRIVER")
     database_url: str = Field(default="", alias="DATABASE_URL")
 
     # Email provider
@@ -317,6 +320,53 @@ class Settings(BaseSettings):
                 "Set LLM_API_KEY in your environment or .env file."
             )
             raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def warn_missing_email_domain(self) -> Settings:
+        """Warn at startup if EMAIL_DOMAIN is not configured."""
+        if not self.email_domain:
+            logger.warning(
+                "EMAIL_DOMAIN is not set. Inbox creation will fail until a domain is configured. "
+                "Set EMAIL_DOMAIN in your .env file (e.g. EMAIL_DOMAIN=mail.yourdomain.com)."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def warn_missing_provider_credentials(self) -> Settings:
+        """Warn at startup if the selected email provider is missing required credentials."""
+        provider = self.email_provider
+        missing: list[str] = []
+
+        if provider == "mailgun":
+            if not self.mailgun_api_key:
+                missing.append("MAILGUN_API_KEY")
+            if not self.mailgun_domain:
+                missing.append("MAILGUN_DOMAIN")
+        elif provider == "ses":
+            if not self.aws_access_key_id:
+                missing.append("AWS_ACCESS_KEY_ID")
+            if not self.aws_secret_access_key:
+                missing.append("AWS_SECRET_ACCESS_KEY")
+        elif provider == "sendgrid":
+            if not self.sendgrid_api_key:
+                missing.append("SENDGRID_API_KEY")
+        elif provider == "resend":
+            if not self.resend_api_key:
+                missing.append("RESEND_API_KEY")
+        elif provider == "imap-smtp":
+            if not self.smtp_host:
+                missing.append("SMTP_HOST")
+            if not self.imap_host:
+                missing.append("IMAP_HOST")
+
+        if missing:
+            logger.warning(
+                "EMAIL_PROVIDER=%s but required credentials are not set: %s. "
+                "Sending email will fail until these are configured in your .env file.",
+                provider,
+                ", ".join(missing),
+            )
         return self
 
 

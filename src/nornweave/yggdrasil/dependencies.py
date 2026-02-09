@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from nornweave.skuld.rate_limiter import GlobalRateLimiter
 
-from fastapi import Depends, Request
+from fastapi import Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -61,7 +61,12 @@ def get_database_url(settings: Settings) -> str:
 
 
 async def init_database(settings: Settings | None = None) -> None:
-    """Initialize database engine and session factory."""
+    """Initialize database engine and session factory.
+
+    For SQLite, tables are auto-created if they don't exist so that
+    ``nornweave api`` works out of the box with zero configuration.
+    PostgreSQL users should run Alembic migrations instead.
+    """
     global _engine, _session_factory
 
     if settings is None:
@@ -85,7 +90,7 @@ async def init_database(settings: Settings | None = None) -> None:
         expire_on_commit=False,
     )
 
-    # Enable foreign keys for SQLite
+    # SQLite-specific setup
     if settings.db_driver == "sqlite":
         from sqlalchemy import event
         from sqlalchemy.engine import Engine
@@ -95,6 +100,14 @@ async def init_database(settings: Settings | None = None) -> None:
             cursor = dbapi_conn.cursor()
             cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()
+
+        # Auto-create tables for SQLite so `nornweave api` works without
+        # a separate migration step.  create_all is idempotent — existing
+        # tables are left untouched.
+        from nornweave.urdr.orm import Base
+
+        async with _engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
 
 async def close_database() -> None:
@@ -180,13 +193,61 @@ def get_rate_limiter(
     return _rate_limiter
 
 
+def _check_provider_credentials(settings: Settings) -> None:
+    """Validate that required credentials are set for the configured email provider.
+
+    Raises ``HTTPException(422)`` with actionable detail if credentials are missing.
+    """
+    provider = settings.email_provider
+    missing: list[str] = []
+
+    if provider == "mailgun":
+        if not settings.mailgun_api_key:
+            missing.append("MAILGUN_API_KEY")
+        if not settings.mailgun_domain:
+            missing.append("MAILGUN_DOMAIN")
+    elif provider == "ses":
+        if not settings.aws_access_key_id:
+            missing.append("AWS_ACCESS_KEY_ID")
+        if not settings.aws_secret_access_key:
+            missing.append("AWS_SECRET_ACCESS_KEY")
+    elif provider == "sendgrid":
+        if not settings.sendgrid_api_key:
+            missing.append("SENDGRID_API_KEY")
+    elif provider == "resend":
+        if not settings.resend_api_key:
+            missing.append("RESEND_API_KEY")
+    elif provider == "imap-smtp":
+        if not settings.smtp_host:
+            missing.append("SMTP_HOST")
+        if not settings.imap_host:
+            missing.append("IMAP_HOST")
+
+    if missing:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"EMAIL_PROVIDER is set to '{provider}' but required credentials are missing: "
+                f"{', '.join(missing)}. "
+                f"Set them in your .env file. See the Configuration docs for details."
+            ),
+        )
+
+
 async def get_email_provider(
     settings: Settings = Depends(get_settings),
 ) -> EmailProvider:
-    """FastAPI dependency to get the configured email provider."""
+    """FastAPI dependency to get the configured email provider.
+
+    Validates that required credentials are present before constructing the
+    adapter.  This turns silent send-time failures into clear HTTP 422
+    errors.
+    """
     # Lazy-import only the adapter for the configured provider so optional
     # dependencies (e.g. cryptography for SendGrid) are not required when
     # using other providers.
+    _check_provider_credentials(settings)
+
     provider = settings.email_provider
 
     if provider == "mailgun":

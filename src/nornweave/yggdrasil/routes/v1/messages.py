@@ -2,7 +2,7 @@
 
 import base64
 import binascii
-import contextlib
+import logging
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -23,6 +23,8 @@ from nornweave.models.thread import Thread
 from nornweave.skuld.rate_limiter import GlobalRateLimiter  # noqa: TC001 - needed at runtime
 from nornweave.verdandi.summarize import generate_thread_summary
 from nornweave.yggdrasil.dependencies import get_email_provider, get_rate_limiter, get_storage
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -82,6 +84,7 @@ class SendMessageResponse(BaseModel):
     thread_id: str
     provider_message_id: str | None
     status: str
+    error: str | None = None
 
 
 def _message_to_response(msg: Message) -> MessageResponse:
@@ -333,15 +336,24 @@ async def send_message(
             )
 
     # Send email via provider
-    # Log error but continue to store the message attempt
+    # On failure the message is still recorded (status="failed") so the
+    # caller can see it and retry, instead of silently losing the attempt.
     provider_message_id: str | None = None
-    with contextlib.suppress(Exception):
+    send_error: str | None = None
+    try:
         provider_message_id = await email_provider.send_email(
             to=payload.to,
             subject=payload.subject,
             body=payload.body,
             from_address=inbox.email_address,
             attachments=provider_attachments if provider_attachments else None,
+        )
+    except Exception:
+        logger.exception("Failed to send email via %s provider", settings.email_provider)
+        send_error = (
+            f"Email provider ({settings.email_provider}) failed to send the message. "
+            "The message has been recorded but was not delivered. "
+            "Check server logs for details."
         )
 
     # Record successful send in rate limiter (only when provider returned an id)
@@ -389,9 +401,17 @@ async def send_message(
     # Fire-and-forget thread summarization
     await generate_thread_summary(storage, thread_id)
 
+    if send_error:
+        send_status = "failed"
+    elif provider_message_id:
+        send_status = "sent"
+    else:
+        send_status = "pending"
+
     return SendMessageResponse(
         id=created_message.id,
         thread_id=thread_id,
         provider_message_id=provider_message_id,
-        status="sent" if provider_message_id else "pending",
+        status=send_status,
+        error=send_error,
     )
