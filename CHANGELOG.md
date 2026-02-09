@@ -33,6 +33,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.7] - 2026-02-09
+
+### Added
+
+- Sample Email MCP Agent (`mcp_ai_agents/email_mcp_agent/`) demonstrating a customer-support use case with NornWeave's MCP tools
+- FAQ entries comparing NornWeave to closed-source alternatives
+
+### Changed
+
+- Default database driver to SQLite with auto-table-creation for zero-config quickstart
+- SQL-agnostic table creation in ORM for broader database compatibility
+
+### Fixed
+
+- Validate `EMAIL_DOMAIN` at inbox creation, returning HTTP 422 when missing instead of creating inboxes with empty domains
+- Validate provider credentials in `get_email_provider()` dependency, returning a clear HTTP 422 before constructing adapters with missing API keys or hostnames
+- Surface email send errors with `status="failed"` and error details instead of silently suppressing exceptions
+- Startup warnings when `EMAIL_DOMAIN` is unset or selected provider is missing required credentials
+- Comprehensive documentation fixes: quickstart flow, `.env.example` accuracy, removed misleading `Authorization: Bearer` headers from curl examples, added `EMAIL_DOMAIN` callouts to provider guides
+
+---
+
 ## [0.1.6] - 2026-02-07
 
 ### Added
@@ -187,7 +209,8 @@ Initial release. See [Unreleased] for current development.
 - Implemented **Urdr**, basic Storage (PSQL and SQLite)
 - E2E testing
 
-[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/DataCovey/nornweave/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/DataCovey/nornweave/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/DataCovey/nornweave/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/DataCovey/nornweave/compare/v0.1.3...v0.1.4

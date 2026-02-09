@@ -1,6 +1,6 @@
 [project]
 name = "nornweave"
-version = "0.1.6"
+version = "0.1.7"
 description = "Open-source, self-hosted Inbox-as-a-Service API for AI Agents"
 readme = "README.md"
 license = { text = "Apache-2.0" }
