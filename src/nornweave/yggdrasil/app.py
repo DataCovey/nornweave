@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from nornweave import __version__
 from nornweave.core.config import get_settings
-from nornweave.yggdrasil.dependencies import close_database, init_database
+from nornweave.yggdrasil.dependencies import close_database, ensure_demo_inbox, init_database
 
 # Configure nornweave loggers to output to stdout
 logging.basicConfig(
@@ -41,6 +41,9 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
 
     settings = get_settings()
     await init_database(settings)
+
+    if settings.email_provider == "demo":
+        await ensure_demo_inbox(settings)
 
     poller_task: asyncio.Task[None] | None = None
 
@@ -90,13 +93,14 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     # Include API routers
-    from nornweave.yggdrasil.routes.v1 import attachments, inboxes, messages, search, threads
+    from nornweave.yggdrasil.routes.v1 import attachments, demo, inboxes, messages, search, threads
 
     app.include_router(inboxes.router, prefix="/v1", tags=["inboxes"])
     app.include_router(threads.router, prefix="/v1", tags=["threads"])
     app.include_router(messages.router, prefix="/v1", tags=["messages"])
     app.include_router(search.router, prefix="/v1", tags=["search"])
     app.include_router(attachments.router, prefix="/v1", tags=["attachments"])
+    app.include_router(demo.router, prefix="/v1", tags=["demo"])
 
     # Include webhook routers
     from nornweave.yggdrasil.routes.webhooks import mailgun, resend, sendgrid, ses

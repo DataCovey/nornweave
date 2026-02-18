@@ -12,8 +12,9 @@ from pydantic import BaseModel, Field
 
 from nornweave.core.config import Settings, get_settings
 from nornweave.core.domain_filter import DomainFilter
-from nornweave.core.interfaces import (  # noqa: TC001 - needed at runtime for FastAPI
+from nornweave.core.interfaces import (
     EmailProvider,
+    InboundMessage,
     StorageInterface,
 )
 from nornweave.core.storage import AttachmentMetadata, create_attachment_storage
@@ -21,6 +22,7 @@ from nornweave.models.attachment import AttachmentUpload, SendAttachment
 from nornweave.models.message import Message, MessageDirection
 from nornweave.models.thread import Thread
 from nornweave.skuld.rate_limiter import GlobalRateLimiter  # noqa: TC001 - needed at runtime
+from nornweave.verdandi.ingest import ingest_message
 from nornweave.verdandi.summarize import generate_thread_summary
 from nornweave.yggdrasil.dependencies import get_email_provider, get_rate_limiter, get_storage
 
@@ -400,6 +402,25 @@ async def send_message(
 
     # Fire-and-forget thread summarization
     await generate_thread_summary(storage, thread_id)
+
+    # Demo mode loopback: deliver a copy to each recipient that is a demo inbox
+    if (
+        settings.email_provider == "demo"
+        and provider_message_id
+    ):
+        for recipient in payload.to:
+            recipient_inbox = await storage.get_inbox_by_email(recipient)
+            if recipient_inbox is None:
+                continue
+            inbound = InboundMessage(
+                from_address=inbox.email_address,
+                to_address=recipient,
+                subject=payload.subject,
+                body_plain=payload.body,
+                message_id=provider_message_id,
+                timestamp=datetime.now(UTC),
+            )
+            await ingest_message(inbound, storage, settings)
 
     if send_error:
         send_status = "failed"

@@ -3,6 +3,7 @@
 Provides commands for running the API server and MCP server.
 """
 
+import os
 import sys
 from typing import Literal
 
@@ -37,7 +38,12 @@ def cli() -> None:
     is_flag=True,
     help="Enable auto-reload for development",
 )
-def api_cmd(host: str, port: int, reload: bool) -> None:
+@click.option(
+    "--demo",
+    is_flag=True,
+    help="Run in demo/sandbox mode: mock mailbox, no .env or real email provider required (local use only).",
+)
+def api_cmd(host: str, port: int, reload: bool, demo: bool) -> None:
     """Run the NornWeave REST API server.
 
     This starts the FastAPI server that handles webhooks, REST API requests,
@@ -47,10 +53,15 @@ def api_cmd(host: str, port: int, reload: bool) -> None:
 
         nornweave api
 
+        nornweave api --demo
+
         nornweave api --port 9000
 
         nornweave api --reload
     """
+    if demo:
+        os.environ["EMAIL_PROVIDER"] = "demo"
+        os.environ["EMAIL_DOMAIN"] = "demo.nornweave.local"
     import uvicorn
 
     uvicorn.run(

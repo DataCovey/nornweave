@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     database_url: str = Field(default="", alias="DATABASE_URL")
 
     # Email provider
-    email_provider: Literal["mailgun", "ses", "sendgrid", "resend", "imap-smtp"] = Field(
+    email_provider: Literal["mailgun", "ses", "sendgrid", "resend", "imap-smtp", "demo"] = Field(
         default="mailgun", alias="EMAIL_PROVIDER"
     )
     email_domain: str = Field(default="", alias="EMAIL_DOMAIN")

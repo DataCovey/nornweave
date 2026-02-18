@@ -11,7 +11,7 @@ NornWeave is an open-source, self-hosted Inbox-as-a-Service API for AI Agents. I
 ```
 nornweave/
 ├── src/nornweave/              # Main Python package
-│   ├── adapters/               # Email provider adapters (Mailgun, SES, SendGrid, Resend, SMTP/IMAP)
+│   ├── adapters/               # Email provider adapters (Mailgun, SES, SendGrid, Resend, SMTP/IMAP, demo)
 │   ├── core/                   # Core utilities (config, exceptions, interfaces)
 │   ├── models/                 # Pydantic/SQLAlchemy models (Event, Inbox, Message, Thread)
 │   ├── huginn/                 # MCP Resources (read operations for AI agents)
@@ -23,7 +23,7 @@ nornweave/
 │   ├── verdandi/               # Ingestion (webhook + IMAP, parsing, threading, attachments, LLM summarization)
 │   └── yggdrasil/              # FastAPI gateway
 │       ├── middleware/         # Auth and logging middleware
-│       └── routes/             # API routes (v1/, webhooks/)
+│       └── routes/             # API routes (v1/, webhooks/, v1/demo when in demo mode)
 ├── clients/                    # SDK clients for NornWeave API
 │   └── python/                 # Python client library (nornweave-client)
 ├── packages/                   # External platform integrations

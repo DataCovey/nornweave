@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import AsyncGenerator  # noqa: TC003 - needed at runtime
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Any
@@ -135,6 +136,42 @@ async def get_session() -> AsyncGenerator[AsyncSession]:
             raise
 
 
+def _storage_for_session(session: AsyncSession, settings: Settings) -> StorageInterface:
+    """Build the storage adapter for a given session and settings (for use outside request context)."""
+    if settings.db_driver == "postgres":
+        try:
+            from nornweave.urdr.adapters.postgres import PostgresAdapter
+        except ImportError as e:
+            raise ImportError(
+                "PostgreSQL support requires additional dependencies. "
+                "Install with: pip install nornweave[postgres]"
+            ) from e
+        return PostgresAdapter(session)
+    if settings.db_driver == "sqlite":
+        from nornweave.urdr.adapters.sqlite import SQLiteAdapter
+
+        return SQLiteAdapter(session)
+    raise ValueError(f"Unknown db_driver: {settings.db_driver}")
+
+
+async def ensure_demo_inbox(settings: Settings) -> None:
+    """Ensure the demo inbox (demo@demo.nornweave.local) exists. Idempotent; call when provider is demo."""
+    from nornweave.models.inbox import Inbox
+
+    async with get_session() as session:
+        storage = _storage_for_session(session, settings)
+        existing = await storage.get_inbox_by_email("demo@demo.nornweave.local")
+        if existing:
+            return
+        inbox = Inbox(
+            id=str(uuid.uuid4()),
+            email_address="demo@demo.nornweave.local",
+            name="Demo Inbox",
+            provider_config={},
+        )
+        await storage.create_inbox(inbox)
+
+
 # -----------------------------------------------------------------------------
 # FastAPI Dependencies
 # -----------------------------------------------------------------------------
@@ -157,21 +194,7 @@ async def get_storage(
     settings: Settings = Depends(get_settings),
 ) -> StorageInterface:
     """FastAPI dependency to get the configured storage adapter."""
-    if settings.db_driver == "postgres":
-        try:
-            from nornweave.urdr.adapters.postgres import PostgresAdapter
-        except ImportError as e:
-            raise ImportError(
-                "PostgreSQL support requires additional dependencies. "
-                "Install with: pip install nornweave[postgres]"
-            ) from e
-        return PostgresAdapter(session)
-    elif settings.db_driver == "sqlite":
-        from nornweave.urdr.adapters.sqlite import SQLiteAdapter
-
-        return SQLiteAdapter(session)
-    else:
-        raise ValueError(f"Unknown db_driver: {settings.db_driver}")
+    return _storage_for_session(session, settings)
 
 
 _rate_limiter: GlobalRateLimiter | None = None
@@ -199,6 +222,8 @@ def _check_provider_credentials(settings: Settings) -> None:
     Raises ``HTTPException(422)`` with actionable detail if credentials are missing.
     """
     provider = settings.email_provider
+    if provider == "demo":
+        return
     missing: list[str] = []
 
     if provider == "mailgun":
@@ -280,5 +305,9 @@ async def get_email_provider(
         from nornweave.adapters.smtp_imap import SmtpImapAdapter
 
         return SmtpImapAdapter(settings=settings)
+    elif provider == "demo":
+        from nornweave.adapters.demo import DemoAdapter
+
+        return DemoAdapter(domain=settings.email_domain or "demo.nornweave.local")
     else:
         raise ValueError(f"Unknown email_provider: {provider}")

@@ -54,47 +54,52 @@ In Norse mythology, the Norns (Urdr, Verdandi, and Skuld) dwell at the base of Y
 
 ## Quick Start
 
-### Install from PyPI
+Try NornWeave with no config: **demo mode** gives you a local sandbox and a pre-configured inbox.
 
 ```bash
-# Base installation (SQLite, Mailgun/SES/SendGrid/Resend)
+pip install nornweave[mcp]
+nornweave api --demo
+```
+
+API: `http://localhost:8000`. Open `/docs`, call `GET /v1/inboxes` to get the demo inbox id, then use MCP (`nornweave mcp`) to send and list messages. When you're ready for real email, set a provider and domain (see below).
+
+### Install options
+
+```bash
+# Base (SQLite, Mailgun/SES/SendGrid/Resend)
 pip install nornweave
 
-# With IMAP/SMTP support (any mailbox)
+# With IMAP/SMTP support
 pip install nornweave[smtpimap]
 
-# With PostgreSQL support
+# With PostgreSQL
 pip install nornweave[postgres]
 
-# With MCP server for AI agents
+# With MCP server (recommended for agents)
 pip install nornweave[mcp]
 
-# Full installation
+# Full
 pip install nornweave[all]
 ```
 
-### Configure Your Email Domain
+### Real email (after demo)
 
-Create a `.env` file in the directory where you'll run the server:
+Create a `.env` file and set your provider and domain:
 
 ```bash
-# .env — minimum configuration for inbox creation
-EMAIL_DOMAIN=mail.yourdomain.com   # your email provider's domain
+# .env — for inbox creation with a real provider
+EMAIL_PROVIDER=mailgun   # or ses, sendgrid, resend, imap-smtp
+EMAIL_DOMAIN=mail.yourdomain.com
+# ... plus provider-specific keys (see .env.example)
 ```
 
-> **Tip:** The domain depends on your provider (e.g. `mail.yourdomain.com` for Mailgun,
-> `yourdomain.resend.app` for Resend). Without `EMAIL_DOMAIN`, inbox creation will fail.
-
-See [Configuration](https://nornweave.datacovey.com/docs/getting-started/configuration/) for all available settings.
-
-### Start the API Server
+See [Configuration](https://nornweave.datacovey.com/docs/getting-started/configuration/) for all settings.
 
 ```bash
-# SQLite is the default — no database setup required
 nornweave api
 ```
 
-The API will be available at `http://localhost:8000`. Data is stored in `./nornweave.db`.
+Data is stored in `./nornweave.db` (SQLite default).
 
 ### Using Docker (Recommended for Production)
 
