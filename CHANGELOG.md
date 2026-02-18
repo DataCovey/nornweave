@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- (None yet)
+
+### Changed
+
+- (None yet)
+
+### Deprecated
+
+- (None yet)
+
+### Removed
+
+- (None yet)
+
+### Fixed
+
+- (None yet)
+
+### Security
+
+- (None yet)
+
+---
+
+## [0.1.8] - 2026-02-18
+
+### Added
+
 - **Demo mode** — local sandbox provider for trying NornWeave without email credentials or a real domain:
   - `nornweave api --demo` CLI flag for zero-configuration quickstart (no `.env` file needed)
   - `DemoAdapter` email provider (`EMAIL_PROVIDER=demo`) with synthetic message IDs, no real delivery
@@ -195,7 +223,8 @@ Initial release. See [Unreleased] for current development.
 - Implemented **Urdr**, basic Storage (PSQL and SQLite)
 - E2E testing
 
-[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.7...HEAD
+[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/DataCovey/nornweave/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/DataCovey/nornweave/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/DataCovey/nornweave/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/DataCovey/nornweave/compare/v0.1.4...v0.1.5
