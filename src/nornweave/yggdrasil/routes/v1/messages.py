@@ -404,10 +404,7 @@ async def send_message(
     await generate_thread_summary(storage, thread_id)
 
     # Demo mode loopback: deliver a copy to each recipient that is a demo inbox
-    if (
-        settings.email_provider == "demo"
-        and provider_message_id
-    ):
+    if settings.email_provider == "demo" and provider_message_id:
         for recipient in payload.to:
             recipient_inbox = await storage.get_inbox_by_email(recipient)
             if recipient_inbox is None:
