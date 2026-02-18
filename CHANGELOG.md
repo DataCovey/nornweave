@@ -9,27 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- (None yet)
-
-### Changed
-
-- (None yet)
-
-### Deprecated
-
-- (None yet)
-
-### Removed
-
-- (None yet)
-
-### Fixed
-
-- (None yet)
-
-### Security
-
-- (None yet)
+- **Demo mode** — local sandbox provider for trying NornWeave without email credentials or a real domain:
+  - `nornweave api --demo` CLI flag for zero-configuration quickstart (no `.env` file needed)
+  - `DemoAdapter` email provider (`EMAIL_PROVIDER=demo`) with synthetic message IDs, no real delivery
+  - `POST /v1/demo/inbound` endpoint to simulate inbound emails for testing and `wait_for_reply` flows
+  - Auto-creates `demo@demo.nornweave.local` inbox on startup
+  - Loopback delivery: emails sent to demo inboxes are automatically delivered back as inbound messages
+  - Domain defaults to `demo.nornweave.local` when in demo mode
 
 ---
 
