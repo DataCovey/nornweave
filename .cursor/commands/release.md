@@ -22,6 +22,7 @@ Create a new release for NornWeave.
 2. **Update `pyproject.toml`**
 
    Replace the `version = "..."` line with the new version number.
+   Also update UV lockfile.
 
 3. **Update `CHANGELOG.md`**
 
