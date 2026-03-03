@@ -56,7 +56,7 @@ jobs:
 
       - name: Install Hugo modules
         working-directory: web
-        run: hugo mod get
+        run: hugo mod get github.com/imfing/hextra@v0.11.1
 
       - name: Copy CHANGELOG for shortcode
         run: cp CHANGELOG.md web/changelog_content.md
