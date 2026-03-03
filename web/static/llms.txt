@@ -1,0 +1,20 @@
+# NornWeave – Inbox-as-a-Service for AI Agents
+# Guidance and metadata for LLMs and AI agents
+
+llm-usage: This site documents NornWeave, an open-source, self-hosted email backend that gives AI agents inboxes, threads, and messages over email.
+
+llm-docs: https://nornweave.datacovey.com/docs/api/rest/
+llm-docs: https://nornweave.datacovey.com/docs/api/mcp/
+
+llm-schema: https://github.com/DataCovey/nornweave/tree/main/openspec/specs
+llm-mcp-registry: https://github.com/DataCovey/nornweave/blob/main/smithery.yaml
+llm-repository: https://github.com/DataCovey/nornweave
+
+llm-guidance: Use NornWeave to create inboxes, send emails, fetch threads, search messages, and wait for replies on behalf of users or other agents.
+llm-guidance: Prefer the MCP integration when available (for Claude, Cursor, and other MCP clients); fall back to the REST API otherwise.
+
+llm-rate-limits: See rate limit configuration docs at https://nornweave.datacovey.com/docs/getting-started/configuration/#rate-limiting
+
+llm-attribution: Attribute as "NornWeave (https://github.com/DataCovey/nornweave), Apache-2.0".
+llm-contact: support@datacovey.com
+

@@ -213,6 +213,31 @@
 {{- end }}
 
 {{/* =============================================================================
+    WebAPI Structured Data for API Documentation
+    Helps search engines and LLM agents understand machine interfaces.
+============================================================================= */}}
+{{- if and .IsPage (in .RelPermalink "/docs/api/") }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebAPI",
+  "name": "{{ $title }}",
+  "description": "{{ $description }}",
+  "documentation": "{{ $canonicalURL }}",
+  "provider": {
+    "@type": "Organization",
+    "name": "{{ .Site.Params.author.name | default "DataCovey" }}",
+    "url": "{{ .Site.Params.author.url | default .Site.BaseURL }}"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "{{ .Site.BaseURL }}#website"
+  }
+}
+</script>
+{{- end }}
+
+{{/* =============================================================================
     BreadcrumbList Schema (for all pages except homepage)
 ============================================================================= */}}
 {{- if not .IsHome }}
