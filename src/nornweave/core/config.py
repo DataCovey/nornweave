@@ -76,7 +76,11 @@ class Settings(BaseSettings):
     # Phase 3
     redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
-    webhook_secret: str = Field(default="", alias="WEBHOOK_SECRET")
+    webhook_secret: str = Field(
+        default="",
+        alias="WEBHOOK_SECRET",
+        description="Secret for webhook signing and local/database attachment URL signing",
+    )
 
     # -------------------------------------------------------------------------
     # Attachment Storage Configuration
@@ -320,6 +324,17 @@ class Settings(BaseSettings):
             msg = (
                 f"LLM_API_KEY is required when LLM_PROVIDER is set to '{self.llm_provider}'. "
                 "Set LLM_API_KEY in your environment or .env file."
+            )
+            raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def validate_api_security_config(self) -> Settings:
+        """Require API key auth in non-development environments."""
+        if self.environment in ("staging", "production") and not self.api_key.strip():
+            msg = (
+                "API_KEY is required when ENVIRONMENT is 'staging' or 'production'. "
+                "Set API_KEY to enforce authentication on /v1 endpoints."
             )
             raise ValueError(msg)
         return self

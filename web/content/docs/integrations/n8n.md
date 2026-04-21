@@ -205,7 +205,7 @@ Add error handling nodes to manage cases where:
 ### Connection Errors
 
 - Verify the Base URL in your credential settings points to the running NornWeave instance
-- API key authentication is not yet enforced; leave the API Key field empty or set any value
+- If your NornWeave server sets `API_KEY`, configure the same value in the n8n credential API Key field
 
 ## Resources
 

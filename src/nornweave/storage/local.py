@@ -29,11 +29,11 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
         Args:
             base_path: Base directory for attachment storage
             serve_url_prefix: URL prefix for download URLs
-            signing_secret: Secret for signing download URLs (uses app secret if not set)
+            signing_secret: Secret for signing download URLs
         """
         self.base_path = Path(base_path)
         self.serve_url_prefix = serve_url_prefix.rstrip("/")
-        self._signing_secret = signing_secret or "default-signing-secret"
+        self._signing_secret = signing_secret.strip() if signing_secret else ""
 
     @property
     def backend_name(self) -> str:
@@ -46,11 +46,13 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
         metadata: AttachmentMetadata,
     ) -> StorageResult:
         """Store attachment on local filesystem."""
+        safe_filename = self._normalize_filename(metadata.filename)
+
         # Create date-based path
         date_path = datetime.now(UTC).strftime("%Y/%m/%d")
-        storage_key = f"{date_path}/{attachment_id}/{metadata.filename}"
+        storage_key = f"{date_path}/{attachment_id}/{safe_filename}"
 
-        full_path = self.base_path / storage_key
+        full_path = self._resolve_storage_path(storage_key)
         full_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Write content
@@ -65,7 +67,10 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
 
     async def retrieve(self, storage_key: str) -> bytes:
         """Retrieve attachment from filesystem."""
-        full_path = self.base_path / storage_key
+        try:
+            full_path = self._resolve_storage_path(storage_key)
+        except ValueError as exc:
+            raise FileNotFoundError(f"Attachment not found: {storage_key}") from exc
 
         if not full_path.exists():
             raise FileNotFoundError(f"Attachment not found: {storage_key}")
@@ -74,7 +79,10 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
 
     async def delete(self, storage_key: str) -> bool:
         """Delete attachment from filesystem."""
-        full_path = self.base_path / storage_key
+        try:
+            full_path = self._resolve_storage_path(storage_key)
+        except ValueError:
+            return False
 
         if not full_path.exists():
             return False
@@ -113,11 +121,42 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
 
     async def exists(self, storage_key: str) -> bool:
         """Check if attachment exists."""
-        full_path = self.base_path / storage_key
+        try:
+            full_path = self._resolve_storage_path(storage_key)
+        except ValueError:
+            return False
+
         return full_path.exists()
+
+    def _normalize_filename(self, filename: str) -> str:
+        """Normalize user-supplied filenames to a safe basename."""
+        if "\x00" in filename:
+            raise ValueError("Invalid attachment filename")
+
+        # Normalize path separators and keep only the final basename segment.
+        candidate = filename.replace("\\", "/").split("/")[-1].strip()
+
+        if candidate in {"", ".", ".."}:
+            raise ValueError("Invalid attachment filename")
+
+        return candidate
+
+    def _resolve_storage_path(self, storage_key: str) -> Path:
+        """Resolve a storage key and ensure it stays within the base directory."""
+        relative_key = storage_key.replace("\\", "/").lstrip("/")
+        base_dir = self.base_path.resolve()
+        resolved_path = (base_dir / relative_key).resolve()
+
+        if not resolved_path.is_relative_to(base_dir):
+            raise ValueError("Storage path escapes configured base directory")
+
+        return resolved_path
 
     def _sign_url(self, attachment_id: str, expiry: int) -> str:
         """Create HMAC signature for URL."""
+        if not self._signing_secret:
+            raise ValueError("Attachment URL signing secret is not configured")
+
         message = f"{attachment_id}:{expiry}"
         signature = hmac.new(
             self._signing_secret.encode(),
@@ -143,6 +182,9 @@ class LocalFilesystemStorage(AttachmentStorageBackend):
         Returns:
             True if signature is valid and not expired
         """
+        if not self._signing_secret:
+            return False
+
         # Check expiry
         if expires < time.time():
             return False

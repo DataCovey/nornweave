@@ -141,7 +141,7 @@ See the [IMAP/SMTP Guide](../../guides/imap-smtp) for detailed setup instruction
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `API_KEY` | API key for authentication (not yet enforced) | Optional |
+| `API_KEY` | API key for `/v1/*` endpoint authentication | Empty in development; required in staging/production |
 | `API_HOST` | Host to bind to | `0.0.0.0` |
 | `API_PORT` | Port to listen on | `8000` |
 | `LOG_LEVEL` | Logging level | `INFO` |
@@ -149,7 +149,7 @@ See the [IMAP/SMTP Guide](../../guides/imap-smtp) for detailed setup instruction
 ### Example
 
 ```bash
-# API_KEY=your-secure-api-key  # Reserved for future use; not yet enforced
+API_KEY=your-secure-api-key
 API_HOST=0.0.0.0
 API_PORT=8000
 LOG_LEVEL=INFO
@@ -164,7 +164,7 @@ NornWeave supports multiple storage backends for email attachments. Choose the o
 | `NORNWEAVE_ATTACHMENT_STORAGE_BACKEND` | Storage backend (`local`, `database`, `s3`, `gcs`) | `local` |
 | `NORNWEAVE_ATTACHMENT_STORAGE_PATH` | Local filesystem path for attachments | `/var/nornweave/attachments` |
 | `NORNWEAVE_ATTACHMENT_URL_EXPIRY` | Signed URL expiry time (seconds) | `3600` |
-| `NORNWEAVE_ATTACHMENT_URL_SECRET` | Secret key for URL signing | Auto-generated |
+| `WEBHOOK_SECRET` | Secret key used to sign local/database attachment URLs | Required for `local` and `database` backends |
 
 ### Local Filesystem Storage (Default)
 
@@ -173,6 +173,7 @@ Store attachments on the local filesystem. Good for development and single-serve
 ```bash
 NORNWEAVE_ATTACHMENT_STORAGE_BACKEND=local
 NORNWEAVE_ATTACHMENT_STORAGE_PATH=/var/nornweave/attachments
+WEBHOOK_SECRET=replace-with-a-random-secret
 ```
 
 ### Database Storage
@@ -181,6 +182,7 @@ Store attachments as BLOBs in the database. Simple deployments without separate 
 
 ```bash
 NORNWEAVE_ATTACHMENT_STORAGE_BACKEND=database
+WEBHOOK_SECRET=replace-with-a-random-secret
 ```
 
 {{< callout type="warning" >}}
@@ -402,7 +404,7 @@ MAILGUN_DOMAIN=mail.example.com
 MAILGUN_REGION=us
 
 # API
-# API_KEY=nw-xxxxxxxxxxxxxxxxxxxxxxxxxxxx  # Not yet enforced
+API_KEY=nw-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 API_HOST=0.0.0.0
 API_PORT=8000
 LOG_LEVEL=INFO

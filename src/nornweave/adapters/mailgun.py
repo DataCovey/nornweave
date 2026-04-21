@@ -1,6 +1,9 @@
 """Mailgun email provider adapter."""
 
+import hashlib
+import hmac
 import logging
+import time
 from typing import TYPE_CHECKING, Any
 
 import httpx
@@ -13,21 +16,35 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+MAILGUN_WEBHOOK_TOLERANCE_SECONDS = 15 * 60
+
+
+class MailgunWebhookError(Exception):
+    """Raised when Mailgun webhook verification fails."""
+
 
 class MailgunAdapter(EmailProvider):
     """Mailgun implementation of EmailProvider."""
 
-    def __init__(self, api_key: str, domain: str, api_url: str = "https://api.mailgun.net") -> None:
+    def __init__(
+        self,
+        api_key: str,
+        domain: str,
+        api_url: str = "https://api.mailgun.net",
+        webhook_signing_key: str = "",
+    ) -> None:
         """Initialize Mailgun adapter.
 
         Args:
             api_key: Mailgun API key
             domain: Mailgun domain (e.g., mail.example.com)
             api_url: Mailgun API URL (default: https://api.mailgun.net)
+            webhook_signing_key: Mailgun webhook signing key for HMAC validation
         """
         self._api_key = api_key
         self._domain = domain
         self._api_url = api_url.rstrip("/")
+        self._webhook_signing_key = webhook_signing_key
 
     async def send_email(
         self,
@@ -135,6 +152,51 @@ class MailgunAdapter(EmailProvider):
             logger.info("Email sent via Mailgun: %s", provider_message_id)
             return provider_message_id
 
+    def verify_webhook_signature(
+        self,
+        payload: dict[str, Any],
+        *,
+        tolerance_seconds: int = MAILGUN_WEBHOOK_TOLERANCE_SECONDS,
+    ) -> None:
+        """Verify Mailgun webhook timestamp/token/signature.
+
+        Mailgun signatures are generated as:
+            hmac_sha256(signing_key, timestamp + token)
+
+        Args:
+            payload: Parsed form payload from Mailgun webhook request.
+            tolerance_seconds: Allowed timestamp skew in seconds.
+
+        Raises:
+            MailgunWebhookError: If verification fails.
+        """
+        if not self._webhook_signing_key:
+            raise MailgunWebhookError("Webhook signing key not configured")
+
+        timestamp_raw = payload.get("timestamp")
+        token = payload.get("token")
+        signature = payload.get("signature")
+        if not timestamp_raw or not token or not signature:
+            raise MailgunWebhookError("Missing required webhook fields: timestamp, token, signature")
+
+        try:
+            timestamp = int(str(timestamp_raw))
+        except (TypeError, ValueError) as e:
+            raise MailgunWebhookError("Invalid timestamp format") from e
+
+        now = int(time.time())
+        if abs(now - timestamp) > tolerance_seconds:
+            raise MailgunWebhookError("Timestamp validation failed")
+
+        signed_payload = f"{timestamp}{token}".encode()
+        expected = hmac.new(
+            self._webhook_signing_key.encode("utf-8"),
+            signed_payload,
+            hashlib.sha256,
+        ).hexdigest()
+        if not hmac.compare_digest(expected, str(signature)):
+            raise MailgunWebhookError("Signature verification failed")
+
     def parse_inbound_webhook(self, payload: dict[str, Any]) -> InboundMessage:
         """Parse Mailgun inbound webhook payload into standardized InboundMessage.
 
@@ -166,7 +228,7 @@ class MailgunAdapter(EmailProvider):
 
                 headers_list = json.loads(headers_raw)
                 headers = {h[0]: h[1] for h in headers_list if len(h) >= 2}
-            except json.JSONDecodeError, TypeError:
+            except (json.JSONDecodeError, TypeError):
                 pass
 
         # Parse references into list

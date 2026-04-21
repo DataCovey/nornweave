@@ -55,7 +55,7 @@ Make sure the NornWeave API server is running before using MCP. Start it with `n
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NORNWEAVE_API_URL` | NornWeave REST API URL | `http://localhost:8000` |
-| `NORNWEAVE_API_KEY` | API key for authentication (not yet enforced) | (none) |
+| `NORNWEAVE_API_KEY` | API key for `/v1/*` authentication (required when server `API_KEY` is set) | (none) |
 
 ## Transports
 

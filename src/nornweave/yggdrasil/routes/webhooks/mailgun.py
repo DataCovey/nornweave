@@ -4,7 +4,7 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from nornweave.adapters.mailgun import MailgunAdapter
+from nornweave.adapters.mailgun import MailgunAdapter, MailgunWebhookError
 from nornweave.core.config import Settings, get_settings
 from nornweave.core.interfaces import (
     StorageInterface,  # noqa: TC001 - needed at runtime for FastAPI
@@ -14,6 +14,15 @@ from nornweave.yggdrasil.dependencies import get_storage
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+def _get_mailgun_adapter(settings: Settings) -> MailgunAdapter:
+    """Create MailgunAdapter with webhook verification config."""
+    return MailgunAdapter(
+        api_key=settings.mailgun_api_key,
+        domain=settings.mailgun_domain,
+        webhook_signing_key=settings.webhook_secret,
+    )
 
 
 @router.post("/mailgun", status_code=status.HTTP_200_OK)
@@ -36,8 +45,25 @@ async def mailgun_webhook(
     logger.info("Received Mailgun webhook for recipient: %s", payload.get("recipient"))
     logger.debug("Mailgun payload keys: %s", list(payload.keys()))
 
+    # Enforce webhook signature verification before parsing/ingestion.
+    if not settings.webhook_secret:
+        logger.error("WEBHOOK_SECRET is not configured")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Mailgun webhook verification is not configured",
+        )
+
+    adapter = _get_mailgun_adapter(settings)
+    try:
+        adapter.verify_webhook_signature(payload)
+    except MailgunWebhookError as e:
+        logger.warning("Mailgun webhook signature verification failed: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+        ) from e
+
     # Parse the webhook payload using the Mailgun adapter
-    adapter = MailgunAdapter(api_key="", domain="")  # Keys not needed for parsing
     try:
         inbound = adapter.parse_inbound_webhook(payload)
     except Exception as e:

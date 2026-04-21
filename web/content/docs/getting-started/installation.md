@@ -155,8 +155,8 @@ EMAIL_PROVIDER=mailgun  # or: sendgrid, ses, resend
 MAILGUN_API_KEY=your-api-key
 MAILGUN_DOMAIN=mail.yourdomain.com
 
-# API Security (not yet enforced — reserved for future use)
-# API_KEY=your-api-key
+# API Security
+API_KEY=your-api-key
 ```
 
 ### Start the Stack

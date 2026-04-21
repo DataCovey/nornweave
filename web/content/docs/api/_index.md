@@ -21,7 +21,10 @@ NornWeave provides two ways to interact with your email data:
 ## Authentication
 
 {{< callout type="info" >}}
-API key authentication is **not yet enforced**. All endpoints are currently accessible without credentials. The `API_KEY` environment variable is reserved for a future release.
+`/v1/*` endpoints require API key auth when `API_KEY` is configured.
+Use either `Authorization: Bearer <API_KEY>` or `X-API-Key: <API_KEY>`.
+
+`/webhooks/*` endpoints remain API-key-free so email providers can deliver webhook events and rely on provider-specific signature verification.
 {{< /callout >}}
 
 ## Base URL

@@ -20,7 +20,10 @@ The NornWeave REST API provides full control over inboxes, threads, and messages
 ## Authentication
 
 {{< callout type="info" >}}
-API key authentication is **not yet enforced**. All endpoints are currently accessible without credentials. The `API_KEY` environment variable is reserved for a future release. You can omit the `Authorization` header for now.
+`/v1/*` endpoints support API key authentication via either `Authorization: Bearer <API_KEY>` or `X-API-Key: <API_KEY>`.
+`/webhooks/*` endpoints are not protected by API key because provider signature validation is used there.
+
+In `staging` and `production`, `API_KEY` is required. In `development`, leaving `API_KEY` empty disables API key auth.
 {{< /callout >}}
 
 ## Base URL

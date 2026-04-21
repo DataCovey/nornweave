@@ -44,7 +44,7 @@ class DatabaseBlobStorage(AttachmentStorageBackend):
             signing_secret: Secret for signing download URLs
         """
         self.serve_url_prefix = serve_url_prefix.rstrip("/")
-        self._signing_secret = signing_secret or "default-signing-secret"
+        self._signing_secret = signing_secret.strip() if signing_secret else ""
 
     @property
     def backend_name(self) -> str:
@@ -131,6 +131,9 @@ class DatabaseBlobStorage(AttachmentStorageBackend):
 
     def _sign_url(self, attachment_id: str, expiry: int) -> str:
         """Create HMAC signature for URL."""
+        if not self._signing_secret:
+            raise ValueError("Attachment URL signing secret is not configured")
+
         message = f"{attachment_id}:{expiry}"
         signature = hmac.new(
             self._signing_secret.encode(),
@@ -156,6 +159,9 @@ class DatabaseBlobStorage(AttachmentStorageBackend):
         Returns:
             True if signature is valid and not expired
         """
+        if not self._signing_secret:
+            return False
+
         # Check expiry
         if expires < time.time():
             return False

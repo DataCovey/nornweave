@@ -209,6 +209,14 @@ class TestDatabaseBlobStorage:
         assert "filename=test.txt" in url
 
     @pytest.mark.asyncio
+    async def test_signed_url_generation_requires_secret(self) -> None:
+        """Test that URL generation fails when signing secret is not configured."""
+        storage = DatabaseBlobStorage(serve_url_prefix="/v1/attachments")
+
+        with pytest.raises(ValueError, match="Attachment URL signing secret is not configured"):
+            await storage.get_download_url("att-123")
+
+    @pytest.mark.asyncio
     async def test_signed_url_verification(self) -> None:
         """Test that signed URLs can be verified."""
         storage = DatabaseBlobStorage(signing_secret="test-secret")
@@ -293,6 +301,57 @@ class TestFilesystemStorage:
             assert Path(tmpdir, result.storage_key).exists()
 
     @pytest.mark.asyncio
+    async def test_store_sanitizes_traversal_filename(self, test_content: bytes) -> None:
+        """Test that traversal segments in filename are normalized to a safe basename."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            storage = LocalFilesystemStorage(base_path=tmpdir, signing_secret="test-secret")
+
+            metadata = AttachmentMetadata(
+                attachment_id="att-123",
+                message_id="msg-456",
+                filename="../..\\..//secret.txt",
+                content_type="text/plain",
+                content_disposition="attachment",
+            )
+
+            result = await storage.store("att-123", test_content, metadata)
+
+            assert result.storage_key.endswith("/secret.txt")
+
+            full_path = Path(tmpdir, result.storage_key).resolve()
+            assert full_path.is_relative_to(Path(tmpdir).resolve())
+            assert full_path.exists()
+
+    @pytest.mark.asyncio
+    async def test_store_rejects_invalid_normalized_filename(self, test_content: bytes) -> None:
+        """Test that empty/dot traversal-only filenames are rejected."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            storage = LocalFilesystemStorage(base_path=tmpdir, signing_secret="test-secret")
+
+            metadata = AttachmentMetadata(
+                attachment_id="att-123",
+                message_id="msg-456",
+                filename="../",
+                content_type="text/plain",
+                content_disposition="attachment",
+            )
+
+            with pytest.raises(ValueError, match="Invalid attachment filename"):
+                await storage.store("att-123", test_content, metadata)
+
+    @pytest.mark.asyncio
+    async def test_storage_key_containment_checks(self) -> None:
+        """Test that traversal storage keys cannot escape the configured base path."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            storage = LocalFilesystemStorage(base_path=tmpdir, signing_secret="test-secret")
+            malicious_key = "../../etc/passwd"
+
+            assert await storage.exists(malicious_key) is False
+            assert await storage.delete(malicious_key) is False
+            with pytest.raises(FileNotFoundError):
+                await storage.retrieve(malicious_key)
+
+    @pytest.mark.asyncio
     async def test_retrieve_returns_content(self, test_content: bytes) -> None:
         """Test that stored content can be retrieved."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -348,6 +407,18 @@ class TestFilesystemStorage:
             assert "expires=" in url
 
     @pytest.mark.asyncio
+    async def test_signed_url_generation_requires_secret_filesystem(self) -> None:
+        """Test that filesystem URL generation fails when signing secret is not configured."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            storage = LocalFilesystemStorage(
+                base_path=tmpdir,
+                serve_url_prefix="/v1/attachments",
+            )
+
+            with pytest.raises(ValueError, match="Attachment URL signing secret is not configured"):
+                await storage.get_download_url("path/to/file.txt")
+
+    @pytest.mark.asyncio
     async def test_attachment_metadata_in_database(
         self,
         storage: SQLiteAdapter,
@@ -394,6 +465,7 @@ class TestAttachmentAPIIntegration:
             email_provider="mailgun",
             email_domain="test.local",
             attachment_storage_backend="database",
+            webhook_secret="test-secret",
         )
 
     @pytest.fixture
@@ -478,3 +550,36 @@ class TestAttachmentAPIIntegration:
         assert data["filename"] == "test.pdf"
         assert data["storage_backend"] == "database"
         assert "download_url" in data
+
+    @pytest.mark.asyncio
+    async def test_get_attachment_metadata_fails_without_signing_secret(
+        self,
+        app_with_data: tuple[Any, str],
+        test_settings: Settings,
+    ) -> None:
+        """Test metadata endpoint fails closed when signing secret is missing."""
+        app, attachment_id = app_with_data
+        unsigned_settings = test_settings.model_copy(update={"webhook_secret": ""})
+        app.dependency_overrides[get_settings] = lambda: unsigned_settings
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get(f"/v1/attachments/{attachment_id}")
+
+        assert response.status_code == 503
+        assert response.json()["detail"] == "Attachment URL signing secret is not configured"
+
+    @pytest.mark.asyncio
+    async def test_get_attachment_content_requires_signed_url(
+        self,
+        app_with_data: tuple[Any, str],
+    ) -> None:
+        """Test content endpoint rejects requests without token/expires."""
+        app, attachment_id = app_with_data
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get(f"/v1/attachments/{attachment_id}/content")
+
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Invalid or expired download URL"

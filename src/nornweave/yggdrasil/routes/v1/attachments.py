@@ -76,7 +76,13 @@ class ContentFormat(StrEnum):
 # -----------------------------------------------------------------------------
 def _get_signing_secret(settings: Settings) -> str:
     """Get the signing secret for URL verification."""
-    return settings.webhook_secret or "default-signing-secret"
+    secret = settings.webhook_secret.strip()
+    if not secret:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Attachment URL signing secret is not configured",
+        )
+    return secret
 
 
 def _sign_url(attachment_id: str, expiry: int, secret: str) -> str:
@@ -98,7 +104,7 @@ def _verify_signed_url(
 ) -> bool:
     """Verify a signed download URL."""
     if token is None or expires is None:
-        return True  # No signature required (direct access)
+        return False
 
     # Check expiry
     if expires < time.time():

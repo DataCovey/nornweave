@@ -165,6 +165,7 @@ def create_attachment_storage(settings: Settings) -> AttachmentStorageBackend:
         return LocalFilesystemStorage(
             base_path=getattr(settings, "attachment_local_path", "./data/attachments"),
             serve_url_prefix=getattr(settings, "attachment_serve_url_prefix", "/v1/attachments"),
+            signing_secret=getattr(settings, "webhook_secret", ""),
         )
     elif backend == "s3":
         bucket = getattr(settings, "attachment_s3_bucket", None)
@@ -187,6 +188,6 @@ def create_attachment_storage(settings: Settings) -> AttachmentStorageBackend:
             credentials_path=getattr(settings, "attachment_gcs_credentials_path", None),
         )
     elif backend == "database":
-        return DatabaseBlobStorage()
+        return DatabaseBlobStorage(signing_secret=getattr(settings, "webhook_secret", ""))
     else:
         raise ValueError(f"Unknown storage backend: {backend}")

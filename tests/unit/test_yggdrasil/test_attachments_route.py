@@ -87,9 +87,22 @@ class TestUrlSigning:
         assert result is False
 
     def test_verify_signed_url_no_signature(self) -> None:
-        """Test verification without signature (direct access)."""
+        """Test verification fails when signature is missing."""
         result = _verify_signed_url("test-123", None, None, "secret")
-        assert result is True
+        assert result is False
+
+    def test_verify_signed_url_missing_token(self) -> None:
+        """Test verification fails when token is missing."""
+        import time
+
+        expiry = int(time.time()) + 3600
+        result = _verify_signed_url("test-123", None, expiry, "secret")
+        assert result is False
+
+    def test_verify_signed_url_missing_expires(self) -> None:
+        """Test verification fails when expiry is missing."""
+        result = _verify_signed_url("test-123", "token", None, "secret")
+        assert result is False
 
 
 class TestAttachmentListResponse:

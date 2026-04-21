@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from nornweave import __version__
 from nornweave.core.config import get_settings
 from nornweave.yggdrasil.dependencies import close_database, ensure_demo_inbox, init_database
+from nornweave.yggdrasil.middleware.auth import APIKeyAuthMiddleware
 
 # Configure nornweave loggers to output to stdout
 logging.basicConfig(
@@ -86,6 +87,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(APIKeyAuthMiddleware, api_key=settings.api_key)
 
     # Health check endpoint
     @app.get("/health")
