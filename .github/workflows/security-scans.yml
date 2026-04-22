@@ -36,7 +36,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.7.22"
+          version: "0.11.7"
 
       - name: Export Python dependency snapshots
         run: |
