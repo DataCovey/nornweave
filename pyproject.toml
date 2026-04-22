@@ -47,6 +47,9 @@ postgres = [
 mcp = [
     "mcp>=1.26.0",
     "fastmcp>=2.14.5",
+    "authlib>=1.6.5",
+    "pyjwt>=2.10.1",
+    "requests>=2.32.4",
 ]
 # Attachment processing
 attachments = [
@@ -172,6 +175,7 @@ line-ending = "auto"
 # Pytest configuration
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 addopts = [

@@ -8,6 +8,8 @@ Provides utilities for:
 - Text extraction from attachments (PDF, CSV, etc.)
 """
 
+from __future__ import annotations
+
 import email
 import mimetypes
 import re
@@ -167,7 +169,7 @@ def parse_content_id_map(content_id_map_json: str | dict[str, str] | None) -> di
 
         try:
             return cast("dict[str, str]", json.loads(content_id_map_json))
-        except json.JSONDecodeError, ValueError:
+        except (json.JSONDecodeError, ValueError):
             return {}
 
     return cast("dict[str, str]", dict(content_id_map_json))
@@ -450,7 +452,7 @@ def parse_attachment_info_json(
 
         try:
             return cast("dict[str, dict[str, Any]]", json.loads(attachment_info))
-        except json.JSONDecodeError, ValueError:
+        except (json.JSONDecodeError, ValueError):
             return {}
 
     return cast("dict[str, dict[str, Any]]", dict(attachment_info))

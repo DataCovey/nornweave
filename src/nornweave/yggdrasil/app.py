@@ -1,5 +1,7 @@
 """FastAPI application factory (Yggdrasil)."""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from contextlib import asynccontextmanager, suppress
@@ -79,11 +81,12 @@ def create_app() -> FastAPI:
     )
 
     # CORS middleware
-    origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+    origins = settings.cors_origin_list
+    wildcard_origin = "*" in origins
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins if origins else ["*"],
-        allow_credentials=True,
+        allow_origins=["*"] if wildcard_origin else origins,
+        allow_credentials=bool(origins) and not wildcard_origin,
         allow_methods=["*"],
         allow_headers=["*"],
     )

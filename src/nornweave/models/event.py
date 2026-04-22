@@ -3,6 +3,8 @@
 Event models for webhook notifications and internal event tracking.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Literal

@@ -130,6 +130,16 @@ def _send_payload(inbox_id: str) -> dict[str, Any]:
     }
 
 
+def _auth_headers() -> dict[str, str]:
+    """Build Authorization header matching the app middleware API key."""
+    for middleware in app.user_middleware:
+        if middleware.cls.__name__ == "APIKeyAuthMiddleware":
+            api_key = middleware.kwargs.get("api_key")
+            if api_key:
+                return {"Authorization": f"Bearer {api_key}"}
+    return {}
+
+
 @pytest.fixture
 def client_under_limit(
     session_factory: async_sessionmaker[AsyncSession],
@@ -150,7 +160,7 @@ def client_under_limit(
     )
 
     transport = ASGITransport(app=app)  # type: ignore[arg-type]
-    client = AsyncClient(transport=transport, base_url="http://test")
+    client = AsyncClient(transport=transport, base_url="http://test", headers=_auth_headers())
     return client
 
 
@@ -177,7 +187,7 @@ def client_minute_exhausted(
     )
 
     transport = ASGITransport(app=app)  # type: ignore[arg-type]
-    return AsyncClient(transport=transport, base_url="http://test")
+    return AsyncClient(transport=transport, base_url="http://test", headers=_auth_headers())
 
 
 @pytest.fixture
@@ -201,7 +211,7 @@ def client_hour_exhausted(
     )
 
     transport = ASGITransport(app=app)  # type: ignore[arg-type]
-    return AsyncClient(transport=transport, base_url="http://test")
+    return AsyncClient(transport=transport, base_url="http://test", headers=_auth_headers())
 
 
 @pytest.fixture
@@ -225,7 +235,7 @@ def client_domain_blocked(
     )
 
     transport = ASGITransport(app=app)  # type: ignore[arg-type]
-    return AsyncClient(transport=transport, base_url="http://test")
+    return AsyncClient(transport=transport, base_url="http://test", headers=_auth_headers())
 
 
 # ---------------------------------------------------------------------------

@@ -128,6 +128,7 @@ def e2e_app(
     # Set EMAIL_DOMAIN before any Settings() call so env and cache see it
     # (pydantic-settings gives env precedence over kwargs in CI)
     monkeypatch.setenv("EMAIL_DOMAIN", TEST_EMAIL_DOMAIN)
+    monkeypatch.setenv("API_KEY", "test-api-key")
     get_settings.cache_clear()
 
     # Build test settings after env is set so they have email_domain
@@ -136,6 +137,7 @@ def e2e_app(
         db_driver="sqlite",
         email_provider="mailgun",
         email_domain=TEST_EMAIL_DOMAIN,
+        api_key="test-api-key",
     )
 
     from nornweave.yggdrasil.app import create_app
@@ -171,6 +173,7 @@ async def e2e_client(e2e_app: FastAPI) -> AsyncGenerator[AsyncClient]:
     async with AsyncClient(
         transport=transport,
         base_url="http://test",
+        headers={"Authorization": "Bearer test-api-key"},
     ) as client:
         yield client
 

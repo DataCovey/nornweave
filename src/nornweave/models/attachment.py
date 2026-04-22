@@ -3,6 +3,8 @@
 Attachment models for file handling in messages.
 """
 
+from __future__ import annotations
+
 import base64
 from enum import StrEnum
 from typing import TYPE_CHECKING

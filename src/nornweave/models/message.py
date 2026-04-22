@@ -3,6 +3,8 @@
 Message models for email content and metadata.
 """
 
+from __future__ import annotations
+
 from datetime import datetime  # noqa: TC003 - needed at runtime for Pydantic
 from enum import StrEnum
 from typing import TYPE_CHECKING, Any

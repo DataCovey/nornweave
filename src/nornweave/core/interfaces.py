@@ -1,5 +1,7 @@
 """Core abstractions: storage and email provider interfaces."""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import date, datetime

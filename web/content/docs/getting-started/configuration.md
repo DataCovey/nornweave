@@ -142,6 +142,7 @@ See the [IMAP/SMTP Guide](../../guides/imap-smtp) for detailed setup instruction
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `API_KEY` | API key for `/v1/*` endpoint authentication | Empty in development; required in staging/production |
+| `CORS_ORIGINS` | Comma-separated allowed origins for browser clients | `http://localhost:3000,http://localhost:8000` |
 | `API_HOST` | Host to bind to | `0.0.0.0` |
 | `API_PORT` | Port to listen on | `8000` |
 | `LOG_LEVEL` | Logging level | `INFO` |
@@ -150,10 +151,14 @@ See the [IMAP/SMTP Guide](../../guides/imap-smtp) for detailed setup instruction
 
 ```bash
 API_KEY=your-secure-api-key
+CORS_ORIGINS=https://app.example.com,https://admin.example.com
 API_HOST=0.0.0.0
 API_PORT=8000
 LOG_LEVEL=INFO
 ```
+
+In `staging` and `production`, `CORS_ORIGINS` must include explicit origins and cannot contain `*`.
+In `development`, `CORS_ORIGINS=*` is allowed for convenience, and credentials are automatically disabled in that mode.
 
 ## Attachment Storage Configuration
 

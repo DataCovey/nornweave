@@ -464,6 +464,7 @@ class TestAttachmentAPIIntegration:
             db_driver="sqlite",
             email_provider="mailgun",
             email_domain="test.local",
+            api_key="test-api-key",
             attachment_storage_backend="database",
             webhook_secret="test-secret",
         )
@@ -477,9 +478,15 @@ class TestAttachmentAPIIntegration:
         test_content: bytes,
         storage: SQLiteAdapter,
         session: AsyncSession,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> AsyncGenerator[tuple[Any, str]]:
         """Create app with test data and return (app, attachment_id)."""
+        monkeypatch.setenv("API_KEY", "test-api-key")
+        monkeypatch.setenv("WEBHOOK_SECRET", "test-secret")
         get_settings.cache_clear()
+        effective_settings = test_settings.model_copy(
+            update={"api_key": "test-api-key", "webhook_secret": "test-secret"}
+        )
 
         from nornweave.yggdrasil.app import create_app
 
@@ -506,7 +513,7 @@ class TestAttachmentAPIIntegration:
                 await sess.commit()
 
         def override_get_settings() -> Settings:
-            return test_settings
+            return effective_settings
 
         app.dependency_overrides[get_storage] = override_get_storage
         app.dependency_overrides[get_settings] = override_get_settings
@@ -523,7 +530,11 @@ class TestAttachmentAPIIntegration:
         app, attachment_id = app_with_data
 
         transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
+        async with AsyncClient(
+            transport=transport,
+            base_url="http://test",
+            headers={"Authorization": "Bearer test-api-key"},
+        ) as client:
             response = await client.get(f"/v1/attachments?message_id={test_message['id']}")
 
         assert response.status_code == 200
@@ -541,7 +552,11 @@ class TestAttachmentAPIIntegration:
         app, attachment_id = app_with_data
 
         transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
+        async with AsyncClient(
+            transport=transport,
+            base_url="http://test",
+            headers={"Authorization": "Bearer test-api-key"},
+        ) as client:
             response = await client.get(f"/v1/attachments/{attachment_id}")
 
         assert response.status_code == 200
@@ -563,7 +578,11 @@ class TestAttachmentAPIIntegration:
         app.dependency_overrides[get_settings] = lambda: unsigned_settings
 
         transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
+        async with AsyncClient(
+            transport=transport,
+            base_url="http://test",
+            headers={"Authorization": "Bearer test-api-key"},
+        ) as client:
             response = await client.get(f"/v1/attachments/{attachment_id}")
 
         assert response.status_code == 503
@@ -578,7 +597,11 @@ class TestAttachmentAPIIntegration:
         app, attachment_id = app_with_data
 
         transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
+        async with AsyncClient(
+            transport=transport,
+            base_url="http://test",
+            headers={"Authorization": "Bearer test-api-key"},
+        ) as client:
             response = await client.get(f"/v1/attachments/{attachment_id}/content")
 
         assert response.status_code == 401

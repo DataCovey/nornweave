@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 
 from nornweave.core.config import get_settings
@@ -105,3 +106,29 @@ def test_create_app_registers_api_key_middleware(monkeypatch: MonkeyPatch) -> No
     get_settings.cache_clear()
 
     assert any(m.cls is APIKeyAuthMiddleware for m in app.user_middleware)
+
+
+def test_create_app_disables_credentials_for_wildcard_cors(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("API_KEY", "test-secret")
+    monkeypatch.setenv("CORS_ORIGINS", "*")
+    monkeypatch.setenv("ENVIRONMENT", "development")
+    get_settings.cache_clear()
+    app = create_app()
+    get_settings.cache_clear()
+
+    cors = next(m for m in app.user_middleware if m.cls is CORSMiddleware)
+    assert cors.kwargs["allow_origins"] == ["*"]
+    assert cors.kwargs["allow_credentials"] is False
+
+
+def test_create_app_enables_credentials_for_explicit_cors_origins(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("API_KEY", "test-secret")
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000")
+    monkeypatch.setenv("ENVIRONMENT", "development")
+    get_settings.cache_clear()
+    app = create_app()
+    get_settings.cache_clear()
+
+    cors = next(m for m in app.user_middleware if m.cls is CORSMiddleware)
+    assert cors.kwargs["allow_origins"] == ["http://localhost:3000"]
+    assert cors.kwargs["allow_credentials"] is True

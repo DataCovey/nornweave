@@ -10,6 +10,8 @@ Configure via environment variables:
     NORNWEAVE_ATTACHMENT_STORAGE_BACKEND=local|s3|gcs|database
 """
 
+from __future__ import annotations
+
 import hashlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass

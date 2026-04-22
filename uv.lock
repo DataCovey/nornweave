@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-03-31T12:43:34.020132Z"
+exclude-newer = "2026-04-14T19:54:31.72766Z"
 exclude-newer-span = "P7D"
 
 [[package]]
@@ -1160,6 +1160,7 @@ all = [
     { name = "aiosmtplib" },
     { name = "anthropic" },
     { name = "asyncpg" },
+    { name = "authlib" },
     { name = "boto3" },
     { name = "fastmcp" },
     { name = "google-cloud-storage" },
@@ -1168,9 +1169,11 @@ all = [
     { name = "openai" },
     { name = "pgvector" },
     { name = "psycopg2-binary" },
+    { name = "pyjwt" },
     { name = "pypdf" },
     { name = "python-magic" },
     { name = "redis" },
+    { name = "requests" },
 ]
 anthropic = [
     { name = "anthropic" },
@@ -1201,8 +1204,11 @@ llm = [
     { name = "openai" },
 ]
 mcp = [
+    { name = "authlib" },
     { name = "fastmcp" },
     { name = "mcp" },
+    { name = "pyjwt" },
+    { name = "requests" },
 ]
 openai = [
     { name = "openai" },
@@ -1242,6 +1248,7 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.18.3" },
     { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.78.0" },
     { name = "asyncpg", marker = "extra == 'postgres'", specifier = ">=0.31.0" },
+    { name = "authlib", marker = "extra == 'mcp'", specifier = ">=1.6.5" },
     { name = "boto3", marker = "extra == 's3'", specifier = ">=1.42.44" },
     { name = "click", specifier = ">=8.3.1" },
     { name = "cryptography", specifier = ">=46.0.4" },
@@ -1265,6 +1272,7 @@ requires-dist = [
     { name = "psycopg2-binary", marker = "extra == 'postgres'", specifier = ">=2.9.11" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
+    { name = "pyjwt", marker = "extra == 'mcp'", specifier = ">=2.10.1" },
     { name = "pypdf", marker = "extra == 'attachments'", specifier = ">=6.6.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.2" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.3.0" },
@@ -1272,6 +1280,7 @@ requires-dist = [
     { name = "python-magic", marker = "extra == 'attachments'", specifier = ">=0.4.27" },
     { name = "python-multipart", specifier = ">=0.0.22" },
     { name = "redis", marker = "extra == 'ratelimit'", specifier = ">=7.1.0" },
+    { name = "requests", marker = "extra == 'mcp'", specifier = ">=2.32.4" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.46" },
     { name = "svix", specifier = ">=1.84.1" },

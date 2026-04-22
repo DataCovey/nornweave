@@ -61,7 +61,10 @@ class Settings(BaseSettings):
 
     # API security
     api_key: str = Field(default="", alias="API_KEY")
-    cors_origins: str = Field(default="*", alias="CORS_ORIGINS")
+    cors_origins: str = Field(
+        default="http://localhost:3000,http://localhost:8000",
+        alias="CORS_ORIGINS",
+    )
 
     # Server
     host: str = Field(default="0.0.0.0", alias="HOST")
@@ -337,6 +340,46 @@ class Settings(BaseSettings):
                 "Set API_KEY to enforce authentication on /v1 endpoints."
             )
             raise ValueError(msg)
+        return self
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        """Return normalized CORS origins from CORS_ORIGINS."""
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @model_validator(mode="after")
+    def validate_cors_security_config(self) -> Settings:
+        """Validate CORS settings and enforce non-wildcard origins outside development."""
+        origins = self.cors_origin_list
+
+        if "*" in origins and len(origins) > 1:
+            msg = "CORS_ORIGINS cannot mix wildcard '*' with explicit origins."
+            raise ValueError(msg)
+
+        for origin in origins:
+            if origin == "*":
+                continue
+            if not re.match(r"^https?://[^/]+$", origin):
+                msg = (
+                    f"Invalid CORS origin '{origin}' in CORS_ORIGINS. "
+                    "Use comma-separated origins like 'https://app.example.com'."
+                )
+                raise ValueError(msg)
+
+        if self.environment in ("staging", "production"):
+            if not origins:
+                msg = (
+                    "CORS_ORIGINS must include at least one explicit origin when ENVIRONMENT is "
+                    "'staging' or 'production'."
+                )
+                raise ValueError(msg)
+            if "*" in origins:
+                msg = (
+                    "CORS_ORIGINS cannot include wildcard '*' when ENVIRONMENT is "
+                    "'staging' or 'production'."
+                )
+                raise ValueError(msg)
+
         return self
 
     @model_validator(mode="after")

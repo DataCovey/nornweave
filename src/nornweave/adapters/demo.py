@@ -87,7 +87,7 @@ class DemoAdapter(EmailProvider):
         if isinstance(ts, str):
             try:
                 ts = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 ts = datetime.now(UTC)
         elif ts is None:
             ts = datetime.now(UTC)
@@ -120,7 +120,7 @@ class DemoAdapter(EmailProvider):
 
                 try:
                     content = base64.b64decode(content)
-                except ValueError, TypeError:
+                except (ValueError, TypeError):
                     content = content.encode("utf-8")
             disposition_str = att.get("disposition", "attachment")
             disposition = (

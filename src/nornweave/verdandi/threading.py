@@ -9,6 +9,8 @@ This module implements email threading based on:
 Reference: https://www.jwz.org/doc/threading.html
 """
 
+from __future__ import annotations
+
 import hashlib
 import re
 from dataclasses import dataclass
