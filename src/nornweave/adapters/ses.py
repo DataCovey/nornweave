@@ -646,14 +646,14 @@ class SESAdapter(EmailProvider):
                     charset = part.get_content_charset() or "utf-8"
                     try:
                         body_plain = part_content.decode(charset, errors="replace")
-                    except (UnicodeDecodeError, LookupError):
+                    except UnicodeDecodeError, LookupError:
                         body_plain = part_content.decode("utf-8", errors="replace")
 
                 elif content_type == "text/html" and "attachment" not in content_disposition:
                     charset = part.get_content_charset() or "utf-8"
                     try:
                         body_html = part_content.decode(charset, errors="replace")
-                    except (UnicodeDecodeError, LookupError):
+                    except UnicodeDecodeError, LookupError:
                         body_html = part_content.decode("utf-8", errors="replace")
 
                 # Handle attachments
@@ -688,7 +688,7 @@ class SESAdapter(EmailProvider):
                     charset = msg.get_content_charset() or "utf-8"
                     try:
                         text = msg_payload.decode(charset, errors="replace")
-                    except (UnicodeDecodeError, LookupError):
+                    except UnicodeDecodeError, LookupError:
                         text = msg_payload.decode("utf-8", errors="replace")
                     if content_type == "text/html":
                         body_html = text

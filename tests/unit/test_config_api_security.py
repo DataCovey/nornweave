@@ -62,7 +62,9 @@ class TestCorsSecurityConfigValidation:
             )
 
     def test_staging_requires_explicit_cors_origins(self) -> None:
-        with pytest.raises(ValidationError, match="CORS_ORIGINS must include at least one explicit origin"):
+        with pytest.raises(
+            ValidationError, match="CORS_ORIGINS must include at least one explicit origin"
+        ):
             Settings(
                 _env_file=None,
                 ENVIRONMENT="staging",

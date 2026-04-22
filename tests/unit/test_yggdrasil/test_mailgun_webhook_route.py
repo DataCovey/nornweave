@@ -32,7 +32,9 @@ def _make_app(signing_key: str) -> FastAPI:
     return app
 
 
-def _mailgun_form(*, signing_key: str, token: str = "token-123", signature: str | None = None) -> dict[str, str]:
+def _mailgun_form(
+    *, signing_key: str, token: str = "token-123", signature: str | None = None
+) -> dict[str, str]:
     timestamp = int(time.time())
     signed = signature or _mailgun_signature(signing_key, timestamp, token)
     return {
@@ -56,12 +58,15 @@ class TestMailgunWebhookRouteVerification:
         client = TestClient(app)
         form_data = _mailgun_form(signing_key="mailgun-signing-key", signature="invalid-signature")
 
-        with patch(
-            "nornweave.yggdrasil.routes.webhooks.mailgun.MailgunAdapter.parse_inbound_webhook"
-        ) as mock_parse, patch(
-            "nornweave.yggdrasil.routes.webhooks.mailgun.ingest_message",
-            new_callable=AsyncMock,
-        ) as mock_ingest:
+        with (
+            patch(
+                "nornweave.yggdrasil.routes.webhooks.mailgun.MailgunAdapter.parse_inbound_webhook"
+            ) as mock_parse,
+            patch(
+                "nornweave.yggdrasil.routes.webhooks.mailgun.ingest_message",
+                new_callable=AsyncMock,
+            ) as mock_ingest,
+        ):
             response = client.post("/webhooks/mailgun", data=form_data)
 
         assert response.status_code == 401
@@ -74,12 +79,15 @@ class TestMailgunWebhookRouteVerification:
         client = TestClient(app)
         form_data = _mailgun_form(signing_key="fallback-key")
 
-        with patch(
-            "nornweave.yggdrasil.routes.webhooks.mailgun.MailgunAdapter.parse_inbound_webhook"
-        ) as mock_parse, patch(
-            "nornweave.yggdrasil.routes.webhooks.mailgun.ingest_message",
-            new_callable=AsyncMock,
-        ) as mock_ingest:
+        with (
+            patch(
+                "nornweave.yggdrasil.routes.webhooks.mailgun.MailgunAdapter.parse_inbound_webhook"
+            ) as mock_parse,
+            patch(
+                "nornweave.yggdrasil.routes.webhooks.mailgun.ingest_message",
+                new_callable=AsyncMock,
+            ) as mock_ingest,
+        ):
             response = client.post("/webhooks/mailgun", data=form_data)
 
         assert response.status_code == 503

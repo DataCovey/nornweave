@@ -181,7 +181,7 @@ def _parse_date(date_str: str | None) -> datetime:
         return datetime.now(UTC)
     try:
         return parsedate_to_datetime(str(date_str))
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         logger.debug("Failed to parse date header: %s", date_str)
         return datetime.now(UTC)
 

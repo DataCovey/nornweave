@@ -39,9 +39,12 @@ class TestVerifyWebhookSignature:
         )
 
         with pytest.raises(
-            MailgunWebhookError, match="Missing required webhook fields: timestamp, token, signature"
+            MailgunWebhookError,
+            match="Missing required webhook fields: timestamp, token, signature",
         ):
-            adapter.verify_webhook_signature({"timestamp": str(int(time.time())), "token": "token-123"})
+            adapter.verify_webhook_signature(
+                {"timestamp": str(int(time.time())), "token": "token-123"}
+            )
 
     def test_raises_for_invalid_timestamp_format(self) -> None:
         """Verification should fail for non-numeric timestamps."""

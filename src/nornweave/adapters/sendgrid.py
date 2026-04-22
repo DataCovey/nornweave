@@ -258,7 +258,7 @@ class SendGridAdapter(EmailProvider):
                 from email.utils import parsedate_to_datetime
 
                 timestamp = parsedate_to_datetime(date_header)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
         # Parse attachments from attachment-info JSON

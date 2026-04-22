@@ -177,7 +177,9 @@ class MailgunAdapter(EmailProvider):
         token = payload.get("token")
         signature = payload.get("signature")
         if not timestamp_raw or not token or not signature:
-            raise MailgunWebhookError("Missing required webhook fields: timestamp, token, signature")
+            raise MailgunWebhookError(
+                "Missing required webhook fields: timestamp, token, signature"
+            )
 
         try:
             timestamp = int(str(timestamp_raw))
@@ -228,7 +230,7 @@ class MailgunAdapter(EmailProvider):
 
                 headers_list = json.loads(headers_raw)
                 headers = {h[0]: h[1] for h in headers_list if len(h) >= 2}
-            except (json.JSONDecodeError, TypeError):
+            except json.JSONDecodeError, TypeError:
                 pass
 
         # Parse references into list
