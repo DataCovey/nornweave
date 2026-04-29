@@ -2,6 +2,10 @@ version = 1
 revision = 3
 requires-python = ">=3.14"
 
+[options]
+exclude-newer = "2026-04-22T19:52:02.524035Z"
+exclude-newer-span = "P7D"
+
 [[package]]
 name = "aiofile"
 version = "3.9.0"
@@ -1130,7 +1134,7 @@ wheels = [
 
 [[package]]
 name = "nornweave"
-version = "0.1.8"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },

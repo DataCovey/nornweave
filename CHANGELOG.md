@@ -33,6 +33,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] - 2026-04-29
+
+### Changed
+
+- Release includes dependency version bumps and security updates only; no product behavior changes.
+
+### Security
+
+- Updated dependency constraints and lockfiles to pick up patched dependency versions.
+
+---
+
 ## [0.1.8] - 2026-02-18
 
 ### Added
@@ -223,7 +235,8 @@ Initial release. See [Unreleased] for current development.
 - Implemented **Urdr**, basic Storage (PSQL and SQLite)
 - E2E testing
 
-[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.1.8...HEAD
+[Unreleased]: https://github.com/DataCovey/nornweave/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/DataCovey/nornweave/compare/v0.1.8...v0.2.0
 [0.1.8]: https://github.com/DataCovey/nornweave/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/DataCovey/nornweave/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/DataCovey/nornweave/compare/v0.1.5...v0.1.6
